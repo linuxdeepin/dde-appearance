@@ -1,0 +1,28 @@
+Source: dde-appearance
+Section: devel
+Priority: optional
+Maintainer: Deepin Packages Builder <packages@deepin.com>
+Build-Depends: debhelper (>= 9),
+   cmake,
+   pkg-config,
+   qtbase5-dev,
+   libdtkwidget-dev,
+   libpolkit-qt5-1-dev,
+   libgdk-pixbuf2.0-0,
+   libgsettings-qt-dev,
+   libdframeworkdbus-dev,
+   libglib2.0-dev,
+   libxcursor-dev,
+   libgtk-3-dev,
+   libxcb-cursor-dev,
+   libssl-dev
+Standards-Version: 3.9.8
+Homepage: http://www.deepin.org
+
+Package: dde-appearance
+Architecture: any
+Depends:
+   ${misc:Depends},
+   ${shlibs:Depends},
+Description: deepin desktop-environment - dde-appearance module
+ dde appearance Provides application resource management and control services for the dde desktop environment.

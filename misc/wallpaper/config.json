@@ -1,0 +1,27 @@
+[
+{
+    "group":"onlyUrl",
+    "wallpaperInfo":{"monitorName":"", "url":""}
+},
+{
+    "group":"onlyMonitorName",
+    "wallpaperInfo":[
+        {"monitorName":"", "url":""},
+        {"monitorName":"", "url":""}
+    ]
+},
+{
+    "group":"index+monitorName",
+    "wallpaperInfo":[
+        {"index+monitorName":"", "url":""},
+        {"index+monitorName":"", "url":""}
+    ]
+},
+{
+    "group":"greeterWallpaper",
+    "greeterWallpaperInfo":[
+        {"sessionId":"", "url":""},
+        {"sessionId":"", "url":""}
+    ]
+}
+]

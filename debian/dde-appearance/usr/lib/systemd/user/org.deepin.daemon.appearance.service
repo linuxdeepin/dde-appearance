@@ -1,0 +1,7 @@
+[Unit]
+Description=Deepin Appearance service
+
+[Service]
+Type=DBus
+BusName=org.deepin.daemon.Appearance
+ExecStart=/usr/bin/dde-Appearance
