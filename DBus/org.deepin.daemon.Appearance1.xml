@@ -65,8 +65,8 @@
     </method>
     <method name='SetWorkspaceBackgroundForMonitor'>
         <arg type='i' name='index' direction='in' />
-        <arg type='s' name='uri' direction='in' />
         <arg type='s' name='strMonitorName' direction='in' />
+        <arg type='s' name='uri' direction='in' />
     </method>
     <method name='GetWorkspaceBackgroundForMonitor'>
         <arg type='i' name='index' direction='in' />

@@ -75,7 +75,7 @@ public Q_SLOTS: // METHODS
     QString GetCurrentWorkspaceBackground();
     void SetCurrentWorkspaceBackgroundForMonitor(const QString &uri, const QString &strMonitorName);
     QString GetCurrentWorkspaceBackgroundForMonitor(const QString &strMonitorName);
-    void SetWorkspaceBackgroundForMonitor(const int &index, const QString &uri, const QString &strMonitorName);
+    void SetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QString &uri);
     QString GetWorkspaceBackgroundForMonitor(const int &index,const QString &strMonitorName);
 
 Q_SIGNALS: // SIGNALS

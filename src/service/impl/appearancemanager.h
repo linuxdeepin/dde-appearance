@@ -71,6 +71,12 @@ public:
     bool doSetWallpaperSlideShow(const QString &monitorName,const QString &wallpaperSlideShow);
     bool doSetWsLoop(const QString& monitorName,const QString& file);
     QString doThumbnail(const QString &type,const QString &name);
+    void doSetCurrentWorkspaceBackground(const QString &uri);
+    QString doGetCurrentWorkspaceBackground();
+    void doSetCurrentWorkspaceBackgroundForMonitor(const QString &uri, const QString &strMonitorName);
+    QString doGetCurrentWorkspaceBackgroundForMonitor(const QString &strMonitorName);
+    void doSetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QString &uri);
+    QString doGetWorkspaceBackgroundForMonitor(const int &index,const QString &strMonitorName);
 
     inline QString getBackground() {return background; }
     inline double getFontSize() {return fontSize; }
@@ -135,6 +141,7 @@ private:
     QString marshal(const QVector<Background>& backgrounds);
     QString marshal(const QStringList& strs);
     QString marshal(const QVector<QSharedPointer<FontsManager::Family>>& strs);
+    QString getCurrentDesktopIndex();
 
 Q_SIGNALS:
     void Changed(const QString &ty, const QString &value);

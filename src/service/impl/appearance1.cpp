@@ -1,6 +1,5 @@
 #include "appearance1.h"
 #include "../modules/common/commondefine.h"
-#include "../modules/dconfig/dconfigsettings.h"
 
 #include <iostream>
 
@@ -196,30 +195,30 @@ void Appearance1::handleRefreshedSignal(const QString &type)
 
 void Appearance1::SetCurrentWorkspaceBackground(const QString &uri)
 {
-
+    return appearanceManager->doSetCurrentWorkspaceBackground(uri);;
 }
 
 QString Appearance1::GetCurrentWorkspaceBackground()
 {
-    return "";
+    return appearanceManager->doGetCurrentWorkspaceBackground();
 }
 
 void Appearance1::SetCurrentWorkspaceBackgroundForMonitor(const QString &uri, const QString &strMonitorName)
 {
-
+    return appearanceManager->doSetCurrentWorkspaceBackgroundForMonitor(uri, strMonitorName);
 }
 
 QString Appearance1::GetCurrentWorkspaceBackgroundForMonitor(const QString &strMonitorName)
 {
-    return "";
+    return appearanceManager->doGetCurrentWorkspaceBackgroundForMonitor(strMonitorName);
 }
 
-void Appearance1::SetWorkspaceBackgroundForMonitor(const int &index, const QString &uri, const QString &strMonitorName)
+void Appearance1::SetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QString &uri)
 {
-
+    return appearanceManager->doSetWorkspaceBackgroundForMonitor(index, strMonitorName, uri);
 }
 
 QString Appearance1::GetWorkspaceBackgroundForMonitor(const int &index,const QString &strMonitorName)
 {
-    return "";
+    return appearanceManager->doGetWorkspaceBackgroundForMonitor(index, strMonitorName);
 }

@@ -17,8 +17,12 @@
 #include "../modules/api/utils.h"
 #include "../modules/common/commondefine.h"
 #include "../modules/api/keyfile.h"
+
 #include "../modules/api/locale.h"
 #include "../modules/api/sunrisesunset.h"
+#include "../modules/dconfig/phasewallpaper.h"
+
+const QString wallpaperJsonPath = QString("%1/.cache/deepin/dde-appearance/").arg(getenv("HOME"));
 
 AppearanceManager::AppearanceManager(QObject *parent)
     : QObject(parent)
@@ -492,6 +496,26 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
     } else if (key == GSKEYWALLPAPERSLIDESHOW) {
         QString policy = settingDconfig.value(key).toString();
         updateWSPolicy(policy);
+    } else if (key == DCKEYALLWALLPAPER) {
+        QVariant value = settingDconfig.value(key);
+        QDir dir;
+        if (!dir.exists(wallpaperJsonPath)) {
+            bool res = dir.mkpath(wallpaperJsonPath);
+            if (!res) {
+                qWarning() << QString("mkdir %1 failed.").arg(wallpaperJsonPath);
+                return;
+            }
+        }
+
+        QFile file(wallpaperJsonPath + "config.json");
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QTextStream textStream(&file);
+            textStream << QString(QJsonDocument::fromVariant(value).toJson());
+            textStream.flush();
+            file.close();
+        } else {
+            qWarning() <<QString("%1 error.").arg(wallpaperJsonPath);
+        }
     } else {
         return;
     }
@@ -1665,6 +1689,73 @@ bool AppearanceManager::doSetWsLoop(const QString &monitorName, const QString &f
     }
 
     return true;
+}
+
+QString AppearanceManager::getCurrentDesktopIndex()
+{
+    QDBusMessage message = wmInterface->call("GetCurrentWorkspace");
+    if (message.type() == QDBusMessage::ErrorMessage) {
+        qDebug() << message.errorMessage();
+        return "";
+    }
+
+    return QString::number(message.arguments().first().toInt());
+}
+
+void AppearanceManager::doSetCurrentWorkspaceBackground(const QString &uri)
+{
+    QString strIndex = getCurrentDesktopIndex();
+    if (strIndex == "") {
+        qWarning() << "error getting current desktop index through wm";
+        return;
+    }
+
+    PhaseWallPaper::setWallpaperUri(strIndex, "", uri);
+    return;
+}
+
+QString AppearanceManager::doGetCurrentWorkspaceBackground()
+{
+    QString strIndex = getCurrentDesktopIndex();
+    if (strIndex == "") {
+        qWarning() << "error getting current desktop index through wm.";
+        return "";
+    }
+
+    return PhaseWallPaper::getWallpaperUri(strIndex, "");
+}
+
+void AppearanceManager::doSetCurrentWorkspaceBackgroundForMonitor(const QString &uri, const QString &strMonitorName)
+{
+    QString strIndex = getCurrentDesktopIndex();
+    if (strIndex == "") {
+        qWarning() << "error getting current desktop index through wm";
+        return;
+    }
+
+    PhaseWallPaper::setWallpaperUri(strIndex, strMonitorName, uri);
+    return;
+}
+
+QString AppearanceManager::doGetCurrentWorkspaceBackgroundForMonitor(const QString &strMonitorName)
+{
+    QString strIndex = getCurrentDesktopIndex();
+    if (strIndex == "") {
+        qWarning() << "error getting current desktop index through wm.";
+        return "";
+    }
+
+    return PhaseWallPaper::getWallpaperUri(strIndex, strMonitorName);
+}
+
+void AppearanceManager::doSetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QString &uri)
+{
+    return PhaseWallPaper::setWallpaperUri(QString::number(index), strMonitorName, uri);
+}
+
+QString AppearanceManager::doGetWorkspaceBackgroundForMonitor(const int &index,const QString &strMonitorName)
+{
+    return PhaseWallPaper::getWallpaperUri(QString::number(index), strMonitorName);
 }
 
 void AppearanceManager::autoChangeBg(QString monitorSpace, QDateTime date)

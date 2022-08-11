@@ -1,7 +1,7 @@
 #ifndef COMMONDEFINE_H
 #define COMMONDEFINE_H
 
-#define APPEARANCESCHEMA    "org.deepin.dde.appearance1"
+#define APPEARANCESCHEMA    "org.deepin.daemon.appearance1.dconfig"
 #define XSETTINGSSCHEMA     "com.deepin.xsettings"
 #define WRAPBGSCHEMA        "com.deepin.wrap.gnome.desktop.background"
 #define GNOMEBGSCHEMA       "org.gnome.desktop.background"
@@ -24,6 +24,7 @@
 #define GSKEYWALLPAPERURIS       "Wallpaper_Uris"
 #define GSKEYDTKWINDOWRADIUS     "dtk-window-radius"
 #define GSKEYFONTNAME            "gtk-font-name"
+#define DCKEYALLWALLPAPER        "All_Wallpaper_Uris"
 
 #define GTK2CONFDELIM            ""
 #define GTK3GROUPSETTINGS        "Settings"

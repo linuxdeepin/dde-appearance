@@ -72,6 +72,8 @@ set(SRCS
     ./modules/common/commondefine.h
     ./modules/dconfig/dconfigsettings.h
     ./modules/dconfig/dconfigsettings.cpp
+    ./modules/dconfig/phasewallpaper.h
+    ./modules/dconfig/phasewallpaper.cpp
     ../../DBus/types/scaleFactors.h
     ../../DBus/types/scaleFactors.cpp
 )
