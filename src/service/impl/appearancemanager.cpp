@@ -12,6 +12,7 @@
 #include <QTimer>
 #include <QTimeZone>
 #include <stdio.h>
+#include <QSettings>
 
 #include "appearancemanager.h"
 #include "../modules/api/utils.h"
@@ -594,6 +595,11 @@ void AppearanceManager::timerEvent(QTimerEvent *event)
 
 void AppearanceManager::setFontSize(double value)
 {
+    if (!fontsManager->isFontSizeValid(value)) {
+        qWarning() << "set font size error:invalid size " << value;
+        return;
+    }
+
     if (settingDconfig.isValid() && !qFuzzyCompare(value, fontSize)) {
         settingDconfig.setValue(GSKEYFONTSIZE, value);
         fontSize = value;
@@ -624,8 +630,13 @@ void AppearanceManager::setCursorTheme(QString value)
     }
 }
 
-void AppearanceManager::setStandarFont(QString value)
+void AppearanceManager::setStandardFont(QString value)
 {
+    if (!fontsManager->isFontFamily(value)) {
+        qWarning() << "set standard font error:invalid font " << value;
+        return;
+    }
+
     if (settingDconfig.isValid() && value != standardFont) {
         settingDconfig.setValue(GSKEYFONTSTANDARD, value);
         standardFont = value;
@@ -634,6 +645,11 @@ void AppearanceManager::setStandarFont(QString value)
 
 void AppearanceManager::setMonospaceFont(QString value)
 {
+    if (!fontsManager->isFontFamily(value)) {
+        qWarning() << "set monospace font error:invalid font " << value;
+        return;
+    }
+
     if (settingDconfig.isValid() && value != monospaceFont) {
         settingDconfig.setValue(GSKEYFONTMONOSPACE, value);
         monospaceFont = value;
@@ -1191,20 +1207,29 @@ QDateTime AppearanceManager::getThemeAutoChangeTime(QDateTime date, double latit
 bool AppearanceManager::doSetFonts(double size)
 {
     if (!fontsManager->isFontSizeValid(size)) {
+        qWarning() << "set font size error:invalid size " << size;
         return false;
     }
 
+    qDebug() << "doSetFonts, standardFont:" << standardFont << ", monospaceFont:"<< monospaceFont;
     bool bSuccess = fontsManager->setFamily(standardFont, monospaceFont, size);
     if (!bSuccess) {
+        qWarning() << "set font size error:can not set family ";
         return false;
     }
 
     QDBusMessage message = xSettingsInterface->call("SetString", "Qt/FontPointSize", QString::number(size));
     if (message.type() == QDBusMessage::ErrorMessage) {
+        qWarning() << "set font size error:can not set xsettings ";
         return false;
     }
 
-    return setDQtTheme({QTKEYFONTSIZE}, {QString::number(size)});
+    if (!setDQtTheme({QTKEYFONTSIZE}, {QString::number(size)})) {
+        qWarning() << "set font size error:can not set qt theme ";
+        return false;
+    }
+
+    return true;
 }
 
 bool AppearanceManager::doSetGtkTheme(QString value)
@@ -1254,6 +1279,7 @@ bool AppearanceManager::doSetCursorTheme(QString value)
 bool AppearanceManager::doSetStandardFont(QString value)
 {
     if (!fontsManager->isFontFamily(value)) {
+        qWarning() << "set standard font error:invalid font " << value;
         return false;
     }
     QString tmpMonoFont = monospaceFont;
@@ -1262,16 +1288,23 @@ bool AppearanceManager::doSetStandardFont(QString value)
         tmpMonoFont = fontList[0];
     }
 
+    qDebug() << "doSetStandardFont standardFont:" << standardFont << ", monospaceFont:"<< monospaceFont;
     if (!fontsManager->setFamily(value, tmpMonoFont, fontSize)) {
+        qWarning() << "set standard font error:can not set family ";
         return false;
     }
 
     QDBusMessage message = xSettingsInterface->call("SetString", "Qt/FontName", value);
     if (message.type() == QDBusMessage::ErrorMessage) {
+        qWarning() << "set standard font error:can not set xsettings ";
         return false;
     }
 
-    return setDQtTheme({QTKEYFONT}, {value});
+    if (!setDQtTheme({QTKEYFONT}, {value})) {
+        qWarning() << "set standard font error:can not set qt theme ";
+        return false;
+    }
+    return true;
 }
 
 bool AppearanceManager::doSetMonospaceFont(QString value)
@@ -1285,16 +1318,24 @@ bool AppearanceManager::doSetMonospaceFont(QString value)
         tmpStandardFont = fontList[0];
     }
 
+    qDebug() << "doSetMonospaceFont, standardFont:" << standardFont << ", monospaceFont:"<< monospaceFont;
     if (!fontsManager->setFamily(tmpStandardFont, value, fontSize)) {
+        qWarning() << "set monospace font error:can not set family ";
         return false;
     }
 
     QDBusMessage message = xSettingsInterface->call("SetString", "Qt/MonoFontName", value);
     if (message.type() == QDBusMessage::ErrorMessage) {
+        qWarning() << "set monospace font error:can not set xsettings ";
         return false;
     }
 
-    return setDQtTheme({QTKEYMONOFONT}, {value});
+    if (!setDQtTheme({QTKEYMONOFONT}, {value})) {
+        qWarning() << "set monospace font error:can not set qt theme ";
+        return false;
+    }
+
+    return true;
 }
 
 bool AppearanceManager::doSetBackground(QString value)
@@ -1529,7 +1570,7 @@ void AppearanceManager::doResetFonts()
     getDefaultFonts(defaultStandardFont, defaultMonospaceFont);
 
     if (defaultStandardFont != standardFont) {
-        setStandarFont(defaultStandardFont);
+        setStandardFont(defaultStandardFont);
     }
 
     if (defaultMonospaceFont != monospaceFont) {
@@ -1581,27 +1622,18 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
         if (standardFont == value) {
             return;
         }
-        bool bSuccess = doSetStandardFont(value);
-        if (bSuccess) {
-            setStandarFont(value);
-        }
+        setStandardFont(value);
     } else if (type == TYPEMONOSPACEFONT) {
         if (monospaceFont == value) {
             return;
         }
-        bool bSuccess = doSetMonospaceFont(value);
-        if (bSuccess) {
-            setMonospaceFont(value);
-        }
+        setMonospaceFont(value);
     } else if (type == TYPEFONTSIZE) {
         double size = value.toDouble();
         if (fontSize > size - 0.01 && fontSize < size + 0.01) {
             return;
         }
-        bool bSuccess = doSetFonts(size);
-        if (bSuccess) {
-            setFontSize(size);
-        }
+        setFontSize(size);
     } else {
         return;
     }
@@ -1839,30 +1871,15 @@ bool AppearanceManager::setDQtTheme(QStringList key, QStringList value)
 
     QString filePath = utils::GetUserConfigDir() + "/deepin" + "/qt-theme.ini";
 
-    QFile file(filePath);
-    if (!file.exists()) {
-        QDir dir(filePath);
-        if (!dir.exists()) {
-            if (!dir.mkdir(filePath.left(filePath.lastIndexOf("/")))) {
-                return false;
-            }
-        }
-
-        if (!file.open(QIODevice::WriteOnly)) {
-            return false;
-        }
-    }
-
-    KeyFile keyfile;
-    keyfile.loadFile(filePath);
+    QSettings settings(filePath, QSettings::IniFormat);
+    settings.beginGroup("Theme");
     for (int i = 0; i < key.length(); i++) {
-        QString temp = keyfile.getStr("Theme", key[i]);
+        QString temp = settings.value(key[i]).value<QString>();
         if (temp == value[i]) {
             continue;
         }
-        keyfile.setKey("Theme", key[i], value[i]);
+        settings.setValue(key[i], value[i]);
     }
-    keyfile.saveToFile(filePath);
 
     return true;
 }

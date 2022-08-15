@@ -42,7 +42,7 @@ public:
     void setGtkTheme(QString value);
     void setIconTheme(QString value);
     void setCursorTheme(QString value);
-    void setStandarFont(QString value);
+    void setStandardFont(QString value);
     void setMonospaceFont(QString value);
     void setWindowRadius(int value);
     void setOpaticy(double value);
@@ -86,7 +86,7 @@ public:
     inline QString getMonospaceFont() {return monospaceFont; }
     inline double getOpaticy() {return opaticy; }
     inline QString getQtActiveColor() {return qtActiveColor; }
-    inline QString getStandarFont() {return standardFont; }
+    inline QString getStandardFont() {return standardFont; }
     inline QString getWallpaperSlideShow() {return wallpaperSlideShow; }
     inline QString getWallpaperURls() {return wallpaperURls;}
     inline int getWindowRadius() {return windowRadius; }

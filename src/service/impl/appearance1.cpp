@@ -75,9 +75,9 @@ void Appearance1::setQtActiveColor(const QString &value)
     appearanceManager->setQtActiveColor(value);
 }
 
-QString Appearance1::standarFont() const
+QString Appearance1::standardFont() const
 {
-    return appearanceManager->getStandarFont();
+    return appearanceManager->getStandardFont();
 }
 
 QString Appearance1::wallpaperSlideShow() const

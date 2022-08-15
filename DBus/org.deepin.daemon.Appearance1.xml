@@ -83,7 +83,7 @@
     <property access='read' type='s' name='CursorTheme' />
     <property access='read' type='s' name='MonospaceFont' />
     <property access='readwrite' type='s' name='QtActiveColor' />
-    <property access='read' type='s' name='StandarFont' />
+    <property access='read' type='s' name='StandardFont' />
     <property access='readwrite' type='s' name='WallpaperSlideShow' />
     <property access='read' type='s' name='WallpaperURls' />
 

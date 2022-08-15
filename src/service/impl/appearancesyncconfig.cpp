@@ -20,7 +20,7 @@ QByteArray ThemeFontSyncConfig::Get()
     syncData.insert("gtk",appearanceManager->getGtkTheme());
     syncData.insert("icon",appearanceManager->getIconTheme());
     syncData.insert("cursor",appearanceManager->getCursorTheme());
-    syncData.insert("font_standard",appearanceManager->getStandarFont());
+    syncData.insert("font_standard",appearanceManager->getStandardFont());
     syncData.insert("font_monospace",appearanceManager->getMonospaceFont());
 
     doc.setObject(syncData);
@@ -75,12 +75,12 @@ void ThemeFontSyncConfig::Set(QByteArray data)
                 }
             }
 
-            if(syncData.value("font_standard").toString() != appearanceManager->getStandarFont())
+            if(syncData.value("font_standard").toString() != appearanceManager->getStandardFont())
             {
                 bsuccess = appearanceManager->doSetStandardFont(syncData.value("font_standard").toString());
                 if(bsuccess)
                 {
-                    appearanceManager->setStandarFont(syncData.value("font_standard").toString());
+                    appearanceManager->setStandardFont(syncData.value("font_standard").toString());
                 }
             }
 

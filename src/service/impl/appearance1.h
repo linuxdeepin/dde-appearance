@@ -40,8 +40,8 @@ public: // PROPERTIES
     QString qtActiveColor() const;
     void setQtActiveColor(const QString &value);
 
-    Q_PROPERTY(QString StandarFont READ standarFont)
-    QString standarFont() const;
+    Q_PROPERTY(QString StandardFont READ standardFont)
+    QString standardFont() const;
 
     Q_PROPERTY(QString WallpaperSlideShow READ wallpaperSlideShow WRITE setWallpaperSlideShow)
     QString wallpaperSlideShow() const;

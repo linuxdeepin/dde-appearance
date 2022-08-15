@@ -81,19 +81,24 @@ bool FontsManager::setFamily(QString standard, QString monospace, double size)
         monospace = fcFontMatch(monospace);
     }
 
-    if(familyMap.count(standard) != 1)
-    {
-        qInfo()<<QString("Invalid standard id %s").arg(standard);
-        return false;
-    }
-    QSharedPointer<Family> standInfo = familyMap[standard];
 
-    if(familyMap.count(monospace) != 1)
+    QString standardMd5 = md5(standard);
+    QString monospaceMd5 = md5(monospace);
+    qDebug() << "setFamily md5, standard=" << standardMd5 << ", monospace=" << monospaceMd5;
+
+    if(familyMap.count(standardMd5) != 1)
     {
-        qInfo()<<QString("Invalid monospace id %s").arg(monospace);
+        qWarning() << QString("Invalid standard id %1").arg(standardMd5);
         return false;
     }
-    QSharedPointer<Family> monoInfo = familyMap[monospace];
+    QSharedPointer<Family> standInfo = familyMap[standardMd5];
+
+    if(familyMap.count(monospaceMd5) != 1)
+    {
+        qWarning() << QString("Invalid monospace id %1").arg(monospaceMd5);
+        return false;
+    }
+    QSharedPointer<Family> monoInfo = familyMap[monospaceMd5];
 
     QString content = configContent(standInfo->id, monoInfo->id);
 
@@ -104,6 +109,10 @@ bool FontsManager::setFamily(QString standard, QString monospace, double size)
     }
 
     QFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly)) {
+        qWarning() << "file open error";
+        return false;
+    }
     file.write(content.toLatin1(),content.length());
     file.close();
 
@@ -112,18 +121,17 @@ bool FontsManager::setFamily(QString standard, QString monospace, double size)
     }
 
     QString value;
-    value.sprintf("%s %lf",standard.toLatin1().data(),size);
+    value.sprintf("%s %.2lf",standard.toLatin1().data(),size);
 
     if(!xSetting)
     {
+        qWarning() << "xSetting is not exist";
         return false;
     }
-    if(xSetting->get(GSKEYFONTNAME).toString() == value)
+    if(xSetting->get(GSKEYFONTNAME).toString() != value)
     {
-        return false;
+        xSetting->set(GSKEYFONTNAME,value);
     }
-
-    xSetting->set(GSKEYFONTNAME,value);
 
     return true;
 }
