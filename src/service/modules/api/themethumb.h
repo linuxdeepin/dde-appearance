@@ -32,7 +32,8 @@ bool genGtk(QString descFile,int width,int height,double scaleFactor,QString des
 QImage CompositeImages(QVector<QImage*>, int width, int height, int inconSize,int padding);
 QImage* loadXCursor(QString fileName, int size);
 QImage* fromXCurorImageToQImage(XcursorImage* image);
-QVector<QImage*> getIcons(QString dir, int size);
+QVector<QImage*> getIcons(QString theme, int size);
+QVector<QImage*> getCursors(QString dir, int size);
 QString getGtk(QString id, QString descFile);
 QString getIcon(QString id, QString descFile);
 bool shouldGenerateNew(QString descFile, QString out);

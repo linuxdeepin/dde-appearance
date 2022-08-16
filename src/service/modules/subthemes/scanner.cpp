@@ -164,7 +164,7 @@ QVector<QString> Scanner::listSubDir(QString path)
 
     for(auto filename : filenames) {
         qInfo() << "filename = " << filename.filePath() << __FUNCTION__ << __LINE__;
-        subDirs .push_back(filename.fileName());
+        subDirs.push_back(filename.fileName());
     }
 
     for(auto sub : subDirs) {

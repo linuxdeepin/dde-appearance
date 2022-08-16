@@ -2,23 +2,49 @@
 #include "../api/dfile.h"
 #include "../common/commondefine.h"
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gtk/gtk.h>
+
 const int gtkVersion = 0;
 const int cursorVersion = 1;
 const int iconVersion = 1;
 const int width = 320;
 const int height = 70;
-const int basePadding  = 12;
-const int baseIconSize = 24;
+const int baseCursorSize = 24;
+const int baseCursorPadding = 12;
+const int baseIconPadding  = 4;
+const int baseIconSize = 48;
 
-static QVector<QStringList> presentCursors{{"left_ptr"},
-                           {"left_ptr_watch"},
-                           {"x-cursor", "X_cursor"},
-                           {"hand2", "hand1"},
-                           {"grab", "grabbing", "closedhand"},
-                           {"fleur", "move"},
-                           {"sb_v_double_arrow"},
-                           {"sb_h_double_arrow"},
-                           {"watch", "wait"}};
+static QVector<QStringList> presentCursors {
+   {"left_ptr"},
+   {"left_ptr_watch"},
+   {"x-cursor", "X_cursor"},
+   {"hand2", "hand1"},
+   {"grab", "grabbing", "closedhand"},
+   {"fleur", "move"},
+   {"sb_v_double_arrow"},
+   {"sb_h_double_arrow"},
+   {"watch", "wait"}
+};
+
+static QVector<QStringList> presentIcons {
+    // file manager:
+    {"dde-file-manager", "system-file-manager"},
+    // music player:
+    {"deepin-music", "banshee", "amarok", "deadbeef", "clementine", "rhythmbox"},
+    // image viewer:
+    {"deepin-image-viewer", "eog", "gthumb", "gwenview", "gpicview", "showfoto", "phototonic"},
+    // media/video player:
+    {"deepin-movie", "media-player", "totem", "smplayer", "vlc", "dragonplayer", "kmplayer"},
+    // web browser:
+    {"google-chrome", "firefox", "chromium", "opera", "internet-web-browser", "browser"},
+    // system settings:
+    {"preferences-system"},
+    // text editor:
+//    {"accessories-text-editor", "text-editor", "gedit", "kedit", "xfce-edit"},
+    // terminal:
+//    {"deepin-terminal", "utilities-terminal", "terminal", "gnome-terminal", "xfce-terminal", "terminator", "openterm"},
+};
 
 QString getScaleDir()
 {
@@ -130,13 +156,13 @@ bool genCursor(QString descFile,int width,int height,double scaleFactor,QString 
 {
     QString dirPath = descFile.left(descFile.lastIndexOf("/")) +"/cursors";
 
-    int iconSize = static_cast<int>(baseIconSize * scaleFactor);
-    int padding  = static_cast<int>(basePadding * scaleFactor);
+    int iconSize = static_cast<int>(baseCursorSize * scaleFactor);
+    int padding  = static_cast<int>(baseCursorPadding * scaleFactor);
     width        = static_cast<int>(width * scaleFactor);
     height       = static_cast<int>(height * scaleFactor);
 
     qDebug()<<"dirPath : "<<dirPath;
-    QVector<QImage*> images = getIcons(dirPath,iconSize);
+    QVector<QImage*> images = getCursors(dirPath,iconSize);
     QImage image = CompositeImages(images,width,height,iconSize,padding);
 
     if(image.save(out))
@@ -145,6 +171,29 @@ bool genCursor(QString descFile,int width,int height,double scaleFactor,QString 
     }
 
     return true;
+}
+
+bool genIcon(QString theme,int width,int height,double scaleFactor,QString out)
+{
+    int iconSize = static_cast<int>(baseIconSize * scaleFactor);
+    int padding  = static_cast<int>(baseIconPadding * scaleFactor);
+    width        = static_cast<int>(width * scaleFactor);
+    height       = static_cast<int>(height * scaleFactor);
+
+    QVector<QImage*> images = getIcons(theme, iconSize);
+    QImage image = CompositeImages(images,width,height,iconSize,padding);
+
+    bool saveRtn = image.save(out);
+    int imagesLen = images.size();
+    for (int i = 0; i < imagesLen; ++i) {
+        if (images[i] != NULL) {
+            delete images[i];
+            images[i] = NULL;
+        }
+    }
+
+    images.clear();
+    return saveRtn;
 }
 
 bool genGtk(QString name,int width,int height,double scaleFactor,QString dest)
@@ -174,7 +223,7 @@ bool genGtk(QString name,int width,int height,double scaleFactor,QString dest)
     return true;
 }
 
-QVector<QImage*> getIcons(QString dir, int size)
+QVector<QImage*> getCursors(QString dir, int size)
 {
     qDebug()<<"dir :"<<dir;
     QVector<QImage*> images;
@@ -209,6 +258,118 @@ QVector<QImage*> getIcons(QString dir, int size)
             }
         }
 
+    }
+
+    return images;
+}
+
+char* chooseIcon(const char *theme_name, const char **icon_names, int size)
+{
+    if (!gtk_init_check(NULL, NULL)) {
+        return NULL;
+    }
+    GtkIconTheme *icon_theme = gtk_icon_theme_new();
+    if (icon_theme == NULL) {
+        qWarning() << "call gtk_icon_theme_new failed: rtn null.";
+        return NULL;
+    }
+    gtk_icon_theme_set_custom_theme(icon_theme, theme_name);
+
+    GtkIconInfo* icon_info = gtk_icon_theme_choose_icon(icon_theme, icon_names, size, GTK_ICON_LOOKUP_FORCE_SVG);
+    if (icon_info == NULL ) {
+        g_object_unref(icon_theme);
+        return NULL;
+    }
+    const char* filename = gtk_icon_info_get_filename(icon_info);
+    if (filename == NULL) {
+        qWarning() << "call gtk_icon_info_get_filename failed: rtn null.";
+        return NULL;
+    }
+    char* filename_dup = g_strdup(filename);
+    if (filename_dup == NULL) {
+        qWarning() << "call g_strdup failed: rtn null.";
+        return NULL;
+    }
+
+    g_object_unref(icon_info);
+    g_object_unref(icon_theme);
+    return filename_dup;
+}
+
+QImage* loadIcon(const QString &theme, const QStringList &iconNames, const int &size)
+{
+    int iconNamesLen = iconNames.length();
+    const char** tmp = new const char*[iconNamesLen + 1];
+    for (int i = 0; i < iconNamesLen; ++i) {
+        tmp[i] = new char[iconNames[i].toLatin1().length()];
+        memcpy(const_cast<char*>(tmp[i]), iconNames[i].toStdString().c_str(), iconNames[i].toLatin1().length() + 1);
+    }
+
+    tmp[iconNamesLen] = nullptr;
+    QString fileName = chooseIcon(theme.toStdString().c_str(), tmp, size);
+
+    for (int i = 0; i < iconNamesLen; ++i) {
+        if (tmp[i]) {
+            delete[] tmp[i];
+        }
+    }
+    if (tmp) {
+        delete[] tmp;
+    }
+
+    if (fileName == "") {
+        qWarning() << QString("choose Icon [%1] failed: ").arg(fileName);
+        return nullptr;
+    }
+
+    QFileInfo iconFile(fileName);
+    QImage* image = new QImage();
+    QString ext = iconFile.suffix().toLower();
+    if (ext == "svg") {
+        QString sizeStr = QString::number(size);
+        QProcess loadSvgProcess;
+        QString cmd = QString("rsvg-convert -f png -w %1 -h %2 %3").arg(sizeStr, sizeStr, fileName);
+        loadSvgProcess.start(cmd);
+        loadSvgProcess.waitForFinished(5000);
+        QByteArray qba = loadSvgProcess.readAll();
+        image->loadFromData(qba);
+        loadSvgProcess.close();
+    } else {
+        image->load(fileName);
+    }
+
+    if (size != image->width()) {
+        auto tmp = image;
+        image = new QImage(image->scaled(size, 0, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        delete tmp;
+    }
+
+    return image;
+}
+
+QVector<QImage*> getIcons(QString theme, int size)
+{
+    QVector<QImage*> images;
+    for(const auto &icons : qAsConst(presentIcons)) {
+        bool bAdd = true;
+        QImage* image = loadIcon(theme, icons, size);
+        if(!image) {
+            continue;
+        }
+
+        for(auto tempImage: images) {
+            if(tempImage->cacheKey() == image->cacheKey()) {
+                bAdd = false;
+                break;
+            }
+        }
+
+        if(bAdd) {
+            if(image->width() != size) {
+                image->scaled(size,image->height());
+            }
+            images.push_back(image);
+        }
     }
 
     return images;
@@ -327,15 +488,14 @@ QString getIcon(QString id, QString descFile)
         return "";
     }
 
-    QString out = prepareOutputPath("icon", id, cursorVersion);
+    QString out = prepareOutputPath("icon", id, iconVersion);
     if (shouldGenerateNewCursor(descFile, out)) {
         return "";
     }
 
     double scaleFactor = getScaleFactor();
 
-    if(!genCursor(descFile,width,height,scaleFactor, out))
-    {
+    if(!genIcon(id, width, height, scaleFactor, out)) {
         return "";
     }
 
