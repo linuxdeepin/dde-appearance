@@ -4,7 +4,7 @@
 #include "fsnotify.h"
 #include "../modules/subthemes/subthemes.h"
 #include "../modules/fonts/fontsmanager.h"
-#include "../../DBus/types/scaleFactors.h"
+#include "../../dbus/types/scaleFactors.h"
 #include "cursorchangehandler.h"
 #include "wallpaperscheduler.h"
 

@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.deepin.daemon.Appearance1
+Exec=/usr/bin/false
+SystemdService=dde-appearance.service

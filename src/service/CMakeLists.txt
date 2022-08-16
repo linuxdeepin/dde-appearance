@@ -8,19 +8,18 @@ find_package(Qt5 REQUIRED COMPONENTS Core DBus Concurrent Gui)
 find_package(DtkCore REQUIRED)
 find_package(PkgConfig REQUIRED)
 
-pkg_check_modules(QGSettings REQUIRED gsettings-qt)
-pkg_check_modules(DFrameworkDBus REQUIRED dframeworkdbus)
-pkg_check_modules(Gio-2.0 REQUIRED gio-2.0)
-pkg_check_modules(X11 REQUIRED xcursor xfixes x11)
-pkg_check_modules(Xcursor REQUIRED xcursor)
-pkg_check_modules(GTK3 REQUIRED gtk+-3.0 gdk-3.0)
-pkg_check_modules(XCB REQUIRED xcb-render xcb xcb-randr xcb-cursor)
-pkg_check_modules(OPENSSL REQUIRED openssl)
-pkg_check_modules(FONTCONFIG REQUIRED fontconfig)
+pkg_check_modules(QGSettings REQUIRED IMPORTED_TARGET gsettings-qt)
+pkg_check_modules(DFrameworkDBus REQUIRED IMPORTED_TARGET dframeworkdbus)
+pkg_check_modules(Gio-2.0 REQUIRED IMPORTED_TARGET gio-2.0)
+pkg_check_modules(X11 REQUIRED IMPORTED_TARGET xcursor xfixes x11)
+pkg_check_modules(GTK3 REQUIRED IMPORTED_TARGET gtk+-3.0 gdk-3.0)
+pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb-render xcb xcb-randr xcb-cursor)
+pkg_check_modules(FONTCONFIG REQUIRED IMPORTED_TARGET fontconfig)
+pkg_check_modules(OPENSSL REQUIRED IMPORTED_TARGET openssl)
 
 
 qt5_add_dbus_adaptor(ADAPTER_SOURCES
-                     ../../DBus/org.deepin.daemon.Appearance1.xml
+                     ../../dbus/org.deepin.daemon.Appearance1.xml
                      impl/appearance1.h
                      Appearance1)
 add_definitions(-DUSE_QT)
@@ -74,8 +73,8 @@ set(SRCS
     ./modules/dconfig/dconfigsettings.cpp
     ./modules/dconfig/phasewallpaper.h
     ./modules/dconfig/phasewallpaper.cpp
-    ../../DBus/types/scaleFactors.h
-    ../../DBus/types/scaleFactors.cpp
+    ../../dbus/types/scaleFactors.h
+    ../../dbus/types/scaleFactors.cpp
 )
 
 add_executable(dde-appearance
@@ -85,15 +84,14 @@ add_executable(dde-appearance
 
 
 target_include_directories(dde-appearance PUBLIC
-    ${QGSettings_INCLUDE_DIRS}
-    ${DFrameworkDBus_INCLUDE_DIRS}
-    ${Gio-2.0_INCLUDE_DIRS}
-    ${GTK3_INCLUDE_DIRS}
-    ${X11_INCLUDE_DIRS}
-    ${Xcursor_INCLUDE_DIRS}
-    ${XCB_INCLUDE_DIRS}
-    ${OPENSSL_INCLUDE_DIRS}
-    ${FONTCONFIG_INCLUDE_DIRS}
+    PkgConfig::QGSettings
+    PkgConfig::DFrameworkDBus
+    PkgConfig::Gio-2.0 
+    PkgConfig::GTK3
+    PkgConfig::X11
+    PkgConfig::XCB
+    PkgConfig::OPENSSL
+    PkgConfig::FONTCONFIG
 
 )
 
@@ -102,16 +100,15 @@ target_link_libraries(dde-appearance
     Qt5::DBus
     Qt5::Concurrent
     Qt5::Gui
-    ${QGSettings_LIBRARIES}
-    ${DFrameworkDBus_LIBRARIES}
-    ${Gio-2.0_LIBRARIES}
-    ${GTK3_LIBRARIES}
-    ${X11_LIBRARY_DIRS}
+    PkgConfig::QGSettings
+    PkgConfig::DFrameworkDBus
+    PkgConfig::Gio-2.0 
+    PkgConfig::GTK3
+    PkgConfig::X11
+    PkgConfig::XCB
+    PkgConfig::OPENSSL
+    PkgConfig::FONTCONFIG
     ${DtkCore_LIBRARIES}
-    ${XCB_LIBRARIES}
-    ${OPENSSL_LIBRARIES}
-    ${FONTCONFIG_LIBRARIES}
-    ${Xcursor_LIBRARIES}
 )
 
 install(TARGETS dde-appearance DESTINATION bin)
