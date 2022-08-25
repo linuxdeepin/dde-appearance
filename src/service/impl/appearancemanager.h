@@ -32,7 +32,7 @@ class AppearanceManager : public QObject
     };
 
 public:
-    AppearanceManager(QObject *parent = nullptr);
+    explicit AppearanceManager(QObject *parent = nullptr);
     ~AppearanceManager();
 
 public:
@@ -113,7 +113,8 @@ public Q_SLOTS:
     void handleDetectSysClockTimeOut();
 
 private:
-    QString qtActiveColorToHexColor();
+    QString qtActiveColorToHexColor(const QString &activeColor) const;
+    QString hexColorToQtActiveColor(const QString &hexColor) const;
     void initCoordinate();
     void initUserObj();
     void initCurrentBgs();

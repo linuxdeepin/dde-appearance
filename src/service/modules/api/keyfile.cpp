@@ -146,7 +146,7 @@ void KeyFile::setKey(const QString &section, const QString &key, const QString &
 bool KeyFile::saveToFile(const QString &filePath)
 {
     QFile file(filePath);
-    if(!file.open(QIODevice::ReadWrite | QIODevice::Append))
+    if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         return false;
     }

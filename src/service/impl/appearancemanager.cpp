@@ -13,6 +13,7 @@
 #include <QTimeZone>
 #include <stdio.h>
 #include <QSettings>
+#include <QColor>
 
 #include "appearancemanager.h"
 #include "../modules/api/utils.h"
@@ -63,16 +64,16 @@ AppearanceManager::AppearanceManager(QObject *parent)
     , fsnotify(new Fsnotify())
     , detectSysClockTimer(this)
     , themeAutoTimer(this)
+    , nid(0)
+    , fontSize(0)
+    , opaticy(0)
+    , windowRadius(0)
+    , longitude(0)
+    , latitude(0)
+    , ntpTimeId(0)
+    , timeUpdateTimeId(0)
+    , locationValid(false)
 {
-    fontSize = 0;
-    opaticy = 0;
-    windowRadius = 0;
-    longitude = 0;
-    latitude = 0;
-    ntpTimeId = 0;
-    timeUpdateTimeId = 0;
-    locationValid = false;
-    nid = 0;
 
     if(QGSettings::isSchemaInstalled(XSETTINGSSCHEMA))\
     {
@@ -109,10 +110,8 @@ AppearanceManager::AppearanceManager(QObject *parent)
     if(xSetting)
     {
         windowRadius  = xSetting->get(GSKEYDTKWINDOWRADIUS).toInt();
-        qtActiveColor = xSetting->get(GSKEYQTACTIVECOLOR).toString();
+        qtActiveColor = qtActiveColorToHexColor(xSetting->get(GSKEYQTACTIVECOLOR).toString());
     }
-
-    qtActiveColor = qtActiveColorToHexColor();
 
     init();
 }
@@ -450,12 +449,10 @@ void AppearanceManager::handleXsettingDConfigChange(QString key)
         return;
     }
 
-    QString value = qtActiveColorToHexColor();
+    QString value = qtActiveColorToHexColor(xSetting->get(GSKEYQTACTIVECOLOR).toString());
 
-    if (qtActiveColor != value) {
-        qtActiveColor = value;
-        Q_EMIT Changed("QtActiveColor", value);
-    }
+    qtActiveColor = value;
+    Q_EMIT Changed("QtActiveColor", value);
 }
 
 void AppearanceManager::handleSettingDConfigChange(QString key)
@@ -495,10 +492,12 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
         userInterface->call("SetDesktopBackgrounds", desktopBgs);
         value = desktopBgs.join(";");
     } else if (key == GSKEYWALLPAPERSLIDESHOW) {
+        type = TYPEWALLPAPERSLIDESHOW;
         QString policy = settingDconfig.value(key).toString();
         updateWSPolicy(policy);
     } else if (key == DCKEYALLWALLPAPER) {
-        QVariant value = settingDconfig.value(key);
+        type = TYPEALLWALLPAPER;
+        value = settingDconfig.value(key).toString();
         QDir dir;
         if (!dir.exists(wallpaperJsonPath)) {
             bool res = dir.mkpath(wallpaperJsonPath);
@@ -526,7 +525,7 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
     }
 
     if (!type.isEmpty()) {
-        Q_EMIT Changed("QtActiveColor", value);
+        Q_EMIT Changed(type, value);
     }
 
 }
@@ -659,7 +658,7 @@ void AppearanceManager::setMonospaceFont(QString value)
 void AppearanceManager::setWindowRadius(int value)
 {
     if (value != windowRadius && xSetting) {
-        xSetting->set(GSKEYWALLPAPERURIS, value);
+        xSetting->set(GSKEYDTKWINDOWRADIUS, value);
         windowRadius = value;
     }
 }
@@ -675,7 +674,7 @@ void AppearanceManager::setOpaticy(double value)
 void AppearanceManager::setQtActiveColor(const QString &value)
 {
     if ( value != qtActiveColor && xSetting) {
-        xSetting->set(GSKEYQTACTIVECOLOR, value);
+        xSetting->set(GSKEYQTACTIVECOLOR, hexColorToQtActiveColor(value));
         qtActiveColor = value;
     }
 }
@@ -710,30 +709,29 @@ bool AppearanceManager::setWallpaperURls(const QString &value)
 
     return true;
 }
-QString AppearanceManager::qtActiveColorToHexColor()
+
+QString AppearanceManager::qtActiveColorToHexColor(const QString &activeColor) const
 {
-    QStringList fields = qtActiveColor.split(",");
+    QStringList fields = activeColor.split(",");
     if (fields.size() != 4)
         return "";
 
-    uint16_t array[4];
-    for (int i = 0; i < 4; i++) {
-        QString field = fields[i];
-        array[i] = uint16_t(field.toInt());
-    }
+    QColor clr = QColor::fromRgba64(fields.at(0).toUShort(), fields.at(1).toUShort(), fields.at(2).toUShort(), fields.at(3).toUShort());
+    return clr.name(clr.alpha() == 255 ? QColor::HexRgb : QColor::HexArgb).toUpper();
+}
 
-    uint8_t byteArr[4];
-    for (int i = 0; i < 4; i++) {
-        byteArr[i] = uint8_t(float(array[i]) / float(UINT16_MAX) * float(UINT8_MAX));
-    }
-    char buf[512];
-    if (byteArr[3] == 255) {
-        sprintf(buf, "#%02X%02X%02X", byteArr[0], byteArr[1], byteArr[2]);
-    } else {
-        sprintf(buf, "#%02X%02X%02X%02X", byteArr[0], byteArr[1], byteArr[2], byteArr[3]);
-    }
-
-    return buf;
+QString AppearanceManager::hexColorToQtActiveColor(const QString &hexColor) const
+{
+    if (!QColor::isValidColor(hexColor))
+        return QString();
+    QColor clr(hexColor);
+    QStringList rgbaList;
+    QRgba64 clr64 = clr.rgba64();
+    rgbaList.append(QString::number(clr64.red()));
+    rgbaList.append(QString::number(clr64.green()));
+    rgbaList.append(QString::number(clr64.blue()));
+    rgbaList.append(QString::number(clr64.alpha()));
+    return rgbaList.join(",");
 }
 
 void AppearanceManager::initCoordinate()
@@ -773,9 +771,9 @@ void AppearanceManager::initUserObj()
         return;
     }
 
-    QDBusInterface accountInter("com.deepin.daemon.Accounts",
-                                "/com/deepin/daemon/Accounts",
-                                "com.deepin.daemon.Accounts",
+    QDBusInterface accountInter("org.deepin.daemon.Accounts1",
+                                "/org/deepin/daemon/Accounts1",
+                                "org.deepin.daemon.Accounts1",
                                 QDBusConnection::systemBus());
 
     if (!accountInter.isValid()) {
@@ -789,9 +787,9 @@ void AppearanceManager::initUserObj()
     }
     QString userPath = message.arguments().first().toString();
 
-    userInterface = QSharedPointer<QDBusInterface>(new QDBusInterface("com.deepin.daemon.Accounts",
+    userInterface = QSharedPointer<QDBusInterface>(new QDBusInterface("org.deepin.daemon.Accounts1",
                                                                       userPath,
-                                                                      "com.deepin.daemon.Accounts.User",
+                                                                      "org.deepin.daemon.Accounts1.User",
                                                                       QDBusConnection::systemBus()));
 
     if (!userInterface->isValid()) {
@@ -1469,7 +1467,7 @@ QString AppearanceManager::doList(QString type)
         QVector<QSharedPointer<Theme>>::iterator iter = gtks.begin();
         while (iter != gtks.end()) {
             if ((*iter)->getId().startsWith("deepin")) {
-                iter++;
+                ++iter;
             } else {
                 iter = gtks.erase(iter);
             }
@@ -1502,7 +1500,7 @@ QString AppearanceManager::doShow(const QString &type, const QStringList &names)
         QVector<QSharedPointer<Theme>>::iterator iter = gtks.begin();
         while (iter != gtks.end()) {
             if (names.indexOf((*iter)->getId())!=-1 ||(*iter)->getId() == AUTOGTKTHEME) {
-                iter++;
+                ++iter;
             } else {
                 iter = gtks.erase(iter);
             }
@@ -1514,7 +1512,7 @@ QString AppearanceManager::doShow(const QString &type, const QStringList &names)
         QVector<QSharedPointer<Theme>>::iterator iter = icons.begin();
         while (iter != icons.end()) {
             if (names.indexOf((*iter)->getId())!=-1) {
-                iter++;
+                ++iter;
             } else {
                 iter = icons.erase(iter);
             }
@@ -1526,7 +1524,7 @@ QString AppearanceManager::doShow(const QString &type, const QStringList &names)
         QVector<QSharedPointer<Theme>>::iterator iter = cursor.begin();
         while (iter != cursor.end()) {
             if (names.indexOf((*iter)->getId())!=-1) {
-                iter++;
+                ++iter;
             } else {
                 iter = cursor.erase(iter);
             }
@@ -1538,7 +1536,7 @@ QString AppearanceManager::doShow(const QString &type, const QStringList &names)
         QVector<Background>::iterator iter = background.begin();
         while (iter != background.end()) {
             if (names.indexOf(iter->getId())!=-1) {
-                iter++;
+                ++iter;
             } else {
                 iter = background.erase(iter);
             }
@@ -1954,7 +1952,6 @@ QString AppearanceManager::marshal(const QVector<QSharedPointer<FontsManager::Fa
         QJsonObject obj;
         obj["Id"] = iter->id;
         obj["Name"] = iter->id;
-        obj["Styles"] = iter->id;
         obj["Styles"] = iter->id;
         obj["Show"] = iter->id;
         arr.push_back(obj);

@@ -322,21 +322,7 @@ QImage* loadIcon(const QString &theme, const QStringList &iconNames, const int &
         return nullptr;
     }
 
-    QFileInfo iconFile(fileName);
-    QImage* image = new QImage();
-    QString ext = iconFile.suffix().toLower();
-    if (ext == "svg") {
-        QString sizeStr = QString::number(size);
-        QProcess loadSvgProcess;
-        QString cmd = QString("rsvg-convert -f png -w %1 -h %2 %3").arg(sizeStr, sizeStr, fileName);
-        loadSvgProcess.start(cmd);
-        loadSvgProcess.waitForFinished(5000);
-        QByteArray qba = loadSvgProcess.readAll();
-        image->loadFromData(qba);
-        loadSvgProcess.close();
-    } else {
-        image->load(fileName);
-    }
+    QImage* image = new QImage(fileName);
 
     if (size != image->width()) {
         auto tmp = image;
@@ -377,7 +363,7 @@ QVector<QImage*> getIcons(QString theme, int size)
 
 QImage CompositeImages(QVector<QImage*> images, int width, int height, int iconSize,int padding)
 {
-    QImage image(width,height,QImage::Format_RGB888);
+    QImage image(width,height,QImage::Format_RGBA8888);
     if(images.isEmpty())
     {
         return image;

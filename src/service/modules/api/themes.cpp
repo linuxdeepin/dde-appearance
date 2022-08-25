@@ -29,7 +29,7 @@ ThemesApi::ThemesApi(QObject *parent)
         wmSetting = QSharedPointer<QGSettings>(new QGSettings(WMSCHEMA));
     }
 
-    if(QGSettings::isSchemaInstalled(XSETTINGSSCHEMA))
+    if(QGSettings::isSchemaInstalled(INTERFACESCHEMA))
     {
         interfaceSetting = QSharedPointer<QGSettings>(new QGSettings(INTERFACESCHEMA));
     }
@@ -296,22 +296,19 @@ void ThemesApi::setGtk2Cursor(QString name)
 
 void ThemesApi::setGtk2Prop(QString key, QString value, QString file)
 {
-    gtk2Mutex.lock();
+    QMutexLocker gtk2MutexLocker(&gtk2Mutex);
     gtk2FileReader(file);
-    QSharedPointer<gtk2ConfInfo> info = getGtk2ConfInfo(key);
-    if (info == nullptr) {
+    QString info = getGtk2ConfInfo(key);
+    if (info.isEmpty()) {
         addGtk2ConfInfo(key, value);
     } else {
-        if (info->value == value) {
-            gtk2Mutex.unlock();
+        if (info == value) {
             return;
         }
-        info->value = value;
+        addGtk2ConfInfo(key, value);
     }
 
     gtk2FileWriter(file);
-
-    gtk2Mutex.unlock();
 }
 
 void ThemesApi::gtk2FileReader(QString file)
@@ -336,45 +333,27 @@ void ThemesApi::gtk2FileReader(QString file)
             continue;
         }
 
-        QSharedPointer<gtk2ConfInfo> info(new gtk2ConfInfo{strv[0], strv[1]});
-        gtk2ConfInfos.push_back(info);
+        addGtk2ConfInfo(strv[0], strv[1]);
     }
 
     qfile.close();
 }
 
-QSharedPointer<ThemesApi::gtk2ConfInfo> ThemesApi::getGtk2ConfInfo(QString key)
+QString ThemesApi::getGtk2ConfInfo(QString key)
 {
-    for(auto info : gtk2ConfInfos) {
-        if ( info->key == key) {
-            return info;
-        }
-    }
-
-    return nullptr;
+    return gtk2ConfInfos.value(key);
 }
 
 void ThemesApi::addGtk2ConfInfo(QString key, QString value)
 {
-    for (auto info : gtk2ConfInfos) {
-        if (info->key == key) {
-            info->value = value;
-            return;
-        }
-    }
-
-    QSharedPointer<gtk2ConfInfo> info(new gtk2ConfInfo{key, value});
-    gtk2ConfInfos.push_back(info);
+    gtk2ConfInfos[key] = value;
 }
 
 void ThemesApi::gtk2FileWriter(QString file)
 {
-    QString content;
-    int length = gtk2ConfInfos.size();
-    for (int i = 0; i < length; i++) {
-        content += gtk2ConfInfos[i]->key + GTK2CONFDELIM + gtk2ConfInfos[i]->value;
-        if (i != length -1)
-            content += "\n";
+    QStringList content;
+    for (auto it = gtk2ConfInfos.cbegin();it !=gtk2ConfInfos.end();it++) {
+        content.append(it.key() + GTK2CONFDELIM + it.value());
     }
 
     QFile qfile(file);
@@ -385,7 +364,7 @@ void ThemesApi::gtk2FileWriter(QString file)
     }
 
     qfile.open(QIODevice::WriteOnly);
-    qfile.write(file.toLatin1().data(), file.size());
+    qfile.write(content.join("\n").toLatin1());
     qfile.close();
 }
 
@@ -406,9 +385,9 @@ void ThemesApi::setGtk3Cursor(QString name)
 
 void ThemesApi::setGtk3Prop(QString key, QString value, QString file)
 {
-    gtk3Mutex.lock();
+    QMutexLocker gtk3MutexLocker(&gtk3Mutex);
     QFile qfile(file);
-    if (qfile.exists()) {
+    if (!qfile.exists()) {
         QDir dir(file.left(file.lastIndexOf("/")));
         dir.mkpath(file.left(file.lastIndexOf("/")));
     }
@@ -418,13 +397,10 @@ void ThemesApi::setGtk3Prop(QString key, QString value, QString file)
     }
 
     if (isGtk3PropEqual(key, value, keyfile)) {
-        gtk3Mutex.unlock();
         return;
     }
 
     doSetGtk3Prop(key, value, file, keyfile);
-
-    gtk3Mutex.unlock();
 }
 
 bool ThemesApi::isGtk3PropEqual(QString key, QString value, KeyFile& keyfile)
@@ -435,11 +411,8 @@ bool ThemesApi::isGtk3PropEqual(QString key, QString value, KeyFile& keyfile)
 
 void ThemesApi::doSetGtk3Prop(QString key, QString value, QString file, KeyFile& keyfile)
 {
-    keyfile.getStr(GTK3GROUPSETTINGS, key, value);
-    QString content; //todo
-
-    QFile qfile(file);
-    qfile.write(content.toLatin1());
+    keyfile.setKey(GTK3GROUPSETTINGS, key, value);
+    keyfile.saveToFile(file);
 }
 
 bool ThemesApi::setQTTheme()
@@ -505,9 +478,7 @@ bool ThemesApi::setDefaultCursor(QString name)
     }
 
     keyfile.setKey("Icon Theme", "Inherits", name);
-    QString contents;// = toData(keyfile);
-
-    return utils::WriteStringToFile(file, contents);
+    return keyfile.saveToFile(file);
 }
 
 void ThemesApi::setGtkCursor(QString name)
@@ -564,12 +535,12 @@ void ThemesApi::setWMCursor(QString name)
 {
     if(interfaceSetting)
     {
-        interfaceSetting->set(GSKEYCURSORTHEME,name);
+        interfaceSetting->set("cursorTheme",name);
     }
 
     if(wmDbusInterface)
     {
-        wmDbusInterface->setProperty("CursorTheme",QString(name));
+        wmDbusInterface->setProperty("cursorTheme",QString(name));
     }
 }
 

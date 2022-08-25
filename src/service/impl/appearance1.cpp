@@ -1,6 +1,8 @@
 #include "appearance1.h"
 #include "../modules/common/commondefine.h"
 
+#include <QDBusMessage>
+#include <QVariant>
 #include <iostream>
 
 Appearance1::Appearance1(QObject *parent)
@@ -186,6 +188,31 @@ void Appearance1::Set(const QString &ty,const QString &value)
 void Appearance1::handleChangeSignal(const QString& type, const QString& value)
 {
     Q_EMIT Changed(type,value);
+    const QMap<QString, QString> c_propMap = {
+        { TYPEBACKGROUND, "Background" },
+        { TYPEFONTSIZE, "FontSize" },
+        { TYPEGTK, "GtkTheme" },
+        { TYPEICON, "IconTheme" },
+        { TYPECURSOR, "CursorTheme" },
+        { TYPEMONOSPACEFONT, "MonospaceFont" },
+        { "Opaticy", "Opaticy" },
+        { "QtActiveColor", "QtActiveColor" },
+        { TYPESTANDARDFONT, "StandardFont" },
+        { TYPEWALLPAPERSLIDESHOW, "WallpaperSlideShow" },
+        { TYPEALLWALLPAPER, "WallpaperURls" },
+        { "WindowRadius", "WindowRadius" }
+    };
+    if (!c_propMap.contains(type))
+        return;
+    QVariantList args;
+    args.push_back(QVariant(QStringLiteral("/org/deepin/daemon/Appearance1")));
+    QVariantMap properties;
+    properties[c_propMap.value(type)] = value;
+    args.push_back(properties);
+    args.push_back(QStringList());
+    QDBusMessage message = QDBusMessage::createSignal(QStringLiteral("/org/deepin/daemon/Appearance1"), QStringLiteral("org.freedesktop.DBus.Properties"), QStringLiteral("PropertiesChanged"));
+    message.setArguments(args);
+    QDBusConnection::sessionBus().send(message);
 }
 
 void Appearance1::handleRefreshedSignal(const QString &type)

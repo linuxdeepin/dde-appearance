@@ -15,11 +15,6 @@ class ThemesApi : public QObject
 {
     Q_OBJECT
 
-    struct gtk2ConfInfo {
-        QString key;
-        QString value;
-    };
-
 public:
     ThemesApi(QObject *parent = nullptr);
     ~ThemesApi();
@@ -41,7 +36,7 @@ public:
     void setGtk2Cursor(QString name);
     void setGtk2Prop(QString key, QString value, QString file);
     void gtk2FileReader(QString file);
-    QSharedPointer<gtk2ConfInfo> getGtk2ConfInfo(QString key);
+    QString getGtk2ConfInfo(QString key);
     void addGtk2ConfInfo(QString key, QString value);
     void gtk2FileWriter(QString file);
     void setGtk3Theme(QString name);
@@ -64,7 +59,7 @@ private:
     QSharedPointer<Scanner>                         scanner;
     QMutex                                          gtk2Mutex;
     QMutex                                          gtk3Mutex;
-    QVector<QSharedPointer<gtk2ConfInfo>>           gtk2ConfInfos;
+    QMap<QString, QString>                          gtk2ConfInfos;
     QSharedPointer<QDBusInterface>                  wmDbusInterface;
     QSharedPointer<QGSettings>                      xSetting;
     QSharedPointer<QGSettings>                      metacitySetting;
