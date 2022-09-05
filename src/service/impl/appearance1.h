@@ -13,6 +13,9 @@ public:
     ~Appearance1();
 
 public: // PROPERTIES
+    Q_PROPERTY(QString GlobalTheme READ globalTheme)
+    QString globalTheme() const;
+
     Q_PROPERTY(QString Background READ background)
     QString background() const;
 
@@ -32,9 +35,9 @@ public: // PROPERTIES
     Q_PROPERTY(QString MonospaceFont READ monospaceFont)
     QString monospaceFont() const;
 
-    Q_PROPERTY(double Opaticy READ opaticy WRITE setOpaticy)
-    double opaticy() const;
-    void setOpaticy(double value);
+    Q_PROPERTY(double Opacity READ opacity WRITE setOpacity)
+    double opacity() const;
+    void setOpacity(double value);
 
     Q_PROPERTY(QString QtActiveColor READ qtActiveColor WRITE setQtActiveColor)
     QString qtActiveColor() const;

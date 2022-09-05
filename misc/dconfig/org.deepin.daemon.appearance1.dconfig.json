@@ -82,6 +82,16 @@
             "permissions": "readwrite",
             "visibility": "private"
         },
+        "Global_Theme": {
+            "value": "bloom",
+            "serial": 0,
+            "flags": [],
+            "name": "Global_Theme",
+            "name[zh_CN]": "*****",
+            "description": "deepin theme to use for the panel, nautilus etc.",
+            "permissions": "readwrite",
+            "visibility": "private"
+        },
         "Opacity": {
             "value": 0.40000000000000002,
             "serial": 0,

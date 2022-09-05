@@ -85,7 +85,7 @@ void Backgrounds::refreshBackground()
 
 void Backgrounds::sortByTime(QFileInfoList listFileInfo)
 {
-    qSort(listFileInfo.begin(), listFileInfo.end(), [ = ](const QFileInfo &f1, QFileInfo &f2){
+    std::sort(listFileInfo.begin(), listFileInfo.end(), [ = ](const QFileInfo &f1, QFileInfo &f2){
         return  f1.lastModified().toTime_t() < f2.lastModified().toTime_t();
     });
 }
@@ -168,7 +168,7 @@ bool Backgrounds::isFileInDirs(QString file, QStringList dirs)
 {
     for (auto dir : dirs) {
         QFileInfo qfile(file);
-        if (qfile.dir() == dir)
+        if (qfile.absolutePath() == dir)
             return true;
     }
 
@@ -209,6 +209,30 @@ void Backgrounds::notifyChanged()
     backgroundsMu->unlock();
 }
 
+QString Backgrounds::resizeImage(QString fileName, QString cacheDir)
+{
+    const int stdWidth = 3840;
+    const int stdHeight = 2400;
+    // TODO: 对图片过大的做处理
+    return fileName;
+}
+
+QString Backgrounds::onPrepare(QString fileName)
+{
+    struct passwd *user = getpwuid(getuid());
+    if(user==nullptr)
+    {
+        return "";
+    }
+    QString file= resizeImage(fileName, customWallpapersConfigDir);
+    notifyChanged();
+
+    return file;
+    // TODO
+//    QDBusInterface daemon("com.deepin.daemon.Daemon","/com/deepin/daemon/Daemon","com.deepin.daemon.Daemon",QDBusConnection::systemBus());
+//    return QDBusPendingReply<QString>(daemon.asyncCall(QStringLiteral("SaveCustomWallPaper"), QVariant::fromValue(QString(user->pw_name)), QVariant::fromValue(file)));
+}
+
 QString Backgrounds::prepare(QString file)
 {
     QString tempFile = utils::deCodeURI(file);
@@ -217,7 +241,6 @@ QString Backgrounds::prepare(QString file)
         return tempFile;
     }
 
-    // todo
-    return prepare(file);
+    return onPrepare(file);
 }
 

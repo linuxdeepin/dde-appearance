@@ -1,6 +1,9 @@
+#include <QImageReader>
+
 #include "themethumb.h"
 #include "../api/dfile.h"
 #include "../common/commondefine.h"
+#include "keyfile.h"
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gtk/gtk.h>
@@ -321,14 +324,12 @@ QImage* loadIcon(const QString &theme, const QStringList &iconNames, const int &
         qWarning() << QString("choose Icon [%1] failed: ").arg(fileName);
         return nullptr;
     }
-
-    QImage* image = new QImage(fileName);
-
-    if (size != image->width()) {
-        auto tmp = image;
-        image = new QImage(image->scaled(size, 0, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-        delete tmp;
-    }
+    QImage *image = new QImage();
+    QImageReader reader;
+    reader.setDecideFormatFromContent(true);
+    reader.setScaledSize(QSize(size, size));
+    reader.setFileName(fileName);
+    reader.read(image);
 
     return image;
 }
@@ -393,10 +394,6 @@ QImage CompositeImages(QVector<QImage*> images, int width, int height, int iconS
 
     for(auto iter : images)
     {
-        if(!iter->save("/home/uos/file"+QString::number(i++)+".png"))
-        {
-            qDebug()<<"save faile";
-        }
         qDebug()<<i<<" :"<<(*iter).bits();
         painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
         painter.drawImage(x,y,*iter);
@@ -444,6 +441,27 @@ QImage* fromXCurorImageToQImage(XcursorImage* image)
     return qImage;
 }
 
+QString getGlobal(QString id, QString descFile)
+{
+    if (!checkScaleFactor()) {
+        qInfo() << "scaleFactor <= 0";
+        return "";
+    }
+    KeyFile keyFile(',');
+    keyFile.loadFile(descFile);
+    QStringList example = keyFile.getStrList("Deepin Theme","Example");
+    if (!example.isEmpty()) {
+        QString path = example.first();
+        QFileInfo file(path);
+        if (file.isRelative()) {
+            QFileInfo themefile(descFile);
+            file.setFile(themefile.absoluteDir(),path);
+            path = file.absoluteFilePath();
+        }
+        return path;
+    }
+    return QString();
+}
 
 QString getGtk(QString id, QString descFile)
 {

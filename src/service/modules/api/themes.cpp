@@ -5,6 +5,9 @@
 #include <gtk/gtk.h>
 #include <xcb/xcb_cursor.h>
 
+#include <X11/Xlib.h>
+#include <X11/Xcursor/Xcursor.h>
+#include <X11/extensions/Xfixes.h>
 
 ThemesApi::ThemesApi(QObject *parent)
     : QObject(parent)
@@ -14,23 +17,19 @@ ThemesApi::ThemesApi(QObject *parent)
     , wmDbusInterface(new QDBusInterface("com.deepin.wm", "/com/deepin/wm",
                                          "com.deepin.wm", QDBusConnection::sessionBus()))
 {
-    if(QGSettings::isSchemaInstalled(XSETTINGSSCHEMA))
-    {
+    if (QGSettings::isSchemaInstalled(XSETTINGSSCHEMA)) {
         xSetting = QSharedPointer<QGSettings>(new QGSettings(XSETTINGSSCHEMA));
     }
 
-    if(QGSettings::isSchemaInstalled(METACITYSCHEMA))
-    {
+    if (QGSettings::isSchemaInstalled(METACITYSCHEMA)) {
         metacitySetting = QSharedPointer<QGSettings>(new QGSettings(METACITYSCHEMA));
     }
 
-    if(QGSettings::isSchemaInstalled(WMSCHEMA))
-    {
+    if (QGSettings::isSchemaInstalled(WMSCHEMA)) {
         wmSetting = QSharedPointer<QGSettings>(new QGSettings(WMSCHEMA));
     }
 
-    if(QGSettings::isSchemaInstalled(INTERFACESCHEMA))
-    {
+    if (QGSettings::isSchemaInstalled(INTERFACESCHEMA)) {
         interfaceSetting = QSharedPointer<QGSettings>(new QGSettings(INTERFACESCHEMA));
     }
 }
@@ -42,14 +41,28 @@ ThemesApi::~ThemesApi()
 bool ThemesApi::isThemeInList(QString theme, QVector<QString> list)
 {
     int index = theme.lastIndexOf("/");
-    QString name = theme.mid(0,index);
-    for(auto l : list) {
+    QString name = theme.mid(0, index);
+    for (auto l : list) {
         index = l.lastIndexOf("/");
 
-        if(name == l.mid(0,index))
+        if (name == l.mid(0, index))
             return true;
     }
     return false;
+}
+
+QVector<QString> ThemesApi::listGlobalTheme()
+{
+    QVector<QString> local;
+    QDir home = QDir::home();
+    local.push_back(home.absoluteFilePath(".cache/deepin/dde-appearance/deepin-themes/"));
+    local.push_back(home.absoluteFilePath(".local/share/deepin-themes"));
+    local.push_back(home.absoluteFilePath(".deepin-themes"));
+
+    QVector<QString> sys;
+    sys.push_back("/usr/share/deepin-themes");
+
+    return doListTheme(local, sys, TYPEGLOBALTHEME);
 }
 
 QVector<QString> ThemesApi::listGtkTheme()
@@ -104,16 +117,17 @@ QVector<QString> ThemesApi::doListTheme(QVector<QString> local, QVector<QString>
 QVector<QString> ThemesApi::scanThemeDirs(QVector<QString> dirs, QString type)
 {
     QVector<QString> lists;
-    for(auto dir : dirs) {
+    for (auto dir : dirs) {
         QVector<QString> tmp;
-        if(type == TYPEGTK)
-        {
+        if (type == TYPEGTK) {
             tmp = scanner->listGtkTheme(dir);
-        }else if (type == TYPECURSOR) {
+        } else if (type == TYPECURSOR) {
             tmp = scanner->listCursorTheme(dir);
-        }else if (type == TYPEICON){
+        } else if (type == TYPEICON) {
             tmp = scanner->listIconTheme(dir);
-        }else {
+        } else if (type == TYPEGLOBALTHEME) {
+            tmp = scanner->listGlobalTheme(dir);
+        } else {
             break;
         }
 
@@ -126,12 +140,12 @@ QVector<QString> ThemesApi::scanThemeDirs(QVector<QString> dirs, QString type)
 QVector<QString> ThemesApi::mergeThemeList(QVector<QString> src, QVector<QString> target)
 {
     qInfo() << "mergeThemeList";
-    if(target.size() == 0) {
+    if (target.size() == 0) {
         return src;
     }
 
-    for(auto t: target) {
-        if(isThemeInList(t, src)) {
+    for (auto t : target) {
+        if (isThemeInList(t, src)) {
             continue;
         }
         src.push_back(t);
@@ -141,14 +155,12 @@ QVector<QString> ThemesApi::mergeThemeList(QVector<QString> src, QVector<QString
 }
 
 bool ThemesApi::setWMTheme(QString name)
-{ 
-    if(metacitySetting)
-    {
-        metacitySetting->set("theme",name);
+{
+    if (metacitySetting) {
+        metacitySetting->set("theme", name);
     }
 
-    if(!wmSetting)
-    {
+    if (!wmSetting) {
         return false;
     }
 
@@ -157,9 +169,19 @@ bool ThemesApi::setWMTheme(QString name)
     return true;
 }
 
+bool ThemesApi::setGlobalTheme(QString name)
+{
+    if (!scanner->isGlobalTheme(getThemePath(name, TYPEGLOBALTHEME, "deepin-theme"))) {
+        qWarning() << "isGlobalTheme failed";
+        return false;
+    }
+
+    return true;
+}
+
 bool ThemesApi::setGtkTheme(QString name)
 {
-    if(!scanner->isGtkTheme(getThemePath(name, TYPEGTK, "themes"))) {
+    if (!scanner->isGtkTheme(getThemePath(name, TYPEGTK, "themes"))) {
         qWarning() << "isGtkTheme failed";
         return false;
     }
@@ -168,8 +190,7 @@ bool ThemesApi::setGtkTheme(QString name)
 
     setGtk3Theme(name);
 
-    if(!xSetting)
-    {
+    if (!xSetting) {
         return false;
     }
     QString old = xSetting->get(XSKEYTHEME).toString();
@@ -178,16 +199,16 @@ bool ThemesApi::setGtkTheme(QString name)
         return false;
     }
 
-    xSetting->set(XSKEYTHEME,name);
+    xSetting->set(XSKEYTHEME, name);
 
     if (!setWMTheme(name)) {
-        xSetting->set(XSKEYTHEME,old);
+        xSetting->set(XSKEYTHEME, old);
         qWarning() << "setWMTheme failed";
         return false;
     }
 
     if (!setQTTheme()) {
-        xSetting->set(XSKEYTHEME,old);
+        xSetting->set(XSKEYTHEME, old);
         setWMTheme(old);
         qWarning() << "setQTTheme failed";
         return false;
@@ -198,7 +219,7 @@ bool ThemesApi::setGtkTheme(QString name)
 
 bool ThemesApi::setIconTheme(QString name)
 {
-    if(!scanner->isIconTheme(getThemePath(name, TYPEICON, "icons"))) {
+    if (!scanner->isIconTheme(getThemePath(name, TYPEICON, "icons"))) {
         qWarning() << "isIconTheme failed";
         return false;
     }
@@ -207,8 +228,7 @@ bool ThemesApi::setIconTheme(QString name)
 
     setGtk3Icon(name);
 
-    if(!xSetting)
-    {
+    if (!xSetting) {
         return false;
     }
     QString old = xSetting->get(XSKEYICONTHEME).toString();
@@ -216,14 +236,14 @@ bool ThemesApi::setIconTheme(QString name)
         return false;
     }
 
-    xSetting->set(XSKEYICONTHEME,name);
+    xSetting->set(XSKEYICONTHEME, name);
 
     return true;
 }
 
 bool ThemesApi::setCursorTheme(QString name)
 {
-    if(!scanner->isCursorTheme(getThemePath(name, TYPECURSOR, "icons"))) {
+    if (!scanner->isCursorTheme(getThemePath(name, TYPECURSOR, "icons"))) {
         qWarning() << "isCursorTheme failed";
         return false;
     }
@@ -234,17 +254,13 @@ bool ThemesApi::setCursorTheme(QString name)
 
     setDefaultCursor(name);
 
-    if(!xSetting)
-    {
+    if (!xSetting) {
         return false;
     }
 
     QString old = xSetting->get(XSKEYCURSORNAME).toString();
-    if (old == name) {
-        return false;
-    }
 
-    xSetting->set(XSKEYCURSORNAME,name);
+    xSetting->set(XSKEYCURSORNAME, name);
 
     setQtCursor(name);
     setGtkCursor(name);
@@ -262,14 +278,14 @@ QString ThemesApi::getThemePath(QString name, QString ty, QString key)
     dirs.push_back("usr/lical/share/" + key);
     dirs.push_back("/usr/share/" + key);
 
-    for(auto dir : dirs) {
+    for (auto dir : dirs) {
         QString tmp = dir + "/" + name;
 
-        if(!utils::isFileExists(tmp)) {
+        if (!utils::isFileExists(tmp)) {
             continue;
         }
 
-        if (ty == TYPEGTK || ty == TYPEICON) {
+        if (ty == TYPEGTK || ty == TYPEICON || ty == TYPEGLOBALTHEME) {
             return utils::enCodeURI(tmp + "/index.theme", SCHEME_FILE);
         } else if (ty == TYPECURSOR) {
             return utils::enCodeURI(tmp + "/cursor.theme", SCHEME_FILE);
@@ -281,17 +297,17 @@ QString ThemesApi::getThemePath(QString name, QString ty, QString key)
 
 void ThemesApi::setGtk2Theme(QString name)
 {
-    setGtk2Prop("gtk-theme-name", "\""+name+"\"", getGtk2ConfFile());
+    setGtk2Prop("gtk-theme-name", "\"" + name + "\"", getGtk2ConfFile());
 }
 
 void ThemesApi::setGtk2Icon(QString name)
 {
-    setGtk2Prop("gtk-icon-theme-name", "\""+name+"\"", getGtk2ConfFile());
+    setGtk2Prop("gtk-icon-theme-name", "\"" + name + "\"", getGtk2ConfFile());
 }
 
 void ThemesApi::setGtk2Cursor(QString name)
 {
-    setGtk2Prop("gtk-cursor-theme-name", "\""+name+"\"", getGtk2ConfFile());
+    setGtk2Prop("gtk-cursor-theme-name", "\"" + name + "\"", getGtk2ConfFile());
 }
 
 void ThemesApi::setGtk2Prop(QString key, QString value, QString file)
@@ -314,22 +330,18 @@ void ThemesApi::setGtk2Prop(QString key, QString value, QString file)
 void ThemesApi::gtk2FileReader(QString file)
 {
     QFile qfile(file);
-    if(!qfile.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
+    if (!qfile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return;
     }
 
-    while (!qfile.atEnd())
-    {
+    while (!qfile.atEnd()) {
         QString line = qfile.readLine();
-        if(line.length()==0){
+        if (line.length() == 0) {
             continue;
         }
 
-
-
         QStringList strv = line.split(GTK2CONFDELIM);
-        if(strv.size() != 2){
+        if (strv.size() != 2) {
             continue;
         }
 
@@ -352,7 +364,7 @@ void ThemesApi::addGtk2ConfInfo(QString key, QString value)
 void ThemesApi::gtk2FileWriter(QString file)
 {
     QStringList content;
-    for (auto it = gtk2ConfInfos.cbegin();it !=gtk2ConfInfos.end();it++) {
+    for (auto it = gtk2ConfInfos.cbegin(); it != gtk2ConfInfos.end(); it++) {
         content.append(it.key() + GTK2CONFDELIM + it.value());
     }
 
@@ -403,13 +415,13 @@ void ThemesApi::setGtk3Prop(QString key, QString value, QString file)
     doSetGtk3Prop(key, value, file, keyfile);
 }
 
-bool ThemesApi::isGtk3PropEqual(QString key, QString value, KeyFile& keyfile)
+bool ThemesApi::isGtk3PropEqual(QString key, QString value, KeyFile &keyfile)
 {
     QString old = keyfile.getStr(GTK3GROUPSETTINGS, key);
     return old == value;
 }
 
-void ThemesApi::doSetGtk3Prop(QString key, QString value, QString file, KeyFile& keyfile)
+void ThemesApi::doSetGtk3Prop(QString key, QString value, QString file, KeyFile &keyfile)
 {
     keyfile.setKey(GTK3GROUPSETTINGS, key, value);
     keyfile.saveToFile(file);
@@ -433,16 +445,16 @@ bool ThemesApi::setQt4Theme(QString config)
 
     QString value = keyfile.getStr("Qt", "style");
     if (value == "GTK+")
-       return true;
+        return true;
 
     if (config.length() == 0)
-       return false;
+        return false;
 
     QFile file(config);
     if (file.exists()) {
-       QDir dir(config.left(config.lastIndexOf("/")));
-       if (!dir.mkpath(config.left(config.lastIndexOf("/"))))
-           return false;
+        QDir dir(config.left(config.lastIndexOf("/")));
+        if (!dir.mkpath(config.left(config.lastIndexOf("/"))))
+            return false;
     }
 
     keyfile.setKey("Qt", "style", "GTK+");
@@ -464,17 +476,17 @@ bool ThemesApi::setDefaultCursor(QString name)
     keyfile.loadFile(file);
 
     QString value = keyfile.getStr("Icon Theme", "Inherits");
-    if (value == "GTK+")
-       return true;
+    if (value == name)
+        return true;
 
     if (file.length() == 0)
-       return false;
+        return false;
 
     QFile qfile(file);
     if (qfile.exists()) {
-       QDir dir(file.left(file.lastIndexOf("/")));
-       if (!dir.mkpath(file.left(file.lastIndexOf("/"))))
-           return false;
+        QDir dir(file.left(file.lastIndexOf("/")));
+        if (!dir.mkpath(file.left(file.lastIndexOf("/"))))
+            return false;
     }
 
     keyfile.setKey("Icon Theme", "Inherits", name);
@@ -483,16 +495,165 @@ bool ThemesApi::setDefaultCursor(QString name)
 
 void ThemesApi::setGtkCursor(QString name)
 {
-    QByteArray ba = name.toLatin1();
-    char* date = ba.data();
-    GtkSettings* s = gtk_settings_get_default();
-    g_object_set(G_OBJECT(s), "gtk-cursor-theme-name", date, NULL);
+    GtkSettings *s = gtk_settings_get_default();
+    g_object_set(G_OBJECT(s), "gtk-cursor-theme-name", name.toLatin1().data(), NULL);
+}
+
+static char *findAlternative(const char *name)
+{
+    // Qt uses non-standard names for some core cursors.
+    // If Xcursor fails to load the cursor, Qt creates it with the correct name
+    // using the core protocol instead (which in turn calls Xcursor).
+    // We emulate that process here.
+    // Note that there's a core cursor called cross, but it's not the one Qt expects.
+    // Precomputed MD5 hashes for the hardcoded bitmap cursors in Qt and KDE.
+    // Note that the MD5 hash for left_ptr_watch is for the KDE version of that cursor.
+    static const QMap<QString, QString> xcursor_alter = {
+        { "cross", "crosshair" },
+        { "up_arrow", "center_ptr" },
+        { "wait", "watch" },
+        { "ibeam", "xterm" },
+        { "size_all", "fleur" },
+        { "pointing_hand", "hand2" },
+        // Precomputed MD5 hashes for the hardcoded bitmap cursors in Qt and KDE.
+        // Note that the MD5 hash for left_ptr_watch is for the KDE version of that cursor.
+        { "size_ver", "00008160000006810000408080010102" },
+        { "size_hor", "028006030e0e7ebffc7f7070c0600140" },
+        { "size_bdiag", "c7088f0f3e6c8088236ef8e1e3e70000" },
+        { "size_fdiag", "fcf1c3c7cd4491d801f1e1c78f100000" },
+        { "whats_this", "d9ce0ab605698f320427677b458ad60b" },
+        { "split_h", "14fef782d02440884392942c11205230" },
+        { "split_v", "2870a09082c103050810ffdffffe0204" },
+        { "forbidden", "03b6e0fcb3499374a867c041f52298f0" },
+        { "left_ptr_watch", "3ecb610c1bf2410f44200f48c40d3599" },
+        { "hand2", "e29285e634086352946a0e7090d73106" },
+        { "openhand", "9141b49c8149039304290b508d208c40" },
+        { "closedhand", "05e88622050804100c20044008402080" }
+    };
+    if (xcursor_alter.contains(name)) {
+        return xcursor_alter.value(name).toLatin1().data();
+    }
+    return NULL;
+}
+
+static XcursorImages *xcLoadImages(const char *theme, const char *image, int size)
+{
+    return XcursorLibraryLoadImages(image, theme, size);
+}
+
+static unsigned long loadCursorHandle(Display *disp, const char *theme, const char *name, int size)
+{
+    if (size == -1) {
+        size = XcursorGetDefaultSize(disp);
+    }
+
+    // Load the cursor images
+    XcursorImages *images = NULL;
+    images = xcLoadImages(theme, name, size);
+    if (!images) {
+        images = xcLoadImages(theme,
+                              findAlternative(name), size);
+        if (!images) {
+            return 0;
+        }
+    }
+
+    unsigned long handle = (unsigned long)XcursorImagesLoadCursor(disp, images);
+    XcursorImagesDestroy(images);
+
+    return handle;
+}
+
+int set_qt_cursor(const char *name)
+{
+    if (!name) {
+        fprintf(stderr, "Cursor theme is NULL\n");
+        return -1;
+    }
+
+    /**
+     * Fixed Qt cursor not work when cursor theme changed.
+     * For details see: lxqt-config/lxqt-config-cursor
+     *
+     * XFixes multiple qt cursor name, a X Error will be occurred.
+     * Now only XFixes qt cursor name 'left_ptr'
+     * Why?
+     **/
+    static const QStringList list = {
+        // Qt cursors
+        "left_ptr",
+        "up_arrow",
+        "cross",
+        "wait",
+        "left_ptr_watch",
+        "ibeam",
+        "size_ver",
+        "size_hor",
+        "size_bdiag",
+        "size_fdiag",
+        "size_all",
+        "split_v",
+        "split_h",
+        "pointing_hand",
+        "openhand",
+        "closedhand",
+        "forbidden",
+        "whats_this",
+        // X core cursors
+        "X_cursor",
+        "right_ptr",
+        "hand1",
+        "hand2",
+        "watch",
+        "xterm",
+        "crosshair",
+        "left_ptr_watch",
+        "center_ptr", // invalid Cursor parameter, why?
+        "sb_h_double_arrow",
+        "sb_v_double_arrow",
+        "fleur",
+        "top_left_corner",
+        "top_side",
+        "top_right_corner",
+        "right_side",
+        "bottom_right_corner",
+        "bottom_side",
+        "bottom_left_corner",
+        "left_side",
+        "question_arrow",
+        "pirate"
+    };
+
+    Display *disp = XOpenDisplay(0);
+    if (!disp) {
+        qWarning() << "Open display failed";
+        return -1;
+    }
+
+    for (auto &&cursorStr : list) {
+        const char *cursorName = cursorStr.toLatin1().data();
+        Cursor cursor = (Cursor)loadCursorHandle(disp, name, cursorName, -1);
+        if (cursor == 0) {
+            qWarning() << "Load cursor" << cursorStr << "failed";
+            continue;
+        }
+
+        XFixesChangeCursorByName(disp, cursor, cursorName);
+        // FIXME: do we need to free the cursor?
+        XFreeCursor(disp, cursor);
+    }
+    XCloseDisplay(disp);
+
+    return 0;
 }
 
 void ThemesApi::setQtCursor(QString name)
 {
-    xcb_connection_t * conn;
-    xcb_screen_t* screen=nullptr;
+#ifndef USE_XCB_CURSOR
+    set_qt_cursor(name.toLatin1().data());
+#else
+    xcb_connection_t *conn;
+    xcb_screen_t *screen = nullptr;
     int screen_nbr;
     xcb_screen_iterator_t iter;
 
@@ -500,54 +661,49 @@ void ThemesApi::setQtCursor(QString name)
 
     iter = xcb_setup_roots_iterator(xcb_get_setup(conn));
 
-    for(; iter.rem; --screen_nbr, xcb_screen_next(&iter))
-    {
-        if (screen_nbr == 0)
-        {
+    for (; iter.rem; --screen_nbr, xcb_screen_next(&iter)) {
+        if (screen_nbr == 0) {
             screen = iter.data;
             break;
         }
     }
-    if(!screen)
-    {
-        qWarning()<<"get screen fail";
+    if (!screen) {
+        qWarning() << "get screen fail";
         return;
     }
 
     xcb_cursor_context_t *ctx;
-    if (xcb_cursor_context_new(conn, screen, &ctx) < 0)
-    {
-        qWarning()<<"xcb_cursor_context_new fail";
+    if (xcb_cursor_context_new(conn, screen, &ctx) < 0) {
+        qWarning() << "xcb_cursor_context_new fail";
         return;
     }
 
     xcb_cursor_t cid = xcb_cursor_load_cursor(ctx, name.toLatin1());
 
     screen = xcb_setup_roots_iterator(xcb_get_setup(conn)).data;
-    xcb_change_window_attributes(conn, screen->root, XCB_CW_CURSOR, static_cast<void*>(&cid));
+    xcb_change_window_attributes(conn, screen->root, XCB_CW_CURSOR, static_cast<void *>(&cid));
     xcb_flush(conn);
 
     xcb_cursor_context_free(ctx);
     xcb_disconnect(conn);
+#endif
 }
 
 void ThemesApi::setWMCursor(QString name)
 {
-    if(interfaceSetting)
-    {
-        interfaceSetting->set("cursorTheme",name);
+    if (interfaceSetting) {
+        interfaceSetting->set("cursorTheme", name);
     }
 
-    if(wmDbusInterface)
-    {
-        wmDbusInterface->setProperty("cursorTheme",QString(name));
+    if (wmDbusInterface) {
+        wmDbusInterface->setProperty("cursorTheme", QString(name));
     }
 }
 
 QString ThemesApi::getGtk2ConfFile()
 {
     QString path = utils::GetUserHomeDir();
-    path= path + "/.gtkrc-2.0";
+    path = path + "/.gtkrc-2.0";
 
     return path;
 }
@@ -555,7 +711,7 @@ QString ThemesApi::getGtk2ConfFile()
 QString ThemesApi::getGtk3ConfFile()
 {
     QString path = utils::GetUserHomeDir();
-    path= path + "/.config/gtk-3.0/settings.ini";
+    path = path + "/.config/gtk-3.0/settings.ini";
 
     return path;
 }

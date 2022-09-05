@@ -25,12 +25,15 @@ public:
     QString query(QString uri);
     QString queryThemeMime(QString file);
     QString doQueryFile(QString file);
+    bool globalTheme(QString file);
     bool gtkTheme(QString file);
     bool iconTheme(QString file);
     bool cursorTheme(QString file);
+    bool isGlobalTheme(QString uri);
     bool isGtkTheme(QString uri);
     bool isIconTheme(QString uri);
     bool isCursorTheme(QString uri);
+    QVector<QString> listGlobalTheme(QString uri);
     QVector<QString> listGtkTheme(QString uri);
     QVector<QString> listIconTheme(QString uri);
     QVector<QString> listCursorTheme(QString uri);

@@ -20,6 +20,7 @@ public:
     ~ThemesApi();
 
     bool isThemeInList(QString theme, QVector<QString> list);
+    QVector<QString> listGlobalTheme();
     QVector<QString> listGtkTheme();
     QVector<QString> listIconTheme();
     QVector<QString> listCursorTheme();
@@ -27,6 +28,7 @@ public:
     QVector<QString> scanThemeDirs(QVector<QString> dirs, QString type);
     QVector<QString> mergeThemeList(QVector<QString> src, QVector<QString> target);
     bool setWMTheme(QString name);
+    bool setGlobalTheme(QString name);
     bool setGtkTheme(QString name);
     bool setIconTheme(QString name);
     bool setCursorTheme(QString name);

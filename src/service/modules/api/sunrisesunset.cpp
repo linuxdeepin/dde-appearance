@@ -2,404 +2,96 @@
 
 #include <QDebug>
 #include <QtMath>
+#include <QTime>
 
-SunriseSunset::SunriseSunset()
+#define ZENITH -0.833333333333333333
+enum CalcSunType:int{
+    Sunrise = 6,
+    Sunset = 18,
+};
+/*****
+ * http://williams.best.vwh.net/sunrise_sunset_algorithm.htm
+ * http://stackoverflow.com/questions/7064531/sunrise-sunset-times-in-c
+ * 如果返回值小于0，则没有日出。如果返回值大于24，则始终是日出状态
+ ***/
+static float calculateSunChangedAsUTCHour(const int &dayOfYear, const float &lat, const float &lng, const float &localOffset, const CalcSunType &sunChanged)
 {
+    /*
+    localOffset will be <0 for western hemisphere and >0 for eastern hemisphere
+    daylightSavings should be 1 if it is in effect during the summer otherwise it should be 0
+    */
+//    // 1. first calculate the day of the year 首先，计算一年中的哪一天
+//    float N1 = floor(275 * month / 9);
+//    float N2 = floor((month + 9) / 12);
+//    float N3 = (1 + floor((year - 4 * floor(year / 4) + 2) / 3));
+//    float N = N1 - (N2 * N3) + day - 30;
+    float N = dayOfYear;
 
+    // 2. convert the longitude to hour value and calculate an approximate time 将经度转换为小时值并计算近似时间
+    float lngHour = lng / 15.0;
+    float t = N + ((sunChanged - lngHour) / 24);
+
+    // 3. calculate the Sun's mean anomaly 计算太阳的平均近点角
+    float M = (0.9856 * t) - 3.289;
+
+    // 4. calculate the Sun's true longitude 计算太阳的真实经度
+    float L = fmod(M + (1.916 * sin((M_PI / 180.0) * M)) + (0.020 * sin(2 * (M_PI / 180.0) * M)) + 282.634, 360.0);
+
+    // 5a. calculate the Sun's right ascension 计算太阳的赤经
+    float RA = fmod(180.0 / M_PI * atan(0.91764 * tan((M_PI / 180.0) * L)), 360.0);
+
+    // 5b. right ascension value needs to be in the same quadrant as L 赤经值需要与L位于同一象限
+    float Lquadrant = floor(L / 90.0) * 90.0;
+    float RAquadrant = floor(RA / 90.0) * 90.0;
+    RA = RA + (Lquadrant - RAquadrant);
+
+    // 5c. right ascension value needs to be converted into hours 赤经值需要转换为小时
+    RA = RA / 15.0;
+
+    // 6. calculate the Sun's declination 计算太阳的赤纬
+    float sinDec = 0.39782 * sin((M_PI / 180.0) * L);
+    float cosDec = cos(asin(sinDec));
+
+    // 7a. calculate the Sun's local hour angle 计算太阳的本地时角
+    float cosH = (sin((M_PI / 180.0) * ZENITH) - (sinDec * sin((M_PI / 180.0) * lat))) / (cosDec * cos((M_PI / 180.0) * lat));
+
+    if (cosH > 1) // the sun never rises on this location (on the specified date) 太阳永远不会在这个位置升起（在指定的日期）
+        return 100;
+
+    if (cosH < -1) // the sun never sets on this location (on the specified date) 太阳永远不会落在这个位置（在指定的日期）
+        return -100;
+
+    // 7b. finish calculating H and convert into hours 完成计算H并转换为小时
+    float H = (180.0 / M_PI) * acos(cosH);
+    if (sunChanged == Sunrise) //   if if rising time is desired:
+        H = 360.0 - H;
+    H = H / 15.0;
+
+    // 8. calculate local mean time of rising/setting 计算本地平均上升/下降时间
+    float T = H + RA - (0.06571 * t) - 6.622;
+
+    // 9. adjust back to UTC 调整回UTC
+    float UT = fmod(T - lngHour, 24.0) + localOffset;
+    if (UT < 0)
+        UT += 24;
+
+    // 10. convert UT value to local time zone of latitude/longitude 将UT值转换为纬度/经度的本地时区
+    // return UT + localOffset + daylightSavings;
+    return UT;
 }
 
-bool SunriseSunset::getSunriseSunset(double latitude, double longitude,double utcOffset, QDateTime date, QDateTime& sunrise,QDateTime& sunset)
+bool SunriseSunset::getSunriseSunset(double latitude, double longitude, double utcOffset, const QDate &date, QDateTime &sunrise, QDateTime &sunset)
 {
-    if(!checkLatitude(latitude))
-    {
-        qDebug()<<"checkLatitude failure";
+    int dayOfYear = date.dayOfYear();
+    float sunriseUT = calculateSunChangedAsUTCHour(dayOfYear, latitude, longitude, utcOffset, CalcSunType::Sunrise);
+    if (sunriseUT < 0 || sunriseUT > 24) // 小于0 长昼 大于24长夜
         return false;
-    }
-
-    if(!checkLongitude(longitude))
-    {
-        qDebug()<<"checkLongitude failure";
+    float sunsetUT = calculateSunChangedAsUTCHour(dayOfYear, latitude, longitude, utcOffset, CalcSunType::Sunset);
+    if (sunsetUT < 0 || sunsetUT > 24) // 小于0 长昼 大于24长夜
         return false;
-    }
 
-    if(!checkUtcOffset(utcOffset))
-    {
-        qDebug()<<"checkUtcOffset failure";
-        return false;
-    }
-
-    if(!checkDate(date))
-    {
-        qDebug()<<"checkDate failure";
-        return false;
-    }
-
-    QDateTime since = QDateTime::fromString(QString("18991230000000"),"yyyyMMddHHmmss");
-    qint64 numDays = diffDays(since,date);
-
-    int seconds = 24 * 60 * 60;
-
-    QVector<double> secondsNorm =createSecondsNormalized(seconds);
-
-    QVector<double> julianDay = calcJulianDay(numDays,secondsNorm,utcOffset);
-
-    QVector<double> julianCentury = calcJulianCentury(julianDay);
-
-    QVector<double> geomMeanLongSun = calcGeomMeanLongSun(julianCentury);
-
-    QVector<double> geomMeanAnomSun = calcGeomMeanAnomSun(julianCentury);
-
-    QVector<double> eccentEarthOrbit = calcEccentEarthOrbit(julianCentury);
-
-    QVector<double> sunEqCtr = calcSunEqCtr(julianCentury, geomMeanAnomSun);
-
-    QVector<double> sunTrueLong = calcSunTrueLong(sunEqCtr, geomMeanLongSun);
-
-    QVector<double> sunAppLong = calcSunAppLong(sunTrueLong, julianCentury);
-
-    QVector<double> meanObliqEcliptic = calcMeanObliqEcliptic(julianCentury);
-
-    QVector<double> obliqCorr = calcObliqCorr(meanObliqEcliptic, julianCentury);
-
-    QVector<double> sunDeclination = calcSunDeclination(obliqCorr, sunAppLong);
-
-    QVector<double> multiFactor;
-    for (int index=0;index<obliqCorr.size();index++){
-        double temp = tan(deg2rad(obliqCorr[index]/2.0)) * tan(deg2rad(obliqCorr[index]/2.0));
-        multiFactor.push_back(temp);
-    }
-
-    QVector<double> equationOfTime = calcEquationOfTime(multiFactor, geomMeanLongSun, eccentEarthOrbit, geomMeanAnomSun);
-
-    QVector<double> haSunrise = calcHaSunrise(latitude, sunDeclination);
-
-    QVector<double> solarNoon = calcSolarNoon(longitude, equationOfTime, utcOffset);
-
-    QVector<double> tempSunrise;
-    QVector<double> tempSunset;
-
-    for (int index=0;index<solarNoon.size();index++) {
-        tempSunrise.push_back(solarNoon[index] - round(haSunrise[index]*4.0*60.0)-(seconds)*secondsNorm[index]);
-        tempSunset.push_back(solarNoon[index] + round(haSunrise[index]*4.0*60.0) - seconds*secondsNorm[index]);
-    }
-
-    // Get the sunrise and sunset in seconds
-    int sunriseSeconds = minIndex(toAbs(tempSunrise));
-    int sunsetSeconds = minIndex(toAbs(tempSunset));
-
-    QDateTime  currTime =QDateTime::currentDateTime();
-    sunrise = currTime.addSecs(sunriseSeconds);
-    sunset = currTime.addSecs(sunsetSeconds);
-}
-
-bool SunriseSunset::checkLatitude(double latitude)
-{
-    if(latitude < -90.0 || latitude > 90.0)
-    {
-        return false;
-    }
-
+    sunrise = QDateTime(date, QTime::fromMSecsSinceStartOfDay(static_cast<int>(sunriseUT * 3600 * 1000)));
+    sunset = QDateTime(date, QTime::fromMSecsSinceStartOfDay(static_cast<int>(sunsetUT * 3600 * 1000)));
+    qInfo()<<__FUNCTION__<<date<<latitude<<longitude<<sunrise<<sunset;
     return true;
-}
-
-bool SunriseSunset::checkLongitude(double longitude)
-{
-    if(longitude < -180.0 || longitude > 180.0)
-    {
-        return false;
-    }
-    return true;
-}
-
-bool SunriseSunset::checkUtcOffset(double utcOffset)
-{
-    if(utcOffset < -12.0 || utcOffset > 14.0)
-    {
-        return false;
-    }
-    return true;
-}
-
-bool SunriseSunset::checkDate(QDateTime date)
-{
-    QDateTime minDate = QDateTime::fromString(QString("19000101000000"),"yyyyMMddHHmmss");
-    QDateTime maxDate = QDateTime::fromString(QString("22000101000000"),"yyyyMMddHHmmss");
-
-    if(date<minDate || date>maxDate)
-    {
-        return false;
-    }
-    return  true;
-}
-
-qint64 SunriseSunset::diffDays(QDateTime date1, QDateTime date2)
-{
-    return  date1.daysTo(date2);
-}
-
-QVector<double> SunriseSunset::createSecondsNormalized(int seconds)
-{
-    QVector<double> ret;
-
-    for(int i=0;i<seconds;i++)
-    {
-        double temp = i/(seconds-1);
-        ret.push_back(temp);
-    }
-    return ret;
-}
-
-QVector<double> SunriseSunset::calcJulianDay(qint64 numDays, const QVector<double>& secondsNorm, double utcOffset)
-{
-    QVector<double> julianDay;
-
-    for(int index =0;index<secondsNorm.length();index++)
-    {
-        double temp = numDays + 2415018.5 + secondsNorm[index] - utcOffset/24.0;
-        julianDay.push_back(temp);
-    }
-    return julianDay;
-}
-
-QVector<double> SunriseSunset::calcJulianCentury(const QVector<double>& julianDay)
-{
-    QVector<double> julianCentury;
-
-    for(int index =0;index<julianDay.length();index++)
-    {
-        double temp = (julianDay[index] - 2451545.0) / 36525.0;
-        julianCentury.push_back(temp);
-    }
-    return julianCentury;
-}
-
-QVector<double> SunriseSunset::calcGeomMeanLongSun(const QVector<double>& julianCentury)
-{
-    QVector<double> geomMeanLongSun;
-
-    for(int index =0;index<julianCentury.length();index++)
-    {
-        double temp = 280.46646 + julianCentury[index]*(36000.76983+julianCentury[index]*0.0003032);
-        temp = static_cast<int>(temp) % 360;
-        geomMeanLongSun.push_back(temp);
-    }
-    return geomMeanLongSun;
-}
-
-QVector<double> SunriseSunset::calcGeomMeanAnomSun(const QVector<double>& julianCentury)
-{
-    QVector<double> geomMeanAnomSun;
-
-    for(int index =0;index<julianCentury.length();index++)
-    {
-        double temp = 2357.52911 + julianCentury[index]*(35999.05029-0.0001537*julianCentury[index]);
-        geomMeanAnomSun.push_back(temp);
-    }
-    return geomMeanAnomSun;
-}
-
-QVector<double> SunriseSunset::calcEccentEarthOrbit(const QVector<double>& julianCentury)
-{
-    QVector<double> eccentEarthOrbit;
-
-    for(int index =0;index<julianCentury.length();index++)
-    {
-        double temp = 0.016708634 - julianCentury[index]*(0.000042037+0.0000001267*julianCentury[index]);
-        eccentEarthOrbit.push_back(temp);
-    }
-    return eccentEarthOrbit;
-}
-
-QVector<double> SunriseSunset::calcSunEqCtr(const QVector<double>& julianCentury,const QVector<double>& geomMeanAnomSun)
-{
-    QVector<double> sunEqCtr;
-    if(julianCentury.length()!=geomMeanAnomSun.length())
-    {
-        return sunEqCtr;
-    }
-
-    for(int index =0;index<julianCentury.length();index++)
-    {
-        double temp = sin(deg2rad(geomMeanAnomSun[index]))*(1.914602-julianCentury[index]*(0.004817+0.000014*julianCentury[index])) +
-                sin(deg2rad(2*geomMeanAnomSun[index]))*(0.019993-0.000101*julianCentury[index]) +
-                sin(deg2rad(3*geomMeanAnomSun[index]))*0.000289;
-
-        sunEqCtr.push_back(temp);
-    }
-    return sunEqCtr;
-}
-
-QVector<double> SunriseSunset::calcSunTrueLong(const QVector<double>& sunEqCtr,const QVector<double>& geomMeanLongSun)
-{
-    QVector<double> sunTrueLong;
-    if(sunEqCtr.length()!=geomMeanLongSun.length())
-    {
-        return sunEqCtr;
-    }
-
-    for(int index =0;index<sunEqCtr.length();index++)
-    {
-        double temp = sunEqCtr[index] + geomMeanLongSun[index];
-        sunTrueLong.push_back(temp);
-    }
-    return sunEqCtr;
-}
-
-QVector<double> SunriseSunset::calcSunAppLong(const QVector<double>& sunTrueLong,const QVector<double>& julianCentury)
-{
-    QVector<double> sunAppLong;
-    if(sunTrueLong.length()!=julianCentury.length())
-    {
-        return sunAppLong;
-    }
-
-    for(int index =0;index<sunTrueLong.length();index++)
-    {
-        double temp = sunTrueLong[index] - 0.00569 - 0.00478*sin(deg2rad(125.04-1934.136*julianCentury[index]));
-        sunAppLong.push_back(temp);
-    }
-    return sunAppLong;
-}
-
-QVector<double> SunriseSunset::calcMeanObliqEcliptic(const QVector<double>& julianCentury)
-{
-    QVector<double> meanObliqEcliptic;
-
-    for(int index =0;index<julianCentury.length();index++)
-    {
-        double temp = 23.0 + (26.0+(21.448-julianCentury[index]*(46.815+julianCentury[index]*(0.00059-julianCentury[index]*0.001813)))/60.0)/60.0;
-        meanObliqEcliptic.push_back(temp);
-    }
-    return meanObliqEcliptic;
-}
-
-QVector<double> SunriseSunset::calcObliqCorr(const QVector<double>& meanObliqEcliptic,const QVector<double>& julianCentury)
-{
-    QVector<double> obliqCorr;
-    if(meanObliqEcliptic.length()!=julianCentury.length())
-    {
-        return obliqCorr;
-    }
-
-    for(int index =0;index<julianCentury.length();index++)
-    {
-        double temp = meanObliqEcliptic[index] + 0.00256*cos(deg2rad(125.04-1934.136*julianCentury[index]));
-        obliqCorr.push_back(temp);
-    }
-    return obliqCorr;
-}
-
-QVector<double> SunriseSunset::calcSunDeclination(const QVector<double>& obliqCorr,const QVector<double>& sunAppLong)
-{
-    QVector<double> sunDeclination;
-    if(obliqCorr.length()!=sunAppLong.length())
-    {
-        return sunDeclination;
-    }
-
-    for(int index =0;index<obliqCorr.length();index++)
-    {
-        double temp = rad2deg(asin(sin(deg2rad(obliqCorr[index])) * sin(deg2rad(sunAppLong[index]))));
-        sunDeclination.push_back(temp);
-    }
-    return sunDeclination;
-}
-
-QVector<double> SunriseSunset::calcEquationOfTime(const QVector<double>& multiFactor,const QVector<double>& geomMeanLongSun,
-                                              const QVector<double>& eccentEarthOrbit,const QVector<double>& geomMeanAnomSun)
-{
-    QVector<double> equationOfTime;
-    if(multiFactor.length()!=geomMeanLongSun.length()||
-       multiFactor.length()!=eccentEarthOrbit.length()||
-       multiFactor.length()!=geomMeanAnomSun.length())
-    {
-        return equationOfTime;
-    }
-
-    for(int index =0;index<multiFactor.length();index++)
-    {
-        double a = multiFactor[index] * sin(2.0*deg2rad(geomMeanLongSun[index]));
-        double b = 2.0 * eccentEarthOrbit[index] * sin(deg2rad(geomMeanAnomSun[index]));
-        double c = 4.0 * eccentEarthOrbit[index] * multiFactor[index] * sin(deg2rad(geomMeanAnomSun[index]));
-        double d = cos(2.0 * deg2rad(geomMeanLongSun[index]));
-        double e = 0.5 * multiFactor[index] * multiFactor[index] * sin(4.0*deg2rad(geomMeanLongSun[index]));
-        double f = 1.25 * eccentEarthOrbit[index] * eccentEarthOrbit[index] * sin(2.0*deg2rad(geomMeanAnomSun[index]));
-        double temp = 4.0 * rad2deg(a-b+c*d-e-f);
-        equationOfTime.push_back(temp);
-    }
-    return equationOfTime;
-}
-
-QVector<double> SunriseSunset::calcHaSunrise(double latitude, QVector<double> sunDeclination)
-{
-    QVector<double> haSunrise;
-    for(int index =0;index<sunDeclination.length();index++)
-    {
-        double temp = rad2deg(acos(cos(deg2rad(90.833))/(cos(deg2rad(latitude))*cos(deg2rad(sunDeclination[index])))
-                                   - tan(deg2rad(latitude))*tan(deg2rad(sunDeclination[index]))));
-        haSunrise.push_back(temp);
-    }
-    return haSunrise;
-}
-
-QVector<double> SunriseSunset::calcSolarNoon(double longitude, QVector<double> equationOfTime, double utcOffset)
-{
-    QVector<double> solarNoon;
-    for(int index =0;index<equationOfTime.length();index++)
-    {
-        double temp = (720.0 - 4.0*longitude - equationOfTime[index] + utcOffset*60.0) * 60.0;
-        solarNoon.push_back(temp);
-    }
-    return solarNoon;
-}
-
-double SunriseSunset::deg2rad(double degrees)
-{
-    return degrees *(M_PI/180.0);
-}
-
-double SunriseSunset::rad2deg(double radians)
-{
-    return radians * (180.0 / M_PI);
-}
-
-QVector<double> SunriseSunset::toAbs(QVector<double> input)
-{
-    QVector<double> output;
-    for(auto iter:input)
-    {
-        output.push_back(abs(iter));
-    }
-    return output;
-}
-
-int SunriseSunset::minIndex(QVector<double> input)
-{
-    if(input.empty())
-    {
-        return -1;
-    }
-
-    double minValue = input[0];
-    int minIndex = 0;
-    for(int i=1;i<input.length();i++)
-    {
-        if(input[i]<minValue)
-        {
-            minValue = input[i];
-            minIndex = i;
-        }
-    }
-
-    return minIndex;
-}
-
-int SunriseSunset::round(double value)
-{
-    if(value < 0)
-    {
-        return static_cast<int>(value - 0.5);
-    }
-
-    return static_cast<int>(value + 0.5);
 }

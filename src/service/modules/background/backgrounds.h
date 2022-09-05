@@ -36,6 +36,8 @@ private:
     void init();
     QStringList getSysBgFIles();
     QStringList getCustomBgFiles();
+    QString resizeImage(QString fileName, QString cacheDir);
+    QString onPrepare(QString fileName);
 
 private:
     QVector<Background> backgrounds;

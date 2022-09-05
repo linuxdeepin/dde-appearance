@@ -18,6 +18,8 @@
 #include <QGSettings>
 
 class Appearance1;
+class CustomTheme;
+
 class AppearanceManager : public QObject
 {
     Q_OBJECT
@@ -39,17 +41,19 @@ public:
     bool init();
     void deleteThermByType(const QString &ty, const QString &name);
     void setFontSize(double value);
+    void setGlobalTheme(QString value);
     void setGtkTheme(QString value);
     void setIconTheme(QString value);
     void setCursorTheme(QString value);
     void setStandardFont(QString value);
     void setMonospaceFont(QString value);
     void setWindowRadius(int value);
-    void setOpaticy(double value);
+    void setOpacity(double value);
     void setQtActiveColor(const QString &value);
     bool setWallpaperSlideShow(const QString &value);
     bool setWallpaperURls(const QString &value);
     bool doSetFonts(double size);
+    bool doSetGlobalTheme(QString value);
     bool doSetGtkTheme(QString value);
     bool doSetIconTheme(QString value);
     bool doSetCursorTheme(QString value);
@@ -80,11 +84,12 @@ public:
 
     inline QString getBackground() {return background; }
     inline double getFontSize() {return fontSize; }
+    inline QString getGLobalTheme() {return globalTheme; }
     inline QString getGtkTheme() {return gtkTheme; }
     inline QString getIconTheme() {return iconTheme; }
     inline QString getCursorTheme() {return cursorTheme; }
     inline QString getMonospaceFont() {return monospaceFont; }
-    inline double getOpaticy() {return opaticy; }
+    inline double getOpacity() {return opacity; }
     inline QString getQtActiveColor() {return qtActiveColor; }
     inline QString getStandardFont() {return standardFont; }
     inline QString getWallpaperSlideShow() {return wallpaperSlideShow; }
@@ -93,7 +98,7 @@ public:
     inline QString getGreetBg() {return greeterBg; }
     inline QMap<QString,QString>& getMonitor() {return monitorMap; }
     inline QSharedPointer<QDBusInterface> getWmDbusInterface(){return wmInterface;}
-    virtual void timerEvent( QTimerEvent *event);
+    void timerEvent( QTimerEvent *event) override;
 
 public Q_SLOTS:
     void handleWmWorkspaceCountChanged(int count);
@@ -111,6 +116,7 @@ public Q_SLOTS:
     void handleWrapBgDConfigChange(QString key);
     void handleGnomeBgDConfigChange(QString key);
     void handleDetectSysClockTimeOut();
+    void handleUpdateToCustom(const QString &mode);
 
 private:
     QString qtActiveColorToHexColor(const QString &activeColor) const;
@@ -143,6 +149,9 @@ private:
     QString marshal(const QStringList& strs);
     QString marshal(const QVector<QSharedPointer<FontsManager::Family>>& strs);
     QString getCurrentDesktopIndex();
+    void applyGlobalTheme(KeyFile &theme, const QString &themeName, const QString &defaultTheme);
+
+    void updateCustomTheme(const QString &type, const QString &value);
 
 Q_SIGNALS:
     void Changed(const QString &ty, const QString &value);
@@ -151,11 +160,13 @@ Q_SIGNALS:
 private: // PROPERTIES
     QString background;
     double  fontSize;
+    QString globalTheme;
+    QString currentGlobalTheme; // 当前主题，globalTheme+.light/.dark
     QString gtkTheme;
     QString iconTheme;
     QString cursorTheme;
     QString monospaceFont;
-    double  opaticy;
+    double  opacity;
     QString qtActiveColor;
     QString standardFont;
     QString wallpaperSlideShow;
@@ -199,6 +210,8 @@ private:
     QString                         zone;
     QMap<QString,QSharedPointer<WallpaperScheduler>> wsSchedulerMap;
     QMap<QString,QSharedPointer<WallpaperLoop>>      wsLoopMap;
+    CustomTheme                     *customTheme;
+    bool                            globalThemeUpdating;
 };
 
 #endif // APPEARANCEMANAGER_H

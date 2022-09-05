@@ -33,42 +33,6 @@ bool KeyFile::getBool(const QString &section, const QString &key, bool defaultVa
     return value;
 }
 
-// TODO
-QVector<bool> KeyFile::getBoolList(const QString &section, const QString &key, bool defaultValue)
-{
-    QVector<bool> tmp;
-    return tmp;
-}
-
-int KeyFile::getInt(const QString &section, const QString &key, int defaultValue)
-{
-    if (mainKeyMap.find(section) == mainKeyMap.end())
-        return defaultValue;
-
-    QString valueStr = mainKeyMap[section][key];
-
-    return valueStr.toInt();
-}
-
-// TODO
-QVector<int> KeyFile::getIntList(const QString &section, const QString &key, int defaultValue)
-{
-    QVector<int> tmp;
-    return tmp;
-}
-
-// TODO
-int64_t KeyFile::getInt64(const QString &section, const QString &key, int64_t defaultValue)
-{
-    return int64_t(0);
-}
-
-// TODO
-float KeyFile::getFloat(const QString &section, const QString &key, float defaultValue)
-{
-    return 1.0;
-}
-
 QString KeyFile::getStr(const QString &section, const QString &key, QString defaultValue)
 {
     if (mainKeyMap.find(section) == mainKeyMap.end())

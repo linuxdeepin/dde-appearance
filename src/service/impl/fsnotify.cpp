@@ -2,15 +2,17 @@
 #include "../modules/common/commondefine.h"
 
 Fsnotify::Fsnotify(QObject *parent)
-   : QObject(parent)
-   , fileWatcher(new QFileSystemWatcher())
-   , backgrounds(new Backgrounds())
+    : QObject(parent)
+    , fileWatcher(new QFileSystemWatcher())
+    , backgrounds(new Backgrounds())
+    , prevTimestamp(0)
 {
     watchGtkDirs();
     watchIconDirs();
+    watchGlobalDirs();
     watchBgDirs();
     QString tmpFilePrefix = backgrounds->getCustomWallpapersConfigDir() + "/temp-";
-    connect(fileWatcher.data(),&QFileSystemWatcher::fileChanged,this, [ = ](const QString &path) {
+    connect(fileWatcher.data(),&QFileSystemWatcher::directoryChanged,this, [ = ](const QString &path) {
         if(path.startsWith(tmpFilePrefix)){
             return ;
         }
@@ -18,7 +20,7 @@ Fsnotify::Fsnotify(QObject *parent)
         qint64 tmp = timestamp - prevTimestamp;
         prevTimestamp = timestamp;
 
-        if(tmp > 100000)
+        if(tmp > 1000)
         {
             if (hasEventOccurred(path, bgDirs)){
                 Q_EMIT themeFileChange(TYPEBACKGROUND);
@@ -26,6 +28,8 @@ Fsnotify::Fsnotify(QObject *parent)
                 Q_EMIT themeFileChange(TYPEGTK);
             } else if(hasEventOccurred(path, iconDirs)) {
                 Q_EMIT themeFileChange(TYPEICON);
+            } else if (path.contains("deepin-themes")) {
+                Q_EMIT themeFileChange(TYPEGLOBALTHEME);
             }
         }
     });
@@ -60,6 +64,18 @@ void Fsnotify::watchBgDirs()
 {
     bgDirs = backgrounds->listDirs();
     watchDirs(bgDirs);
+}
+
+void Fsnotify::watchGlobalDirs()
+{
+    QStringList globalDirs;
+    QDir home = QDir::home();
+    globalDirs.append(home.absoluteFilePath(".cache/deepin/dde-appearance/deepin-themes/"));
+    globalDirs.append(home.absoluteFilePath(".local/share/deepin-themes"));
+    globalDirs.append(home.absoluteFilePath(".deepin-themes"));
+    globalDirs.append("/usr/local/share/deepin-themes");
+    globalDirs.append("/usr/share/deepin-themes");
+    watchDirs(globalDirs);
 }
 
 void Fsnotify::watchDirs(QStringList dirs)

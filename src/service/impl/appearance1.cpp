@@ -22,6 +22,11 @@ Appearance1::~Appearance1()
 
 }
 
+QString Appearance1::globalTheme() const
+{
+    return appearanceManager->getGLobalTheme();
+}
+
 QString Appearance1::background() const
 {
     return appearanceManager->getBackground();
@@ -57,14 +62,14 @@ QString Appearance1::monospaceFont() const
     return appearanceManager->getMonospaceFont();
 }
 
-double Appearance1::opaticy() const
+double Appearance1::opacity() const
 {
-    return appearanceManager->getOpaticy();
+    return appearanceManager->getOpacity();
 }
 
-void Appearance1::setOpaticy(double value)
+void Appearance1::setOpacity(double value)
 {
-    appearanceManager->setOpaticy(value);
+    appearanceManager->setOpacity(value);
 }
 
 QString Appearance1::qtActiveColor() const
@@ -190,24 +195,33 @@ void Appearance1::handleChangeSignal(const QString& type, const QString& value)
     Q_EMIT Changed(type,value);
     const QMap<QString, QString> c_propMap = {
         { TYPEBACKGROUND, "Background" },
-        { TYPEFONTSIZE, "FontSize" },
+        { TYPEFONTSIZE, "FontSize" },// double
+        { TYPEGLOBALTHEME, "GlobalTheme" },
         { TYPEGTK, "GtkTheme" },
         { TYPEICON, "IconTheme" },
         { TYPECURSOR, "CursorTheme" },
         { TYPEMONOSPACEFONT, "MonospaceFont" },
-        { "Opaticy", "Opaticy" },
+        { TYPEWINDOWOPACITY, "Opacity" },// double
         { "QtActiveColor", "QtActiveColor" },
         { TYPESTANDARDFONT, "StandardFont" },
         { TYPEWALLPAPERSLIDESHOW, "WallpaperSlideShow" },
         { TYPEALLWALLPAPER, "WallpaperURls" },
-        { "WindowRadius", "WindowRadius" }
+        { "WindowRadius", "WindowRadius" }// int
     };
     if (!c_propMap.contains(type))
         return;
     QVariantList args;
     args.push_back(QVariant(QStringLiteral("/org/deepin/daemon/Appearance1")));
     QVariantMap properties;
-    properties[c_propMap.value(type)] = value;
+    QString propertName = c_propMap.value(type);
+    if (propertName == "WindowRadius") {
+        properties[propertName] = value.toInt();
+    } else if (propertName == "FontSize"
+               || propertName == "Opacity") {
+        properties[propertName] = value.toDouble();
+    } else {
+        properties[propertName] = value;
+    }
     args.push_back(properties);
     args.push_back(QStringList());
     QDBusMessage message = QDBusMessage::createSignal(QStringLiteral("/org/deepin/daemon/Appearance1"), QStringLiteral("org.freedesktop.DBus.Properties"), QStringLiteral("PropertiesChanged"));

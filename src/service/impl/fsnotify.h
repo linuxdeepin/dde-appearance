@@ -20,6 +20,7 @@ public:
     void watchGtkDirs();
     void watchIconDirs();
     void watchBgDirs();
+    void watchGlobalDirs();
     void watchDirs(QStringList dirs);
     bool hasEventOccurred(QString name, QStringList lists);
 

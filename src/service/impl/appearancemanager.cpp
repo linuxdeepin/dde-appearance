@@ -24,6 +24,8 @@
 #include "../modules/api/sunrisesunset.h"
 #include "../modules/dconfig/phasewallpaper.h"
 
+#include "../modules/subthemes/customtheme.h"
+
 const QString wallpaperJsonPath = QString("%1/.cache/deepin/dde-appearance/").arg(getenv("HOME"));
 
 AppearanceManager::AppearanceManager(QObject *parent)
@@ -44,9 +46,9 @@ AppearanceManager::AppearanceManager(QObject *parent)
                                            "/org/freedesktop/timedate1",
                                            "org.freedesktop.timedate1",
                                            QDBusConnection::systemBus()))
-    , sessionTimeDateInterface(new QDBusInterface("com.deepin.SessionManager",
-                                                  "/com/deepin/XSettings",
-                                                  "com.deepin.XSettings",
+    , sessionTimeDateInterface(new QDBusInterface("org.deepin.daemon.Timedate1",
+                                                  "/org/deepin/daemon/Timedate1",
+                                                  "org.deepin.daemon.Timedate1",
                                                   QDBusConnection::sessionBus()))
     , imageBlurInterface(new QDBusInterface("com.deepin.daemon.Accounts",
                                             "/com/deepin/daemon/ImageBlur",
@@ -66,15 +68,16 @@ AppearanceManager::AppearanceManager(QObject *parent)
     , themeAutoTimer(this)
     , nid(0)
     , fontSize(0)
-    , opaticy(0)
+    , opacity(0)
     , windowRadius(0)
     , longitude(0)
     , latitude(0)
     , ntpTimeId(0)
     , timeUpdateTimeId(0)
     , locationValid(false)
+    , customTheme(new CustomTheme())
+    , globalThemeUpdating(false)
 {
-
     if(QGSettings::isSchemaInstalled(XSETTINGSSCHEMA))\
     {
         xSetting = QSharedPointer<QGSettings>(new QGSettings(XSETTINGSSCHEMA));
@@ -96,13 +99,14 @@ AppearanceManager::AppearanceManager(QObject *parent)
     }
 
     if (settingDconfig.isValid()) {
+        globalTheme     = settingDconfig.value(GSKEYGLOBALTHEME).toString();
         gtkTheme        = settingDconfig.value(GSKEYGTKTHEME).toString();
         iconTheme       = settingDconfig.value(GSKEYICONTHEM).toString();
         cursorTheme     = settingDconfig.value(GSKEYCURSORTHEME).toString();
         standardFont    = settingDconfig.value(GSKEYFONTSTANDARD).toString();
         monospaceFont   = settingDconfig.value(GSKEYFONTMONOSPACE).toString();
         fontSize        = settingDconfig.value(GSKEYFONTSIZE).toDouble();
-        opaticy         = settingDconfig.value(GSKEYOPACITY).toDouble();
+        opacity         = settingDconfig.value(GSKEYOPACITY).toDouble();
         wallpaperSlideShow = settingDconfig.value(GSKEYWALLPAPERSLIDESHOW).toString();
         wallpaperURls   = settingDconfig.value(GSKEYWALLPAPERURIS).toString();
     }
@@ -118,12 +122,14 @@ AppearanceManager::AppearanceManager(QObject *parent)
 
 AppearanceManager::~AppearanceManager()
 {
-
+    delete customTheme;
+    customTheme = nullptr;
 }
 
 bool AppearanceManager::init()
 {
     qInfo()<<"init";
+    initCoordinate();
     initUserObj();
     initCurrentBgs();
 
@@ -198,21 +204,34 @@ bool AppearanceManager::init()
     bSuccess = QDBusConnection::sessionBus().connect(sessionTimeDateInterface->service(),
                                                      sessionTimeDateInterface->path(),
                                                      sessionTimeDateInterface->interface(),
-                                                     SIGNAL(TimeUpdate()),
+                                                     "TimeUpdate",
                                                      this, SLOT(handleTimeUpdate()));
     if (!bSuccess) {
 
     }
 
-    QDBusConnection::sessionBus().connect(timeDateInterface->service(),
-                                          timeDateInterface->path(),
+    bSuccess = QDBusConnection::sessionBus().connect(sessionTimeDateInterface->service(),
+                                          sessionTimeDateInterface->path(),
                                           "org.freedesktop.DBus.Properties",
                                           "PropertiesChanged",
-                                          "sa{sv}as",
-                                          this, SLOT(handleNTPChanged(QDBusMessage)));
+
+                                          this, SLOT(handleNTPChanged()));
+    QVector<QSharedPointer<Theme>> globalList = subthemes->listGlobalThemes();
+    bool bFound = false;
+
+    for (auto theme : globalList) {
+        if (theme->getId() == globalTheme) {
+            bFound = true;
+            break;
+        }
+    }
+    if (!bFound) {
+        setGlobalTheme(DEFAULTICONTHEME);
+        doSetGlobalTheme(DEFAULTICONTHEME);
+    }
 
     QVector<QSharedPointer<Theme>> iconList = subthemes->listIconThemes();
-    bool bFound = false;
+    bFound = false;
 
     for (auto theme : iconList) {
         if (theme->getId() == iconTheme) {
@@ -251,6 +270,8 @@ bool AppearanceManager::init()
     connect(gnomeBgSetting.data(), SIGNAL(changed(const QString)), this, SLOT(handleGnomeBgDConfigChange(QString)));
 
     connect(&detectSysClockTimer, SIGNAL(timeout()), this, SLOT(handleDetectSysClockTimeOut()));
+
+    connect(customTheme, &CustomTheme::updateToCustom, this, &AppearanceManager::handleUpdateToCustom);
 
     return true;
 }
@@ -408,6 +429,7 @@ void AppearanceManager::handleTimeNTPChanged(QDBusMessage mes)
         for (int i = 0; i < keys.size(); i++) {
             if (keys.at(i) == "NTP") {
                 handleTimeUpdate();
+                break;
             }
         }
     }
@@ -415,17 +437,22 @@ void AppearanceManager::handleTimeNTPChanged(QDBusMessage mes)
 
 void AppearanceManager::handleTimeUpdate()
 {
+    locationValid = true;
     timeUpdateTimeId = this->startTimer(2000);
 }
 
 void AppearanceManager::handleNTPChanged()
 {
+    locationValid = true;
     ntpTimeId = this->startTimer(2000);
 }
 
 void AppearanceManager::handlethemeFileChange(QString theme)
 {
-    if (theme == TYPEBACKGROUND) {
+    if (theme == TYPEGLOBALTHEME) {
+        subthemes->refreshGlobalThemes();
+        Q_EMIT Refreshed(TYPEGLOBALTHEME);
+    } else if (theme == TYPEBACKGROUND) {
         backgrounds->notifyChanged();
         for (auto iter : wsLoopMap) {
             iter->notifyFileChange();
@@ -445,14 +472,15 @@ void AppearanceManager::handlethemeFileChange(QString theme)
 
 void AppearanceManager::handleXsettingDConfigChange(QString key)
 {
-    if (key != GSKEYQTACTIVECOLOR) {
-        return;
+    if (key == GSKEYQTACTIVECOLOR) {
+        QString value = qtActiveColorToHexColor(xSetting->get(GSKEYQTACTIVECOLOR).toString());
+
+        qtActiveColor = value;
+        Q_EMIT Changed("QtActiveColor", value);
+    } else if (key == GSKEYDTKWINDOWRADIUS) {
+        windowRadius = xSetting->get(GSKEYDTKWINDOWRADIUS).toInt();
+        Q_EMIT Changed("WindowRadius", QString::number(windowRadius));
     }
-
-    QString value = qtActiveColorToHexColor(xSetting->get(GSKEYQTACTIVECOLOR).toString());
-
-    qtActiveColor = value;
-    Q_EMIT Changed("QtActiveColor", value);
 }
 
 void AppearanceManager::handleSettingDConfigChange(QString key)
@@ -460,11 +488,14 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
     QString type;
     QString value;
     bool bSuccess = false;
-    if (key == GSKEYGTKTHEME) {
+    if (key == GSKEYGLOBALTHEME) {
+        type = TYPEGLOBALTHEME;
+        value = settingDconfig.value(key).toString();
+        bSuccess = doSetGlobalTheme(value);
+    } else if (key == GSKEYGTKTHEME) {
         type = TYPEGTK;
         value = settingDconfig.value(key).toString();
         bSuccess = doSetGtkTheme(value);
-        updateThemeAuto(value == AUTOGTKTHEME);
     } else if (key == GSKEYICONTHEM) {
         type = TYPEICON;
         value = settingDconfig.value(key).toString();
@@ -493,8 +524,16 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
         value = desktopBgs.join(";");
     } else if (key == GSKEYWALLPAPERSLIDESHOW) {
         type = TYPEWALLPAPERSLIDESHOW;
-        QString policy = settingDconfig.value(key).toString();
-        updateWSPolicy(policy);
+        value = settingDconfig.value(key).toString();
+        updateWSPolicy(value);
+    } else if (key == GSKEYOPACITY) {
+        type = TYPEWINDOWOPACITY;
+        bool ok = false;
+        double opacity = settingDconfig.value(key).toDouble(&ok);
+        if (ok) {
+            setOpacity(opacity);
+            value = QString::number(opacity);
+        }
     } else if (key == DCKEYALLWALLPAPER) {
         type = TYPEALLWALLPAPER;
         value = settingDconfig.value(key).toString();
@@ -579,6 +618,12 @@ void AppearanceManager::handleDetectSysClockTimeOut()
     }
 }
 
+void AppearanceManager::handleUpdateToCustom(const QString &mode)
+{
+    currentGlobalTheme = "custom" + mode;
+    setGlobalTheme("custom");
+}
+
 void AppearanceManager::timerEvent(QTimerEvent *event)
 {
     if (event->timerId() == timeUpdateTimeId || event->timerId() == ntpTimeId) {
@@ -602,6 +647,15 @@ void AppearanceManager::setFontSize(double value)
     if (settingDconfig.isValid() && !qFuzzyCompare(value, fontSize)) {
         settingDconfig.setValue(GSKEYFONTSIZE, value);
         fontSize = value;
+        updateCustomTheme(TYPEFONTSIZE, QString::number(value));
+    }
+}
+
+void AppearanceManager::setGlobalTheme(QString value)
+{
+    if (settingDconfig.isValid() && value != globalTheme) {
+        settingDconfig.setValue(GSKEYGLOBALTHEME, value);
+        globalTheme = value;
     }
 }
 
@@ -660,14 +714,16 @@ void AppearanceManager::setWindowRadius(int value)
     if (value != windowRadius && xSetting) {
         xSetting->set(GSKEYDTKWINDOWRADIUS, value);
         windowRadius = value;
+        updateCustomTheme(TYPWINDOWRADIUS, QString::number(value));
     }
 }
 
-void AppearanceManager::setOpaticy(double value)
+void AppearanceManager::setOpacity(double value)
 {
-    if (settingDconfig.isValid() && !qFuzzyCompare(value, opaticy)) {
+    if (settingDconfig.isValid() && !qFuzzyCompare(value, opacity)) {
         settingDconfig.setValue(GSKEYOPACITY, value);
-        opaticy = value;
+        opacity = value;
+        updateCustomTheme(TYPEWINDOWOPACITY, QString::number(value));
     }
 }
 
@@ -676,6 +732,7 @@ void AppearanceManager::setQtActiveColor(const QString &value)
     if ( value != qtActiveColor && xSetting) {
         xSetting->set(GSKEYQTACTIVECOLOR, hexColorToQtActiveColor(value));
         qtActiveColor = value;
+        updateCustomTheme(TYPEACTIVECOLOR, value);
     }
 }
 
@@ -742,15 +799,13 @@ void AppearanceManager::initCoordinate()
         return;
     }
 
-    QRegExp pattern{"^#`"};
-
     while (!file.atEnd()) {
         QString line = file.readLine();
         if (line.length() == 0) {
             continue;
         }
-
-        if (pattern.exactMatch(line)) {
+        line = line.trimmed();
+        if (line.startsWith("#")) {
             continue;
         }
 
@@ -760,6 +815,12 @@ void AppearanceManager::initCoordinate()
         }
 
         iso6709Parsing(strv[2], strv[1]);
+    }
+
+    QString city = timeDateInterface->property("Timezone").toString();
+    if (coordinateMap.count(city) == 1) {
+        latitude = coordinateMap[city].latitude;
+        longitude = coordinateMap[city].longitude;
     }
 }
 
@@ -877,7 +938,7 @@ void AppearanceManager::updateMonitorMap()
 
 void AppearanceManager::iso6709Parsing(QString city, QString coordinates)
 {
-    QRegExp pattern("(\+|-)\d+\.?\d*");
+    QRegExp pattern("(\\+|-)\\d+\\.?\\d*");
 
     QVector<QString> resultVet;
 
@@ -923,9 +984,9 @@ void AppearanceManager::doUpdateWallpaperURIs()
 
             QString key;
             if (monitorMap.count(monitorList[i]) != 0) {
-                key.sprintf("%s##%d", monitorMap[monitorList[i]].toLatin1().data(), idx);
+                key = QString::asprintf("%s&&%d", monitorMap[monitorList[i]].toLatin1().data(), idx);
             } else {
-                key.sprintf("%s##%d", "", idx);
+                key = QString::asprintf("&&%d", idx);
             }
 
             monitorWallpaperUris[key] = wallpaperUri;
@@ -962,7 +1023,7 @@ void AppearanceManager::updateNewVersionData()
     QJsonObject wallPaperSlideObj;
     if (!doc.isEmpty()) {
         for (int i = 1 ; i <= workspaceCount; i++) {
-            QString key = QString("%1##%2").arg(primaryMonitor).arg(i);
+            QString key = QString("%1&&%2").arg(primaryMonitor).arg(i);
             wallPaperSlideObj.insert(key, wallpaperSlideShow);
         }
 
@@ -980,7 +1041,7 @@ void AppearanceManager::updateNewVersionData()
             if (message.type() == QDBusMessage::ErrorMessage) {
                 continue;
             }
-            QString key = QString("%1##%2").arg(item.second).arg(i);
+            QString key = QString("%1&&%2").arg(item.second).arg(i);
             wallpaperURIsObj.insert(key, message.arguments().first().toString());
         }
     }
@@ -993,25 +1054,23 @@ void AppearanceManager::autoSetTheme(double latitude, double longitude)
 {
     QDateTime curr = QDateTime::currentDateTimeUtc();
     curr.setTimeZone(QTimeZone(zone.toLatin1()));
-
-    double utcOffset = curr.toSecsSinceEpoch() / 3600.0;
+    double utcOffset = curr.offsetFromUtc() / 3600.0;
 
     QDateTime sunrise, sunset;
-    bool bSuccess = SunriseSunset::getSunriseSunset(latitude, longitude, utcOffset, curr.toUTC(), sunrise, sunset);
+    bool bSuccess = SunriseSunset::getSunriseSunset(latitude, longitude, utcOffset, curr.date(), sunrise, sunset);
     if (!bSuccess) {
         return;
     }
-
     QString themeName;
     curr = QDateTime::currentDateTimeUtc();
     if (sunrise.secsTo(curr) >= 0 && curr.secsTo(sunset) >= 0) {
-        themeName = "deepin";
+        themeName = globalTheme + ".light";
     } else {
-        themeName = "deepin-dark";
+        themeName = globalTheme + ".dark";
     }
 
-    if (gtkTheme != themeName) {
-        doSetGtkTheme(themeName);
+    if (currentGlobalTheme != themeName) {
+        doSetGlobalTheme(themeName);
     }
 }
 
@@ -1022,13 +1081,12 @@ void AppearanceManager::resetThemeAutoTimer()
         return;
     }
 
-    QDateTime curr = QDateTime::currentDateTimeUtc();
-    curr.setTimeZone(QTimeZone(zone.toLatin1()));
+    QDateTime curr = QDateTime::currentDateTime();
     QDateTime changeTime = getThemeAutoChangeTime(curr, latitude, longitude);
 
-    qint64 interval = curr.secsTo(changeTime);
+    qint64 interval = curr.msecsTo(changeTime);
     themeAutoTimer.start(static_cast<int>(interval));
-    qDebug() << "change theme after:" << interval;
+    qDebug() << "change theme after:" << interval<<curr<<changeTime;
 }
 
 void AppearanceManager::loadDefaultFontConfig()
@@ -1174,27 +1232,27 @@ void AppearanceManager::loadWSConfig()
 
 QDateTime AppearanceManager::getThemeAutoChangeTime(QDateTime date, double latitude, double longitude)
 {
-    QDateTime curr = QDateTime::currentDateTimeUtc();
-    curr.setTimeZone(QTimeZone(zone.toLatin1()));
+    QDateTime curr = QDateTime::currentDateTime();
 
-    double utcOffset = curr.toSecsSinceEpoch() / 3600.0;
+    double utcOffset = curr.offsetFromUtc() / 3600.0;
 
     QDateTime sunrise, sunset;
-    bool bSuccess = SunriseSunset::getSunriseSunset(latitude, longitude, utcOffset, curr.toUTC(), sunrise, sunset);
+    bool bSuccess = SunriseSunset::getSunriseSunset(latitude, longitude, utcOffset, curr.date(), sunrise, sunset);
     if (!bSuccess) {
         return QDateTime();
     }
-    if (curr.secsTo(sunrise) <= 0) {
+
+    if (curr.secsTo(sunrise) > 0) {
         return sunrise;
     }
 
-    if (curr.secsTo(sunset) <= 0) {
+    if (curr.secsTo(sunset) > 0) {
         return sunset;
     }
 
     curr = curr.addDays(1);
 
-    bSuccess = SunriseSunset::getSunriseSunset(latitude, longitude, utcOffset, curr.toUTC(), sunrise, sunset);
+    bSuccess = SunriseSunset::getSunriseSunset(latitude, longitude, utcOffset, curr.date(), sunrise, sunset);
     if (!bSuccess) {
         return QDateTime();
     }
@@ -1225,6 +1283,63 @@ bool AppearanceManager::doSetFonts(double size)
     if (!setDQtTheme({QTKEYFONTSIZE}, {QString::number(size)})) {
         qWarning() << "set font size error:can not set qt theme ";
         return false;
+    }
+
+    return true;
+}
+
+bool AppearanceManager::doSetGlobalTheme(QString value)
+{
+    enum GolbalThemeMode {
+        Light = 1,
+        Dark = 2,
+        Auto = 3,
+        };
+    QString themeId = value;
+    GolbalThemeMode mode = Auto;
+    if (value.endsWith(".light")) {
+        themeId=value.chopped(6);
+        mode = Light;
+    } else if (value.endsWith(".dark")) {
+        themeId=value.chopped(5);
+        mode = Dark;
+    }
+
+    QVector<QSharedPointer<Theme>> globalThemes = subthemes->listGlobalThemes();
+    QString themePath;
+    for(auto iter : globalThemes)
+    {
+        if(iter->getId() == themeId)
+        {
+            themePath = iter->getPath();
+            break;
+        }
+    }
+    if (themePath.isEmpty())
+        return false;
+
+    KeyFile theme(',');
+    theme.loadFile(themePath+"/index.theme");
+    QString defaultTheme = theme.getStr("Deepin Theme","DefaultTheme");
+    if (defaultTheme.isEmpty())
+        return false;
+    QString darkTheme = theme.getStr("Deepin Theme","DarkTheme");
+    if (darkTheme.isEmpty() && mode==Auto)
+        mode = Light;
+    switch(mode) {
+    case Light:
+        applyGlobalTheme(theme, defaultTheme, defaultTheme);
+        currentGlobalTheme = value;
+        break;
+    case Dark: {
+        if (darkTheme.isEmpty())
+            return false;
+        applyGlobalTheme(theme, darkTheme, defaultTheme);
+        currentGlobalTheme = value;
+    }   break;
+    case Auto: {
+        updateThemeAuto(true);
+    }    break;
     }
 
     return true;
@@ -1385,7 +1500,7 @@ QString AppearanceManager::doGetWallpaperSlideShow(QString monitorName)
     QJsonDocument doc = QJsonDocument::fromJson(wallpaperSlideShow.toLatin1());
     QVariantMap tempMap = doc.object().toVariantMap();
 
-    QString key = QString("%1##%2").arg(monitorName).arg(message.arguments().first().toInt());
+    QString key = QString("%1&&%2").arg(monitorName).arg(message.arguments().first().toInt());
 
     if (tempMap.count(key) == 1) {
         return tempMap[key].toString();
@@ -1472,10 +1587,6 @@ QString AppearanceManager::doList(QString type)
                 iter = gtks.erase(iter);
             }
         }
-
-        QSharedPointer<Theme> theme(new Theme(AUTOGTKTHEME, "", false));
-        gtks.push_back(theme);
-
         return marshal(gtks);
     } else if (type == TYPEICON) {
         return marshal(subthemes->listIconThemes());
@@ -1487,6 +1598,8 @@ QString AppearanceManager::doList(QString type)
         return marshal(fontsManager->listStandard());
     } else if (type == TYPEMONOSPACEFONT) {
         return marshal(fontsManager->listMonospace());
+    } else if (type == TYPEGLOBALTHEME) {
+        return marshal(subthemes->listGlobalThemes());
     }
 
     return "";
@@ -1518,6 +1631,18 @@ QString AppearanceManager::doShow(const QString &type, const QStringList &names)
             }
         }
         return marshal(icons);
+    } else if (type == TYPEGLOBALTHEME) {
+        QVector<QSharedPointer<Theme>> globalThemes = subthemes->listGlobalThemes();
+
+        QVector<QSharedPointer<Theme>>::iterator iter = globalThemes.begin();
+        while (iter != globalThemes.end()) {
+            if (names.indexOf((*iter)->getId())!=-1) {
+                ++iter;
+            } else {
+                iter = globalThemes.erase(iter);
+            }
+        }
+        return marshal(globalThemes);
     } else if (type == TYPECURSOR) {
         QVector<QSharedPointer<Theme>> cursor = subthemes->listCursorThemes();
 
@@ -1585,6 +1710,7 @@ void AppearanceManager::doResetFonts()
 
 void AppearanceManager::doSetByType(const QString &type, const QString &value)
 {
+    bool updateValut = false;
     if (type == TYPEGTK) {
         if (value == gtkTheme) {
             return;
@@ -1592,6 +1718,7 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
 
         if (doSetGtkTheme(value)) {
             setGtkTheme(value);
+            updateValut = true;
         }
     } else if (type == TYPEICON) {
         if (value == iconTheme) {
@@ -1600,6 +1727,7 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
 
         if (doSetIconTheme(value)) {
             setIconTheme(value);
+            updateValut = true;
         }
     } else if (type == TYPECURSOR) {
         if (value == cursorTheme) {
@@ -1608,32 +1736,58 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
 
         if (doSetCursorTheme(value)) {
             setCursorTheme(value);
+            updateValut = true;
+        }
+    } else if (type == TYPEGLOBALTHEME) {
+        if (value == globalTheme) {
+            return;
+        }
+        if (doSetGlobalTheme(value)) {
+            setGlobalTheme(value);
         }
     } else if (type == TYPEBACKGROUND) {
         bool bSuccess = doSetBackground(value);
         if (bSuccess && wsLoopMap.count(curMonitorSpace) == 1) {
             wsLoopMap[curMonitorSpace]->addToShow(value);
+            updateValut = true;
         }
     } else if (type == TYPEGREETERBACKGROUND) {
-        doSetGreeterBackground(value);
+        updateValut = doSetGreeterBackground(value);
     } else if (type == TYPESTANDARDFONT) {
         if (standardFont == value) {
             return;
         }
         setStandardFont(value);
+        updateValut = true;
     } else if (type == TYPEMONOSPACEFONT) {
         if (monospaceFont == value) {
             return;
         }
         setMonospaceFont(value);
+        updateValut = true;
     } else if (type == TYPEFONTSIZE) {
         double size = value.toDouble();
         if (fontSize > size - 0.01 && fontSize < size + 0.01) {
             return;
         }
         setFontSize(size);
-    } else {
-        return;
+    } else if (type == TYPEACTIVECOLOR) {
+        setQtActiveColor(value);
+    } else if (type == TYPWINDOWRADIUS) {
+        bool ok = false;
+        int radius = value.toInt(&ok);
+        if (ok) {
+            setWindowRadius(radius);
+        }
+    } else if (type == TYPEWINDOWOPACITY) {
+        bool ok = false;
+        double opacity = value.toDouble(&ok);
+        if (ok) {
+            setOpacity(opacity);
+        }
+    }
+    if (updateValut) {
+        updateCustomTheme(type, value);
     }
 }
 
@@ -1673,6 +1827,8 @@ QString AppearanceManager::doThumbnail(const QString &type, const QString &name)
         return subthemes->getIconThumbnail(name);
     } else if (type == TYPECURSOR) {
         return subthemes->getCursorThumbnail(name);
+    } else if (type == TYPEGLOBALTHEME) {
+        return subthemes->getGlobalThumbnail(name);
     } else {
         return QString("invalid type: %1").arg(type);
     }
@@ -1688,7 +1844,7 @@ bool AppearanceManager::doSetWallpaperSlideShow(const QString &monitorName, cons
     QJsonDocument doc = QJsonDocument::fromJson(wallpaperSlideShow.toLatin1());
     QJsonObject cfgObj = doc.object();
 
-    QString key = QString("%1##%2").arg(monitorName).
+    QString key = QString("%1&&%2").arg(monitorName).
             arg(message.arguments().first().toString());
 
     cfgObj[key] = wallpaperSlideShow;
@@ -1713,7 +1869,7 @@ bool AppearanceManager::doSetWsLoop(const QString &monitorName, const QString &f
     }
 
     int index = message.arguments().first().toInt();
-    QString monitor = QString("%1##%2").arg(monitorName).arg(index);
+    QString monitor = QString("%1&&%2").arg(monitorName).arg(index);
     if (wsLoopMap.count(monitor) == 1) {
         wsLoopMap[monitor]->addToShow(file);
     }
@@ -1730,6 +1886,44 @@ QString AppearanceManager::getCurrentDesktopIndex()
     }
 
     return QString::number(message.arguments().first().toInt());
+}
+
+void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeName, const QString &defaultTheme)
+{
+    globalThemeUpdating = true;
+    QString defTheme = (defaultTheme.isEmpty() || defaultTheme == themeName) ? QString() : defaultTheme;
+    // 设置globlaTheme的一项，先从themeName中找对应项，若没有则从defTheme中找对应项，最后调用doSetByType实现功能
+    auto setGlobalItem = [&theme, &themeName, &defTheme, this](const QString &key, const QString &type) {
+        QString themeValue = theme.getStr(themeName, key);
+        if (themeValue.isEmpty() && !defTheme.isEmpty())
+            themeValue = theme.getStr(defTheme, key);
+        if (!themeValue.isEmpty())
+            doSetByType(type, themeValue);
+    };
+
+    setGlobalItem("Wallpaper",TYPEBACKGROUND);
+    setGlobalItem("LockBackground", TYPEGREETERBACKGROUND);
+    setGlobalItem("IconTheme", TYPEICON);
+    setGlobalItem("CursorTheme", TYPECURSOR);
+    setGlobalItem("AppTheme", TYPEGTK);
+    setGlobalItem("StandardFont", TYPESTANDARDFONT);
+    setGlobalItem("MonospaceFont", TYPEMONOSPACEFONT);
+    setGlobalItem("FontSize", TYPEFONTSIZE);
+    setGlobalItem("ActiveColor", TYPEACTIVECOLOR);
+//    setGlobalItem("DockBackground", TYPESTANDARDFONT);
+//    setGlobalItem("DockOpacity", TYPEDOCKOPACITY);
+//    setGlobalItem("LauncherBackground", TYPEBACKGROUND);
+//    setGlobalItem("LauncherOpacity", TYPESTANDARDFONT);
+    setGlobalItem("WindowRadius", TYPWINDOWRADIUS);
+    setGlobalItem("WindowOpacity", TYPEWINDOWOPACITY);
+    globalThemeUpdating = false;
+}
+
+void AppearanceManager::updateCustomTheme(const QString &type, const QString &value)
+{
+    if (!globalThemeUpdating) {
+        customTheme->updateValue(type, value, globalTheme, subthemes->listGlobalThemes());
+    }
 }
 
 void AppearanceManager::doSetCurrentWorkspaceBackground(const QString &uri)
@@ -1809,7 +2003,7 @@ void AppearanceManager::autoChangeBg(QString monitorSpace, QDateTime date)
 
     QString strIndex = QString::number(message.arguments().first().toInt());
 
-    int index = monitorSpace.indexOf("##");
+    int index = monitorSpace.indexOf("&&");
     if (index == -1) {
         qWarning() << "monitorSpace format error";
         return;
@@ -1906,6 +2100,10 @@ QString AppearanceManager::marshal(const QVector<QSharedPointer<Theme>> &themes)
         obj.insert("Id", iter->getId());
         obj.insert("Path", iter->getPath());
         obj.insert("Deletable", iter->getDeleteable());
+        obj.insert("Name", iter->name());
+        obj.insert("Comment", iter->comment());
+        obj.insert("hasDark", iter->hasDark());
+        obj.insert("Example", iter->example());
         array.append(obj);
     }
 

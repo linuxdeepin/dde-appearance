@@ -21,18 +21,23 @@ public:
     void refreshGtkThemes();
     void refreshIconThemes();
     void refreshCursorThemes();
+    void refreshGlobalThemes();
     QVector<QSharedPointer<Theme>> listGtkThemes();
     QVector<QSharedPointer<Theme>> listIconThemes();
     QVector<QSharedPointer<Theme>> listCursorThemes();
+    QVector<QSharedPointer<Theme>> listGlobalThemes();
     bool deleteGtkTheme(const QString& name);
     bool deleteIconTheme(const QString& name);
     bool deleteCursorTheme(const QString& name);
+    bool isGlobalTheme(QString id);
     bool isGtkTheme(QString id);
     bool isIconTheme(QString id);
     bool isCursorTheme(QString id);
+    bool setGlobalTheme(QString id);
     bool setGtkTheme(QString id);
     bool setIconTheme(QString id);
     bool setCursorTheme(QString id);
+    QString getGlobalThumbnail(QString id);
     QString getGtkThumbnail(QString id);
     QString getIconThumbnail(QString id);
     QString getCursorThumbnail(QString id);
@@ -47,6 +52,7 @@ private:
     QVector<QSharedPointer<Theme>>     gtkThemes;
     QVector<QSharedPointer<Theme>>     iconThemes;
     QVector<QSharedPointer<Theme>>     cursorThemes;
+    QVector<QSharedPointer<Theme>>     globalThemes;
     QMap<QString,QString>              gtkThumbnailMap;
 };
 

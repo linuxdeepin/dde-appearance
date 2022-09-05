@@ -120,8 +120,7 @@ bool FontsManager::setFamily(QString standard, QString monospace, double size)
         size = getFontSize();
     }
 
-    QString value;
-    value.sprintf("%s %.2lf",standard.toLatin1().data(),size);
+    QString value = QString::asprintf("%s %.2lf", standard.toLatin1().data(), size);
 
     if(!xSetting)
     {
@@ -356,9 +355,7 @@ QString FontsManager::fontMatch(QString family)
 
 QString FontsManager::configContent(QString standard, QString monospace)
 {
-    QString retString;
-
-    retString.sprintf(R"(<?xml version="1.0"?>
+    QString retString = QString::asprintf(R"(<?xml version="1.0"?>
                                            <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
                                            <fontconfig>
                                                <match target="pattern">
@@ -395,9 +392,10 @@ QString FontsManager::configContent(QString standard, QString monospace)
                                                <match target="font">
                                                    <edit name="rgba"><const>rgb</const></edit>
                                                </match>
-                                           </fontconfig>)", standard.toLatin1().data(), "Noto Sans",
-                                                   standard.toLatin1().data(), "Noto Sans",
-                                                   monospace.toLatin1().data(), "Noto Mono", standard.toLatin1().data());
+                                           </fontconfig>)",
+                                          standard.toLatin1().data(), "Noto Sans",
+                                          standard.toLatin1().data(), "Noto Sans",
+                                          monospace.toLatin1().data(), "Noto Mono", standard.toLatin1().data());
     return retString;
 }
 

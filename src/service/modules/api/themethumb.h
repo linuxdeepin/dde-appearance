@@ -34,6 +34,7 @@ QImage* loadXCursor(QString fileName, int size);
 QImage* fromXCurorImageToQImage(XcursorImage* image);
 QVector<QImage*> getIcons(QString theme, int size);
 QVector<QImage*> getCursors(QString dir, int size);
+QString getGlobal(QString id, QString descFile);
 QString getGtk(QString id, QString descFile);
 QString getIcon(QString id, QString descFile);
 bool shouldGenerateNew(QString descFile, QString out);

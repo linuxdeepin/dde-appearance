@@ -13,6 +13,7 @@ Subthemes::Subthemes(QObject *parent)
     refreshGtkThemes();
     refreshIconThemes();
     refreshCursorThemes();
+    refreshGlobalThemes();
     gtkThumbnailMap["deepin"] ="light";
     gtkThumbnailMap["deepin-dark"] ="dark";
     gtkThumbnailMap["deepin-auto"] ="auto";
@@ -45,6 +46,10 @@ void Subthemes::refreshIconThemes()
         {
             continue;
         }
+        KeyFile keyFile(',');
+        keyFile.loadFile(info->getPath()+"/index.theme");
+        info->setName(keyFile.getLocaleStr("Icon Theme","Name"));
+        info->setComment(keyFile.getLocaleStr("Icon Theme","Comment"));
         iconThemes.push_back(info);
     }
 }
@@ -52,6 +57,48 @@ void Subthemes::refreshIconThemes()
 void Subthemes::refreshCursorThemes()
 {
     cursorThemes = getThemes(themeApi->listCursorTheme());
+    for(auto &&info:cursorThemes) {
+        KeyFile keyFile(',');
+        keyFile.loadFile(info->getPath()+"/cursor.theme");
+        info->setName(keyFile.getLocaleStr("Icon Theme","Name"));
+        info->setComment(keyFile.getLocaleStr("Icon Theme","Comment"));
+    }
+}
+
+void Subthemes::refreshGlobalThemes()
+{
+    globalThemes.clear();
+//    // 路径同图标主题
+//    QVector<QString> themePaths = themeApi->listIconTheme();
+//    // 增加自定义主题
+//    themePaths.append("");
+    QVector<QSharedPointer<Theme>> infos = getThemes(themeApi->listGlobalTheme());
+
+//    QStringList blacklist;
+//    DConfig dConfig(APPEARANCESCHEMA);
+//    if(dConfig.isValid()){
+//        blacklist = dConfig.value(gsKeyExcludedIcon).toStringList();
+//    }
+
+    for (auto &&info : infos) {
+        KeyFile keyFile(',');
+        keyFile.loadFile(info->getPath()+"/index.theme");
+        info->setName(keyFile.getLocaleStr("Deepin Theme","Name"));
+        info->setComment(keyFile.getLocaleStr("Deepin Theme","Comment"));
+        QStringList example =keyFile.getStrList("Deepin Theme","Example");
+
+        for (QList<QString>::iterator i = example.begin(); i != example.end(); ++i) {
+            QFileInfo file(*i);
+            if (file.isRelative()) {
+                QDir themefile(info->getPath());
+                file.setFile(themefile, *i);
+                *i = file.absoluteFilePath();
+            }
+        }
+        info->setExample(example.join(','));
+        info->setHasDark(keyFile.containKey("Deepin Theme","DarkTheme"));
+        globalThemes.push_back(info);
+    }
 }
 
 QVector<QSharedPointer<Theme>> Subthemes::listGtkThemes()
@@ -79,6 +126,15 @@ QVector<QSharedPointer<Theme>> Subthemes::listCursorThemes()
     }
 
     return cursorThemes;
+}
+
+QVector<QSharedPointer<Theme> > Subthemes::listGlobalThemes()
+{
+    if(globalThemes.empty()) {
+        refreshGlobalThemes();
+    }
+
+    return globalThemes;
 }
 
 bool Subthemes::deleteGtkTheme(const QString& name)
@@ -131,6 +187,18 @@ bool Subthemes::deleteCursorTheme(const QString& name){
     return false;
 }
 
+bool Subthemes::isGlobalTheme(QString id)
+{
+    for(auto iter : globalThemes)
+    {
+        if(iter->getId() == id)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool Subthemes::isGtkTheme(QString id)
 {
     for(auto iter : gtkThemes)
@@ -167,6 +235,11 @@ bool Subthemes::isCursorTheme(QString id)
     return false;
 }
 
+bool Subthemes::setGlobalTheme(QString id)
+{
+    return themeApi->setGlobalTheme(id);
+}
+
 bool Subthemes::setGtkTheme(QString id)
 {
     return themeApi->setGtkTheme(id);
@@ -180,6 +253,26 @@ bool Subthemes::setIconTheme(QString id)
 bool Subthemes::setCursorTheme(QString id)
 {
     return  themeApi->setCursorTheme(id);
+}
+
+QString Subthemes::getGlobalThumbnail(QString id)
+{
+    QSharedPointer<Theme> theme;
+    for(auto iter: globalThemes)
+    {
+        if(iter->getId()==id)
+        {
+            theme = iter;
+        }
+    }
+
+    if(!theme)
+    {
+        return "";
+    }
+
+    QString path = theme->getPath()+"/index.theme";
+    return getGlobal(id,path);
 }
 
 QString Subthemes::getGtkThumbnail(QString id)

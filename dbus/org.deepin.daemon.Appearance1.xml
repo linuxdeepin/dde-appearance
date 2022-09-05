@@ -75,9 +75,10 @@
     </method>
 
     <property access='readwrite' type='d' name='FontSize' />
-    <property access='readwrite' type='d' name='Opaticy' />
+    <property access='readwrite' type='d' name='Opacity' />
     <property access='readwrite' type='i' name='WindowRadius' />
     <property access='read' type='s' name='Background' />
+    <property access='read' type='s' name='GlobalTheme' />
     <property access='read' type='s' name='GtkTheme' />
     <property access='read' type='s' name='IconTheme' />
     <property access='read' type='s' name='CursorTheme' />

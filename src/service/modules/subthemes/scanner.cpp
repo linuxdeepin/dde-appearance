@@ -24,6 +24,8 @@ bool Scanner::isHidden(QString file, QString ty)
         hidden = keyFile.getBool("Desktop Entry","Hidden");
     } else if (ty == TYPEICON || ty == TYPECURSOR) {
         hidden = keyFile.getBool("Icon Theme","Hidden");
+    } else if (ty == TYPEGLOBALTHEME) {
+        hidden = keyFile.getBool("Deepin Theme","Hidden");
     }
 
     return hidden;
@@ -43,21 +45,15 @@ QString Scanner::query(QString uri)
 
 QString Scanner::queryThemeMime(QString file)
 {
-    bool gtk = gtkTheme(file);
-    if(gtk) {
+    if (gtkTheme(file)) {
         return MIMETYPEGTK;
-    }
-
-    bool icon = iconTheme(file);
-    if(icon) {
+    } else if (iconTheme(file)) {
         return MIMETYPEICON;
-    }
-
-    bool cursor = cursorTheme(file);
-    if(cursor) {
+    } else if (cursorTheme(file)) {
         return MIMETYPECURSOR;
+    } else if (globalTheme(file)) {
+        return MIMETYPEGLOBAL;
     }
-
     return "";
 }
 
@@ -82,6 +78,22 @@ QString Scanner::doQueryFile(QString file)
     qInfo() << "attributeString" << attributeString << __FUNCTION__ << __LINE__;
 
     return attributeString;
+}
+
+bool Scanner::globalTheme(QString file)
+{
+    KeyFile keyfile;
+    keyfile.loadFile(file);
+    if(!keyfile.loadFile(file)) {
+        return false;
+    }
+
+
+    if(keyfile.getStr("Deepin Theme","DefaultTheme").isEmpty()) {
+        return false;
+    }
+
+    return true;
 }
 
 bool Scanner::gtkTheme(QString file)
@@ -118,6 +130,16 @@ bool Scanner::cursorTheme(QString file)
     return true;
 }
 
+bool Scanner::isGlobalTheme(QString uri)
+{
+    if(uri.size() == 0)
+        return false;
+
+    QString ty = query(uri);
+
+    return ty == MIMETYPEGLOBAL;
+}
+
 bool Scanner::isGtkTheme(QString uri)
 {
     if(uri.size() == 0)
@@ -125,7 +147,6 @@ bool Scanner::isGtkTheme(QString uri)
 
     QString ty = query(uri);
 
-    qInfo() << "isGtkTheme" << uri << ty << __FUNCTION__ << __LINE__;
     return ty == MIMETYPEGTK;
 }
 
@@ -135,7 +156,6 @@ bool Scanner::isIconTheme(QString uri)
         return false;
 
     QString ty = query(uri);
-    qInfo() << "isIconTheme" << uri << ty << __FUNCTION__ << __LINE__;
 
     return ty == MIMETYPEICON;
 }
@@ -146,7 +166,6 @@ bool Scanner::isCursorTheme(QString uri)
         return false;
 
     QString ty = query(uri);
-    qInfo() << "isCursorTheme" << uri << ty << __FUNCTION__ << __LINE__;
 
     return ty == MIMETYPECURSOR;
 }
@@ -205,9 +224,15 @@ QVector<QString> Scanner::doListTheme(QString uri, QString ty, Fn fn)
     return themes;
 }
 
+
+QVector<QString> Scanner::listGlobalTheme(QString uri)
+{
+    Fn fn = std::bind(&Scanner::isGlobalTheme, this,std::placeholders::_1);
+    return doListTheme(uri, TYPEGLOBALTHEME, fn);
+}
+
 QVector<QString> Scanner::listGtkTheme(QString uri)
 {
-    qInfo() << "listGtkTheme" << uri << __FUNCTION__ << __LINE__;
     Fn fn = std::bind(&Scanner::isGtkTheme, this,std::placeholders::_1);
     return doListTheme(uri, TYPEGTK, fn);
 }

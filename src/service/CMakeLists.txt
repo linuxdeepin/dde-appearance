@@ -48,6 +48,8 @@ set(SRCS
     ./modules/subthemes/scanner.cpp
     ./modules/subthemes/theme.h
     ./modules/subthemes/theme.cpp
+    ./modules/subthemes/customtheme.h
+    ./modules/subthemes/customtheme.cpp
     ./modules/api/themes.h
     ./modules/api/themes.cpp
     ./modules/api/keyfile.cpp
