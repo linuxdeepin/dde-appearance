@@ -499,7 +499,7 @@ void ThemesApi::setGtkCursor(QString name)
     g_object_set(G_OBJECT(s), "gtk-cursor-theme-name", name.toLatin1().data(), NULL);
 }
 
-static char *findAlternative(const char *name)
+static const char *findAlternative(const char *name)
 {
     // Qt uses non-standard names for some core cursors.
     // If Xcursor fails to load the cursor, Qt creates it with the correct name
@@ -508,30 +508,32 @@ static char *findAlternative(const char *name)
     // Note that there's a core cursor called cross, but it's not the one Qt expects.
     // Precomputed MD5 hashes for the hardcoded bitmap cursors in Qt and KDE.
     // Note that the MD5 hash for left_ptr_watch is for the KDE version of that cursor.
-    static const QMap<QString, QString> xcursor_alter = {
-        { "cross", "crosshair" },
-        { "up_arrow", "center_ptr" },
-        { "wait", "watch" },
-        { "ibeam", "xterm" },
-        { "size_all", "fleur" },
-        { "pointing_hand", "hand2" },
+    static const char *xcursor_alter[] = {
+        "cross", "crosshair",
+        "up_arrow", "center_ptr",
+        "wait", "watch",
+        "ibeam", "xterm",
+        "size_all", "fleur",
+        "pointing_hand", "hand2",
         // Precomputed MD5 hashes for the hardcoded bitmap cursors in Qt and KDE.
         // Note that the MD5 hash for left_ptr_watch is for the KDE version of that cursor.
-        { "size_ver", "00008160000006810000408080010102" },
-        { "size_hor", "028006030e0e7ebffc7f7070c0600140" },
-        { "size_bdiag", "c7088f0f3e6c8088236ef8e1e3e70000" },
-        { "size_fdiag", "fcf1c3c7cd4491d801f1e1c78f100000" },
-        { "whats_this", "d9ce0ab605698f320427677b458ad60b" },
-        { "split_h", "14fef782d02440884392942c11205230" },
-        { "split_v", "2870a09082c103050810ffdffffe0204" },
-        { "forbidden", "03b6e0fcb3499374a867c041f52298f0" },
-        { "left_ptr_watch", "3ecb610c1bf2410f44200f48c40d3599" },
-        { "hand2", "e29285e634086352946a0e7090d73106" },
-        { "openhand", "9141b49c8149039304290b508d208c40" },
-        { "closedhand", "05e88622050804100c20044008402080" }
+        "size_ver", "00008160000006810000408080010102",
+        "size_hor", "028006030e0e7ebffc7f7070c0600140",
+        "size_bdiag", "c7088f0f3e6c8088236ef8e1e3e70000",
+        "size_fdiag", "fcf1c3c7cd4491d801f1e1c78f100000",
+        "whats_this", "d9ce0ab605698f320427677b458ad60b",
+        "split_h", "14fef782d02440884392942c11205230",
+        "split_v", "2870a09082c103050810ffdffffe0204",
+        "forbidden", "03b6e0fcb3499374a867c041f52298f0",
+        "left_ptr_watch", "3ecb610c1bf2410f44200f48c40d3599",
+        "hand2", "e29285e634086352946a0e7090d73106",
+        "openhand", "9141b49c8149039304290b508d208c40",
+        "closedhand", "05e88622050804100c20044008402080",
+        NULL
     };
-    if (xcursor_alter.contains(name)) {
-        return xcursor_alter.value(name).toLatin1().data();
+    for (int i = 0; xcursor_alter[i] != NULL; i += 2) {
+        if (strcmp(name, xcursor_alter[i]) == 0)
+            return xcursor_alter[i + 1];
     }
     return NULL;
 }
@@ -551,8 +553,7 @@ static unsigned long loadCursorHandle(Display *disp, const char *theme, const ch
     XcursorImages *images = NULL;
     images = xcLoadImages(theme, name, size);
     if (!images) {
-        images = xcLoadImages(theme,
-                              findAlternative(name), size);
+        images = xcLoadImages(theme, findAlternative(name), size);
         if (!images) {
             return 0;
         }
@@ -579,7 +580,7 @@ int set_qt_cursor(const char *name)
      * Now only XFixes qt cursor name 'left_ptr'
      * Why?
      **/
-    static const QStringList list = {
+    static const char *list[] = {
         // Qt cursors
         "left_ptr",
         "up_arrow",
@@ -621,7 +622,8 @@ int set_qt_cursor(const char *name)
         "bottom_left_corner",
         "left_side",
         "question_arrow",
-        "pirate"
+        "pirate",
+        NULL
     };
 
     Display *disp = XOpenDisplay(0);
@@ -629,16 +631,14 @@ int set_qt_cursor(const char *name)
         qWarning() << "Open display failed";
         return -1;
     }
-
-    for (auto &&cursorStr : list) {
-        const char *cursorName = cursorStr.toLatin1().data();
-        Cursor cursor = (Cursor)loadCursorHandle(disp, name, cursorName, -1);
+    for (int i = 0; list[i] != NULL; ++i) {
+        Cursor cursor = (Cursor)loadCursorHandle(disp, name, list[i], -1);
         if (cursor == 0) {
-            qWarning() << "Load cursor" << cursorStr << "failed";
+            qWarning() << "Load cursor" << list[i] << "failed";
             continue;
         }
 
-        XFixesChangeCursorByName(disp, cursor, cursorName);
+        XFixesChangeCursorByName(disp, cursor, list[i]);
         // FIXME: do we need to free the cursor?
         XFreeCursor(disp, cursor);
     }
