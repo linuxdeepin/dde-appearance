@@ -8,33 +8,24 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <QFile>
+#include <QFileInfo>
 
 DFile::DFile()
 {
 }
 bool DFile::isAbs(QString file)
 {
-    char resolved_path[MAX_FILEPATH_LEN];
-    if (realpath(file.toStdString().c_str(), resolved_path)) {
-        QString filePath(resolved_path);
-        if (filePath == file)
-            return true;
-    }
-    return false;
+    QFileInfo info(file);
+    return info.isAbsolute();
 }
 bool DFile::isExisted(QString file)
 {
-    return !access(file.toStdString().c_str(), F_OK);
+    return QFileInfo::exists(file);
 }
 QString DFile::dir(QString file)
 {
-    QString ret;
-    if (isAbs(file)) {
-        if (file.indexOf("/")!=-1) {
-            ret=file.mid(0,file.indexOf("/")+1);// 包含结尾斜杠/
-        }
-    }
-    return ret;
+    QFileInfo info(file);
+    return info.absolutePath();
 }
 QString DFile::base(QString file)
 {
