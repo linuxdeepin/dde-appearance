@@ -8,9 +8,6 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gtk/gtk.h>
 
-const int gtkVersion = 0;
-const int cursorVersion = 1;
-const int iconVersion = 1;
 const int width = 320;
 const int height = 70;
 const int baseCursorSize = 24;
@@ -508,30 +505,12 @@ QString getIcon(QString id, QString descFile)
 
 bool shouldGenerateNew(QString descFile, QString out)
 {
-    struct stat descFileStat;
-    struct stat outFileStat;
-
-    int res = stat(descFile.toStdString().c_str(),&descFileStat);
-    if(res==-1){
-        return false;
-    }
-
-    struct timespec descFileTime = descFileStat.st_ctim;
-    int descFileTimestamp= clock_gettime(CLOCK_REALTIME,&descFileTime);
-
-    res = stat(out.toStdString().c_str(),&outFileStat);
-    if(res==-1){
-        return false;
-    }
-
-    struct timespec outFileTime = descFileStat.st_ctim;
-    int outFileTimestamp= clock_gettime(CLOCK_REALTIME,&outFileTime);
-
-    if(descFileTimestamp>outFileTimestamp){
+    QFileInfo outFileInfo(out);qInfo()<<descFile<<out<<outFileInfo.exists();
+    if (!outFileInfo.exists()) {
         return true;
     }
-
-    return false;
+    QFileInfo descFileInfo(descFile);
+    return descFileInfo.lastModified() > outFileInfo.lastModified();
 }
 
 bool shouldGenerateNewCursor(QString descFile, QString out)
@@ -561,3 +540,40 @@ QString prepareOutputPath(QString type0, QString id, int version)
 }
 
 
+
+void CreateGlobalThumbnail(const QString path, const QString filename)
+{
+
+}
+
+void CreateGtkThumbnail(const QString path, const QString filename)
+{
+    if (!shouldGenerateNew(path, filename)) {
+        return ;
+    }
+
+    double scaleFactor = getScaleFactor();
+    QFileInfo fileinfo(path);
+    genGtk(fileinfo.baseName(),width,height,scaleFactor,filename);
+}
+
+void CreateIconThumbnail(const QString path, const QString filename)
+{
+    if (!shouldGenerateNew(path, filename)) {
+        return ;
+    }
+
+    double scaleFactor = getScaleFactor();
+    QFileInfo fileinfo(path);
+    genIcon(fileinfo.baseName(), width, height, scaleFactor, filename);
+}
+
+void CreateCursorThumbnail(const QString path, const QString filename)
+{
+    if (!shouldGenerateNewCursor(path+"/index.theme", filename)) {
+        return ;
+    }
+    double scaleFactor = getScaleFactor();
+
+    genCursor(path+"/index.theme",width,height,scaleFactor, filename);
+}

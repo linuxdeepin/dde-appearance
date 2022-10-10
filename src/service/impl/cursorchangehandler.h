@@ -6,7 +6,9 @@
 class CursorChangeHandler : public QThread
 {
 public:
-    CursorChangeHandler();
+    explicit CursorChangeHandler(QObject *parent = nullptr);
+    ~CursorChangeHandler();
+
     void start();
     void stop();
     static void endCursorChangeHandler();

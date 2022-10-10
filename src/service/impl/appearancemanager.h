@@ -117,6 +117,7 @@ public Q_SLOTS:
     void handleGnomeBgDConfigChange(QString key);
     void handleDetectSysClockTimeOut();
     void handleUpdateToCustom(const QString &mode);
+    void handleGlobalThemeChangeTimeOut();
 
 private:
     QString qtActiveColorToHexColor(const QString &activeColor) const;
@@ -174,7 +175,7 @@ private: // PROPERTIES
     int     windowRadius;
 
 private:
-    DConfig                         settingDconfig;
+    DTK_CORE_NAMESPACE::DConfig                         settingDconfig;
     QSharedPointer<QGSettings>      xSetting;
     QSharedPointer<QGSettings>      wrapBgSetting;
     QSharedPointer<QGSettings>      gnomeBgSetting;
@@ -205,7 +206,7 @@ private:
     QSharedPointer<Fsnotify>        fsnotify;
     QString                         m_gsQtActiveColor;
     QTimer                          detectSysClockTimer;
-    QTimer                          themeAutoTimer;
+    QTimer                          themeAutoTimer;     // 自动切换深浅主题定时器
     qint64                          detectSysClockStartTime;
     QString                         zone;
     QMap<QString,QSharedPointer<WallpaperScheduler>> wsSchedulerMap;

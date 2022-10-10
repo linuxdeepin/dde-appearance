@@ -6,10 +6,16 @@
 int     CursorChangeHandler::sigId=0;
 bool    CursorChangeHandler::endFlag=false;
 
-CursorChangeHandler::CursorChangeHandler()
+CursorChangeHandler::CursorChangeHandler(QObject *parent)
+    : QThread(parent)
 {
     gtk_init(nullptr,nullptr);
     bRun=false;
+}
+
+CursorChangeHandler::~CursorChangeHandler()
+{
+    stop();
 }
 
 void CursorChangeHandler::start()
@@ -21,6 +27,7 @@ void CursorChangeHandler::start()
 void CursorChangeHandler::run()
 {
     while (bRun) {
+        msleep(1000);
         handleGtkCursorChange();
     }
 }
@@ -28,6 +35,7 @@ void CursorChangeHandler::run()
 void CursorChangeHandler::stop()
 {
     bRun=false;
+    gtk_main_quit();
 }
 
 void CursorChangeHandler::endCursorChangeHandler()

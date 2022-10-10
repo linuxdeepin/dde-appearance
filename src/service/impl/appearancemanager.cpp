@@ -26,6 +26,10 @@
 
 #include "../modules/subthemes/customtheme.h"
 
+#define NAN_ANGLE (-200.0) // 异常经纬度
+
+DCORE_USE_NAMESPACE
+
 const QString wallpaperJsonPath = QString("%1/.cache/deepin/dde-appearance/").arg(getenv("HOME"));
 
 AppearanceManager::AppearanceManager(QObject *parent)
@@ -62,7 +66,7 @@ AppearanceManager::AppearanceManager(QObject *parent)
     , subthemes(new Subthemes())
     , backgrounds(new Backgrounds())
     , fontsManager(new FontsManager())
-    , cursorChangeHandler(new CursorChangeHandler)
+    , cursorChangeHandler(new CursorChangeHandler(this))
     , fsnotify(new Fsnotify())
     , detectSysClockTimer(this)
     , themeAutoTimer(this)
@@ -70,8 +74,8 @@ AppearanceManager::AppearanceManager(QObject *parent)
     , fontSize(0)
     , opacity(0)
     , windowRadius(0)
-    , longitude(0)
-    , latitude(0)
+    , longitude(NAN_ANGLE) // 非法经纬度，未初始化状态
+    , latitude(NAN_ANGLE)
     , ntpTimeId(0)
     , timeUpdateTimeId(0)
     , locationValid(false)
@@ -270,6 +274,8 @@ bool AppearanceManager::init()
     connect(gnomeBgSetting.data(), SIGNAL(changed(const QString)), this, SLOT(handleGnomeBgDConfigChange(QString)));
 
     connect(&detectSysClockTimer, SIGNAL(timeout()), this, SLOT(handleDetectSysClockTimeOut()));
+    connect(&themeAutoTimer, SIGNAL(timeout()), this, SLOT(handleGlobalThemeChangeTimeOut()));
+    themeAutoTimer.start(60000); // 每分钟检查一次是否要切换主题
 
     connect(customTheme, &CustomTheme::updateToCustom, this, &AppearanceManager::handleUpdateToCustom);
 
@@ -622,6 +628,16 @@ void AppearanceManager::handleUpdateToCustom(const QString &mode)
 {
     currentGlobalTheme = "custom" + mode;
     setGlobalTheme("custom");
+}
+
+void AppearanceManager::handleGlobalThemeChangeTimeOut()
+{
+    // 相同则为指定主题
+    if (globalTheme == currentGlobalTheme
+        || longitude <= NAN_ANGLE
+        || latitude <= NAN_ANGLE)
+        return;
+    autoSetTheme(latitude, longitude);
 }
 
 void AppearanceManager::timerEvent(QTimerEvent *event)
@@ -1085,7 +1101,6 @@ void AppearanceManager::resetThemeAutoTimer()
     QDateTime changeTime = getThemeAutoChangeTime(curr, latitude, longitude);
 
     qint64 interval = curr.msecsTo(changeTime);
-    themeAutoTimer.start(static_cast<int>(interval));
     qDebug() << "change theme after:" << interval<<curr<<changeTime;
 }
 
@@ -1148,8 +1163,6 @@ void AppearanceManager::updateThemeAuto(bool enable)
     enableDetectSysClock(enable);
 
     if (enable) {
-        themeAutoTimer.start(0);
-
         QString city = timeDateInterface->property("Timezone").toString();
         if (coordinateMap.count(city) == 1) {
             latitude = coordinateMap[city].latitude;

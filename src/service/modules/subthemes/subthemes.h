@@ -9,7 +9,7 @@
 #include <vector>
 #include <DConfig>
 
-DCORE_USE_NAMESPACE
+class QThread;
 
 class Subthemes : public QObject
 {
@@ -47,6 +47,18 @@ public:
     QString getBasePath(QString filename);
     QMap<QString,QString>& getGtkThumbnailMap();
 
+protected Q_SLOTS:
+    void createGlobalThumbnail(const QString path, const QString filename);
+    void createGtkThumbnail(const QString path, const QString filename);
+    void createIconThumbnail(const QString path, const QString filename);
+    void createCursorThumbnail(const QString path, const QString filename);
+
+Q_SIGNALS:
+    void requestGlobalThumbnail(const QString &path, const QString &filename);
+    void requestGtkThumbnail(const QString &path, const QString &filename);
+    void requestIconThumbnail(const QString &path, const QString &filename);
+    void requestCursorThumbnail(const QString &path, const QString &filename);
+
 private:
     QSharedPointer<ThemesApi>          themeApi;
     QVector<QSharedPointer<Theme>>     gtkThemes;
@@ -54,6 +66,7 @@ private:
     QVector<QSharedPointer<Theme>>     cursorThemes;
     QVector<QSharedPointer<Theme>>     globalThemes;
     QMap<QString,QString>              gtkThumbnailMap;
+    QThread                            *thread;
 };
 
 #endif

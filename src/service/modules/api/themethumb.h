@@ -17,6 +17,10 @@
 #include <QProcess>
 #include <X11/Xcursor/Xcursor.h>
 
+const int gtkVersion = 0;
+const int iconVersion = 1;
+const int cursorVersion = 1;
+
 QString getScaleDir();
 QString getTypeDir(QString type0, int version);
 void init(double scalFactor0);
@@ -40,6 +44,10 @@ QString getIcon(QString id, QString descFile);
 bool shouldGenerateNew(QString descFile, QString out);
 bool shouldGenerateNewCursor(QString descFile, QString out);
 QString prepareOutputPath(QString type0, QString id, int version);
+void CreateGlobalThumbnail(const QString path, const QString filename);
+void CreateGtkThumbnail(const QString path, const QString filename);
+void CreateIconThumbnail(const QString path, const QString filename);
+void CreateCursorThumbnail(const QString path, const QString filename);
 //bool gen(QString descFile, int width, int height, float scaleFactor, QString out);
 
 

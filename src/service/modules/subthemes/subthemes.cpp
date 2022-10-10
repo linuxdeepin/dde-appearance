@@ -2,14 +2,25 @@
 #include "../api/themethumb.h"
 #include "../common/commondefine.h"
 #include <QDir>
+#include <QThread>
 #include <QDebug>
+
+DCORE_USE_NAMESPACE
 
 const QString gsKeyExcludedIcon = "excluded-icon-themes";
 
 Subthemes::Subthemes(QObject *parent)
     : QObject(parent)
     , themeApi(new ThemesApi())
+    , thread(new QThread(this))
 {
+    moveToThread(thread);
+    thread->start(QThread::LowestPriority);
+    connect(this, &Subthemes::requestGlobalThumbnail, this, &Subthemes::createGlobalThumbnail, Qt::QueuedConnection);
+    connect(this, &Subthemes::requestGtkThumbnail, this, &Subthemes::createGtkThumbnail, Qt::QueuedConnection);
+    connect(this, &Subthemes::requestIconThumbnail, this, &Subthemes::createIconThumbnail, Qt::QueuedConnection);
+    connect(this, &Subthemes::requestCursorThumbnail, this, &Subthemes::createCursorThumbnail, Qt::QueuedConnection);
+
     refreshGtkThemes();
     refreshIconThemes();
     refreshCursorThemes();
@@ -17,11 +28,19 @@ Subthemes::Subthemes(QObject *parent)
     gtkThumbnailMap["deepin"] ="light";
     gtkThumbnailMap["deepin-dark"] ="dark";
     gtkThumbnailMap["deepin-auto"] ="auto";
+
+    for (auto &&theme : cursorThemes) {
+        getCursorThumbnail(theme->getId());
+    }
+    for (auto &&theme : iconThemes) {
+        getIconThumbnail(theme->getId());
+    }
 }
 
 Subthemes::~Subthemes()
 {
-
+    thread->quit();
+    thread->wait();
 }
 
 
@@ -292,7 +311,14 @@ QString Subthemes::getGtkThumbnail(QString id)
     }
 
     QString path = theme->getPath()+"/index.theme";
-    return getGtk(id,path);
+    if (!checkScaleFactor()) {
+        qInfo() << "scaleFactor <= 0";
+        return "";
+    }
+
+    QString out = prepareOutputPath("gtk", id, cursorVersion);
+    Q_EMIT requestGtkThumbnail(path,out);
+    return out;
 }
 
 QString Subthemes::getIconThumbnail(QString id)
@@ -311,8 +337,15 @@ QString Subthemes::getIconThumbnail(QString id)
         return "";
     }
 
-    QString path = theme->getPath()+"/index.theme";
-    return getIcon(id,path);
+    QString path = theme->getPath();
+    if (!checkScaleFactor()) {
+        qInfo() << "scaleFactor <= 0";
+        return "";
+    }
+
+    QString out = prepareOutputPath("icon", id, iconVersion);
+    Q_EMIT requestIconThumbnail(path,out);
+    return out;
 }
 
 QString Subthemes::getCursorThumbnail(QString id)
@@ -331,8 +364,16 @@ QString Subthemes::getCursorThumbnail(QString id)
         return "";
     }
 
-    QString path = theme->getPath()+"/index.theme";
-    return getCursor(id,path);
+    QString path = theme->getPath();
+
+    if (!checkScaleFactor()) {
+        qInfo() << "scaleFactor <= 0";
+        return "";
+    }
+
+    QString out = prepareOutputPath("cursor", id, cursorVersion);
+    Q_EMIT requestCursorThumbnail(path,out);
+    return out;
 }
 
 QVector<QSharedPointer<Theme>> Subthemes::getThemes(QVector<QString> files)
@@ -380,4 +421,24 @@ QString Subthemes::getBasePath(QString filename)
 QMap<QString,QString>& Subthemes::getGtkThumbnailMap()
 {
     return gtkThumbnailMap;
+}
+
+void Subthemes::createGlobalThumbnail(const QString path, const QString filename)
+{
+    CreateGlobalThumbnail(path, filename);
+}
+
+void Subthemes::createGtkThumbnail(const QString path, const QString filename)
+{
+    CreateGtkThumbnail(path, filename);
+}
+
+void Subthemes::createIconThumbnail(const QString path, const QString filename)
+{
+    CreateIconThumbnail(path, filename);
+}
+
+void Subthemes::createCursorThumbnail(const QString path, const QString filename)
+{
+    CreateCursorThumbnail(path, filename);
 }
