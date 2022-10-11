@@ -156,8 +156,9 @@ QStringList FontsManager::listStandard()
     {
         if(item.second->monospace || !item.second->show)
         {
-            retList.push_back(item.second->id);
+            continue;
         }
+        retList.push_back(item.second->id);
     }
     retList.sort();
 
