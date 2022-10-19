@@ -1,3 +1,20 @@
+dde-appearance (1.0.1) unstable; urgency=medium
+
+  [ TagBuilder ]
+  * feat: 删除编译自动生成文件(Task: 176633)(Influence: 无)
+  * feat: 壁纸管理服务(Task: 170687)(Influence: 壁纸管理相关)
+  * fix: 修复字体和字体大小设置无效的问题(Task: 178097)(Influence: 控制中心/个性化/字体)
+  * feat: 项目工程结构优化(Task: 178097)(Influence: 无)
+  * feat: 个性化icon问题修改(Task: 178097)(Influence: Icon Theme)
+  * fix: 修改活动色、光标修改不生效问题(Task: 170635)(Influence: 控制中心-个性化-主题-修改活动色、光标)
+  * fix: 添加高可定主题功能(Task: 170635)(Influence: 控制中心-个性化-主题-高可定主题功能)
+  * fix: 修改光标设置不生效问题(Task: 170635)(Influence: 控制中心-个性化-主题-高可定主题-修改光标)
+  * fix: 修改个性化后端服务崩溃问题(Task: 195695)(Influence: 控制中心-进入个性化界面，后端服务崩溃)
+  * fix: 修改第二次进入控制中心个性化时间过长问题(Bug: 162283)(Influence: 控制中心-个性化-来回切换至主题界面)
+  * fix: 修改标准字体显示错误问题(Bug: 160519)(Influence: 控制中心-个性化-标准字体下拉项个数)
+
+ -- caixiangrong <caixiangrong@uniontech.com>  Wed, 19 Oct 2022 12:12:33 +0800
+
 dde-appearance (1.0.0) unstable; urgency=medium
 
   * Initial release
