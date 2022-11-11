@@ -42,7 +42,7 @@ AppearanceManager::AppearanceManager(QObject *parent)
                                           "/com/deepin/daemon/Display",
                                           "com.deepin.daemon.Display",
                                           QDBusConnection::sessionBus()))
-    , xSettingsInterface(new QDBusInterface("com.deepin.SessionManager",
+    , xSettingsInterface(new QDBusInterface("com.deepin.daemon.Display",
                                             "/com/deepin/XSettings",
                                             "com.deepin.XSettings",
                                             QDBusConnection::sessionBus()))

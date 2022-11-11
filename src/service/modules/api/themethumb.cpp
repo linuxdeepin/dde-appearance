@@ -113,7 +113,7 @@ bool checkScaleFactor()
 double getScaleFactor()
 {
     double scaleFactor =0;
-    QDBusInterface xSettingsInterface("com.deepin.SessionManager",
+    QDBusInterface xSettingsInterface("com.deepin.daemon.Display",
                                                 "/com/deepin/XSettings",
                                                 "com.deepin.XSettings",
                                                 QDBusConnection::sessionBus());
