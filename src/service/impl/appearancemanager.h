@@ -2,9 +2,9 @@
 #define APPEARANCEMANAGER_H
 
 #include "fsnotify.h"
-#include "../modules/subthemes/subthemes.h"
-#include "../modules/fonts/fontsmanager.h"
-#include "../../dbus/types/scaleFactors.h"
+#include "modules/subthemes/subthemes.h"
+#include "modules/fonts/fontsmanager.h"
+#include "dbus/scaleFactors.h"
 #include "cursorchangehandler.h"
 #include "wallpaperscheduler.h"
 
@@ -17,6 +17,7 @@
 #include <QTimer>
 #include <QGSettings>
 
+class AppearanceDBusProxy;
 class Appearance1;
 class CustomTheme;
 
@@ -97,17 +98,16 @@ public:
     inline int getWindowRadius() {return windowRadius; }
     inline QString getGreetBg() {return greeterBg; }
     inline QMap<QString,QString>& getMonitor() {return monitorMap; }
-    inline QSharedPointer<QDBusInterface> getWmDbusInterface(){return wmInterface;}
-    void timerEvent( QTimerEvent *event) override;
+    inline QSharedPointer<AppearanceDBusProxy> getDBusProxy() const { return dbusProxy; }
+    inline int getWorkspaceCount() const { return workspaceCount; }
+    void timerEvent(QTimerEvent *event) override;
 
 public Q_SLOTS:
     void handleWmWorkspaceCountChanged(int count);
     void handleWmWorkspaceSwithched(int from,int to);
     void handleSetScaleFactorStarted();
     void handleSetScaleFactorDone();
-    void handleDisplayChanged(QDBusMessage mes);
-    void handleTimezoneChanged(QDBusMessage mes);
-    void handleTimeNTPChanged(QDBusMessage mes);
+    void handleTimezoneChanged(QString timezone);
     void handleTimeUpdate();
     void handleNTPChanged();
     void handlethemeFileChange(QString theme);
@@ -118,6 +118,7 @@ public Q_SLOTS:
     void handleDetectSysClockTimeOut();
     void handleUpdateToCustom(const QString &mode);
     void handleGlobalThemeChangeTimeOut();
+    void updateMonitorMap();
 
 private:
     QString qtActiveColorToHexColor(const QString &activeColor) const;
@@ -126,7 +127,6 @@ private:
     void initUserObj();
     void initCurrentBgs();
     void initWallpaperSlideshow();
-    void updateMonitorMap();
     void iso6709Parsing(QString city, QString coordinates);
     void doUpdateWallpaperURIs();
     void setPropertyWallpaperURIs(QMap<QString,QString> monitorWallpaperUris);
@@ -149,7 +149,7 @@ private:
     QString marshal(const QVector<Background>& backgrounds);
     QString marshal(const QStringList& strs);
     QString marshal(const QVector<QSharedPointer<FontsManager::Family>>& strs);
-    QString getCurrentDesktopIndex();
+    int getCurrentDesktopIndex();
     void applyGlobalTheme(KeyFile &theme, const QString &themeName, const QString &defaultTheme);
 
     void updateCustomTheme(const QString &type, const QString &value);
@@ -179,14 +179,7 @@ private:
     QSharedPointer<QGSettings>      xSetting;
     QSharedPointer<QGSettings>      wrapBgSetting;
     QSharedPointer<QGSettings>      gnomeBgSetting;
-    QSharedPointer<QDBusInterface>  wmInterface;
-    QSharedPointer<QDBusInterface>  displayInterface;
-    QSharedPointer<QDBusInterface>  xSettingsInterface;
-    QSharedPointer<QDBusInterface>  userInterface;
-    QSharedPointer<QDBusInterface>  timeDateInterface;
-    QSharedPointer<QDBusInterface>  sessionTimeDateInterface;
-    QSharedPointer<QDBusInterface>  imageBlurInterface;
-    QSharedPointer<QDBusInterface>  imageEffectInterface;
+    QSharedPointer<AppearanceDBusProxy> dbusProxy;
     QSharedPointer<Subthemes>       subthemes;
     QSharedPointer<Backgrounds>     backgrounds;
     QSharedPointer<FontsManager>    fontsManager;
@@ -200,7 +193,6 @@ private:
     int                             timeUpdateTimeId;
     int                             ntpTimeId;
     bool                            locationValid;
-    uint                            nid;
     QString                         curMonitorSpace;
     QSharedPointer<CursorChangeHandler> cursorChangeHandler;
     QSharedPointer<Fsnotify>        fsnotify;
@@ -213,6 +205,8 @@ private:
     QMap<QString,QSharedPointer<WallpaperLoop>>      wsLoopMap;
     CustomTheme                     *customTheme;
     bool                            globalThemeUpdating;
+
+    int  workspaceCount;
 };
 
 #endif // APPEARANCEMANAGER_H

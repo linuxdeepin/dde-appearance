@@ -1,13 +1,14 @@
 #include "backgrounds.h"
 #include "../api/utils.h"
 #include "../common/commondefine.h"
+#include "dbus/appearancedbusproxy.h"
 
 #include <QDBusInterface>
 #include <pwd.h>
 #include <QDBusReply>
 
-QStringList Backgrounds::systemWallpapersDir = {"/usr/share/wallpapers/deepin"};
-QStringList Backgrounds::uiSupportedFormats = {"jpeg", "png", "bmp", "tiff", "gif"};
+QStringList Backgrounds::systemWallpapersDir = { "/usr/share/wallpapers/deepin" };
+QStringList Backgrounds::uiSupportedFormats = { "jpeg", "png", "bmp", "tiff", "gif" };
 
 Backgrounds::Backgrounds(QObject *parent)
     : QObject(parent)
@@ -19,19 +20,18 @@ Backgrounds::Backgrounds(QObject *parent)
 
 Backgrounds::~Backgrounds()
 {
-
 }
 
-bool Backgrounds::deleteBackground(const QString& uri)
+bool Backgrounds::deleteBackground(const QString &uri)
 {
-    QVector<Background>::iterator iter=backgrounds.begin();
+    QVector<Background>::iterator iter = backgrounds.begin();
 
-    while (iter!=backgrounds.end()) {
-        if((*iter).getId() == uri){
+    while (iter != backgrounds.end()) {
+        if ((*iter).getId() == uri) {
             (*iter).Delete();
             iter = backgrounds.erase(iter);
             return true;
-        }else {
+        } else {
             iter++;
         }
     }
@@ -42,10 +42,9 @@ bool Backgrounds::deleteBackground(const QString& uri)
 void Backgrounds::init()
 {
     QString configPath = g_get_user_config_dir();
-    customWallpapersConfigDir = configPath +"/deepin/dde-daemon/appearance/custom-wallpapers";
+    customWallpapersConfigDir = configPath + "/deepin/dde-daemon/appearance/custom-wallpapers";
     QDir qdir;
-    if(!qdir.exists(customWallpapersConfigDir))
-    {
+    if (!qdir.exists(customWallpapersConfigDir)) {
         qdir.mkdir(customWallpapersConfigDir);
         qInfo() << "mkdir: " << customWallpapersConfigDir;
     }
@@ -80,17 +79,15 @@ void Backgrounds::refreshBackground()
         bg.setDeletable(true);
         backgrounds.push_back(bg);
     }
-    fsChanged=false;
+    fsChanged = false;
 }
 
 void Backgrounds::sortByTime(QFileInfoList listFileInfo)
 {
-    std::sort(listFileInfo.begin(), listFileInfo.end(), [ = ](const QFileInfo &f1, QFileInfo &f2){
-        return  f1.lastModified().toTime_t() < f2.lastModified().toTime_t();
+    std::sort(listFileInfo.begin(), listFileInfo.end(), [=](const QFileInfo &f1, QFileInfo &f2) {
+        return f1.lastModified().toTime_t() < f2.lastModified().toTime_t();
     });
 }
-
-
 
 QStringList Backgrounds::getSysBgFIles()
 {
@@ -103,23 +100,11 @@ QStringList Backgrounds::getSysBgFIles()
 
 QStringList Backgrounds::getCustomBgFiles()
 {
-    QStringList ret;
-    QDBusInterface daemon("com.deepin.daemon.Daemon","/com/deepin/daemon/Daemon","com.deepin.daemon.Daemon",QDBusConnection::systemBus());
-
-     struct passwd *user = getpwuid(getuid());
-     if(user==nullptr)
-     {
-         return ret;
-     }
-
-     QDBusReply<QStringList> reply = daemon.call("GetCustomWallPapers",user->pw_name);
-     if(!reply.isValid())
-     {
-         return ret;
-     }
-     ret=reply.value();
-
-     return ret;
+    struct passwd *user = getpwuid(getuid());
+    if (user == nullptr) {
+        return QStringList();
+    }
+    return AppearanceDBusProxy::GetCustomWallPapers(user->pw_name);
 }
 
 QStringList Backgrounds::getCustomBgFilesInDir(QString dir)
@@ -220,27 +205,21 @@ QString Backgrounds::resizeImage(QString fileName, QString cacheDir)
 QString Backgrounds::onPrepare(QString fileName)
 {
     struct passwd *user = getpwuid(getuid());
-    if(user==nullptr)
-    {
+    if (user == nullptr) {
         return "";
     }
-    QString file= resizeImage(fileName, customWallpapersConfigDir);
+    QString file = resizeImage(fileName, customWallpapersConfigDir);
     notifyChanged();
 
-    return file;
-    // TODO
-//    QDBusInterface daemon("com.deepin.daemon.Daemon","/com/deepin/daemon/Daemon","com.deepin.daemon.Daemon",QDBusConnection::systemBus());
-//    return QDBusPendingReply<QString>(daemon.asyncCall(QStringLiteral("SaveCustomWallPaper"), QVariant::fromValue(QString(user->pw_name)), QVariant::fromValue(file)));
+    return AppearanceDBusProxy::SaveCustomWallPaper(user->pw_name, file);
 }
 
 QString Backgrounds::prepare(QString file)
 {
     QString tempFile = utils::deCodeURI(file);
-    if(isFileInDirs(tempFile,systemWallpapersDir))
-    {
+    if (isFileInDirs(tempFile, systemWallpapersDir)) {
         return tempFile;
     }
 
     return onPrepare(file);
 }
-

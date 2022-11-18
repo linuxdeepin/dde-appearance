@@ -1,6 +1,8 @@
 #include "themes.h"
 #include "utils.h"
 #include "../common/commondefine.h"
+#include "impl/appearancemanager.h"
+#include "dbus/appearancedbusproxy.h"
 
 #include <gtk/gtk.h>
 #include <xcb/xcb_cursor.h>
@@ -9,13 +11,12 @@
 #include <X11/Xcursor/Xcursor.h>
 #include <X11/extensions/Xfixes.h>
 
-ThemesApi::ThemesApi(QObject *parent)
+ThemesApi::ThemesApi(AppearanceManager *parent)
     : QObject(parent)
     , scanner(new Scanner())
     , gtk2Mutex(QMutex())
     , gtk3Mutex(QMutex())
-    , wmDbusInterface(new QDBusInterface("com.deepin.wm", "/com/deepin/wm",
-                                         "com.deepin.wm", QDBusConnection::sessionBus()))
+    , dbusProxy(parent->getDBusProxy())
 {
     if (QGSettings::isSchemaInstalled(XSETTINGSSCHEMA)) {
         xSetting = QSharedPointer<QGSettings>(new QGSettings(XSETTINGSSCHEMA));
@@ -695,9 +696,7 @@ void ThemesApi::setWMCursor(QString name)
         interfaceSetting->set("cursorTheme", name);
     }
 
-    if (wmDbusInterface) {
-        wmDbusInterface->setProperty("cursorTheme", QString(name));
-    }
+    dbusProxy->setcursorTheme(name);
 }
 
 QString ThemesApi::getGtk2ConfFile()

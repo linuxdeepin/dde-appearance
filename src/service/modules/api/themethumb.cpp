@@ -45,6 +45,8 @@ static QVector<QStringList> presentIcons {
     // terminal:
 //    {"deepin-terminal", "utilities-terminal", "terminal", "gnome-terminal", "xfce-terminal", "terminator", "openterm"},
 };
+// ScaleFactor 多次用到，且修改有信号，改为静态变量做缓存
+static double g_ScaleFactor = 0.0;
 
 QString getScaleDir()
 {
@@ -112,22 +114,7 @@ bool checkScaleFactor()
 
 double getScaleFactor()
 {
-    double scaleFactor =0;
-    QDBusInterface xSettingsInterface("com.deepin.daemon.Display",
-                                                "/com/deepin/XSettings",
-                                                "com.deepin.XSettings",
-                                                QDBusConnection::sessionBus());
-
-    if(xSettingsInterface.isValid())
-    {
-        QDBusMessage message = xSettingsInterface.call("GetScaleFactor");
-        if(message.type() != QDBusMessage::ErrorMessage)
-        {
-            scaleFactor = message.arguments().first().toDouble();
-        }
-    }
-
-    return scaleFactor;
+    return g_ScaleFactor;
 }
 
 QString getCursor(QString id, QString descFile)
@@ -576,4 +563,9 @@ void CreateCursorThumbnail(const QString path, const QString filename)
     double scaleFactor = getScaleFactor();
 
     genCursor(path+"/index.theme",width,height,scaleFactor, filename);
+}
+
+void UpdateScaleFactor(double scaleFactor)
+{
+    g_ScaleFactor = scaleFactor;
 }

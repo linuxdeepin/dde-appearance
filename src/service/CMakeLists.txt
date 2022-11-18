@@ -75,8 +75,10 @@ set(SRCS
     ./modules/dconfig/dconfigsettings.cpp
     ./modules/dconfig/phasewallpaper.h
     ./modules/dconfig/phasewallpaper.cpp
-    ../../dbus/types/scaleFactors.h
-    ../../dbus/types/scaleFactors.cpp
+    ./dbus/scaleFactors.h
+    ./dbus/scaleFactors.cpp
+    ./dbus/dccdbusinterface.cpp
+    ./dbus/appearancedbusproxy.cpp
 )
 
 add_executable(dde-appearance

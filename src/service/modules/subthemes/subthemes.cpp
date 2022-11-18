@@ -1,4 +1,5 @@
 #include "subthemes.h"
+#include "impl/appearancemanager.h"
 #include "../api/themethumb.h"
 #include "../common/commondefine.h"
 #include <QDir>
@@ -9,9 +10,9 @@ DCORE_USE_NAMESPACE
 
 const QString gsKeyExcludedIcon = "excluded-icon-themes";
 
-Subthemes::Subthemes(QObject *parent)
-    : QObject(parent)
-    , themeApi(new ThemesApi())
+Subthemes::Subthemes(AppearanceManager *parent)
+    : QObject()
+    , themeApi(new ThemesApi(parent))
     , thread(new QThread(this))
 {
     moveToThread(thread);

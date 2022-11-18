@@ -1,23 +1,17 @@
 #include "syncconfig.h"
 #include "../common/commondefine.h"
 
+#include <QDBusConnection>
+#include <QDBusPendingReply>
+#include <QDebug>
+// 数据同步处理，和UOS ID同步数据
 SyncConfig::SyncConfig(QString name, QString path)
-    :name(name)
-    ,path(path)
-    ,orgDbusInterface("org.freedesktop.DBus",
-                      "/org/freedesktop/DBus",
-                      "org.freedesktop.DBus",
-                      QDBusConnection::sessionBus())
-    ,syncInterface("com.deepin.sync.Daemon",
-                   "/com/deepin/sync/Daemon",
-                   "com.deepin.sync.Daemon",
-                   QDBusConnection::sessionBus())
+    : name(name)
+    , path(path)
 {
-     QDBusConnection::sessionBus().connect(orgDbusInterface.service(),
-                                                     orgDbusInterface.path(),
-                                                     orgDbusInterface.interface(),
-                                                     SIGNAL(NameOwnerChanged(QString,QString,QString)),
-                                                     this, SLOT(handleNameOwnerChanged(QString,QString,QString)));
+    QDBusConnection::sessionBus().registerObject(path, this, QDBusConnection::ExportNonScriptableSlots);
+    QDBusConnection::sessionBus().connect("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "NameOwnerChanged", this, SLOT(handleNameOwnerChanged(QString, QString, QString)));
+    registerConfig();
 }
 
 QByteArray SyncConfig::Get()
@@ -27,35 +21,24 @@ QByteArray SyncConfig::Get()
 
 void SyncConfig::Set(QByteArray)
 {
-
 }
 
 void SyncConfig::registerConfig()
 {
-    if(!orgDbusInterface.isValid())
-    {
+    QDBusMessage dbusMessage = QDBusMessage::createMethodCall("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "NameHasOwner");
+    dbusMessage << SYNCSERVICENAME;
+    if (false == QDBusPendingReply<bool>(QDBusConnection::sessionBus().asyncCall(dbusMessage)))
         return;
-    }
 
-    QDBusMessage  message = orgDbusInterface.call("ListNames");
-    if(message.type()==QDBusMessage::ErrorMessage)
-    {
-        return;
-    }
-
-    QStringList availableServices = message.arguments().first().toStringList();
-    if(availableServices.indexOf(SYNCSERVICENAME) == -1)
-    {
-        return;
-    }
-
-    syncInterface.call("Register", name, path);
+    QDBusMessage syncMessage = QDBusMessage::createMethodCall(SYNCSERVICENAME, SYNCSERVICEPATH, SYNCSERVICEINTERFACE, "Register");
+    syncMessage << name << path;
+    QDBusConnection::sessionBus().asyncCall(syncMessage);
+    qInfo() << "SyncConfig" << name << path;
 }
 
 void SyncConfig::handleNameOwnerChanged(QString name, QString oldOwner, QString newOwner)
 {
-    if(name == SYNCSERVICENAME && !newOwner.isEmpty())
-    {
+    if (name == SYNCSERVICENAME && !newOwner.isEmpty()) {
         registerConfig();
     }
 }

@@ -11,12 +11,15 @@
 #include <vector>
 #include <QGSettings>
 
+class AppearanceManager;
+class AppearanceDBusProxy;
+
 class ThemesApi : public QObject
 {
     Q_OBJECT
 
 public:
-    ThemesApi(QObject *parent = nullptr);
+    ThemesApi(AppearanceManager *parent = nullptr);
     ~ThemesApi();
 
     bool isThemeInList(QString theme, QVector<QString> list);
@@ -62,7 +65,7 @@ private:
     QMutex                                          gtk2Mutex;
     QMutex                                          gtk3Mutex;
     QMap<QString, QString>                          gtk2ConfInfos;
-    QSharedPointer<QDBusInterface>                  wmDbusInterface;
+    QSharedPointer<AppearanceDBusProxy>             dbusProxy;
     QSharedPointer<QGSettings>                      xSetting;
     QSharedPointer<QGSettings>                      metacitySetting;
     QSharedPointer<QGSettings>                      wmSetting;

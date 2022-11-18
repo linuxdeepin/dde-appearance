@@ -4,6 +4,7 @@
 #include <QtGlobal>
 
 #include "appearancesyncconfig.h"
+#include "dbus/appearancedbusproxy.h"
 
 ThemeFontSyncConfig::ThemeFontSyncConfig(QString name, QString path, QSharedPointer<AppearanceManager> appearManager)
     :SyncConfig(name, path)
@@ -15,7 +16,7 @@ QByteArray ThemeFontSyncConfig::Get()
 {
     QJsonDocument doc;
     QJsonObject syncData;
-    syncData.insert("version",1);
+    syncData.insert("version","1.0");
     syncData.insert("font_size",appearanceManager->getFontSize());
     syncData.insert("gtk",appearanceManager->getGtkTheme());
     syncData.insert("icon",appearanceManager->getIconTheme());
@@ -107,7 +108,7 @@ QByteArray BackgroundSyncConfig::Get()
 {
     QJsonDocument doc;
     QJsonObject syncData;
-    syncData.insert("version",2.0);
+    syncData.insert("version","2.0");
 
     QJsonObject uploadSlideObject;
     QJsonParseError err_rpt;
@@ -211,16 +212,11 @@ void BackgroundSyncConfig::Set(QByteArray data)
             }
         }
 
-        QSharedPointer<QDBusInterface> wmInterface = appearanceManager->getWmDbusInterface();
-        if(wmInterface)
+        int  workspaceCount = appearanceManager->getWorkspaceCount();
+        for(int i=0; i<workspaceCount; i++)
         {
-            QDBusMessage message = wmInterface->call("WorkspaceCount");
-            int  workspaceCount = message.arguments().first().toInt();
-            for(int i=0; i<workspaceCount; i++)
-            {
-                 QString key = QString("%1&&%2").arg(primaryMonitor).arg(i);
-                 slidewConfigObject[key] = syncData.value("slide_show").toString();
-            }
+             QString key = QString("%1&&%2").arg(primaryMonitor).arg(i);
+             slidewConfigObject[key] = syncData.value("slide_show").toString();
         }
         QJsonDocument tempWallpaperSlideShowDoc;
         tempWallpaperSlideShowDoc.setObject(slidewConfigObject);
@@ -245,14 +241,11 @@ void BackgroundSyncConfig::Set(QByteArray data)
                 wallpaperURIsObject.insert(item.first, item.second.toString());
             }
 
+            QSharedPointer<AppearanceDBusProxy> dbusProxy = appearanceManager->getDBusProxy();
             QJsonArray backgroundURIsArr =  syncData.value("background_uris").toArray();
             for(int i =0; i < backgroundURIsArr.size();i++)
             {
-                QDBusMessage message = wmInterface->call("SetWorkspaceBackgroundForMonitor",i+1,primaryMonitor, backgroundURIsArr[i].toString());
-                if(message.type() == QDBusMessage::ErrorMessage)
-                {
-                    return;
-                }
+                dbusProxy->SetWorkspaceBackgroundForMonitor(i + 1, primaryMonitor, backgroundURIsArr[i].toString());
                 QString key = QString("%1&&%2").arg(primaryMonitor).arg(i+1);
                 wallpaperURIsObject.insert(key,backgroundURIsArr[i]);
             }
@@ -300,36 +293,33 @@ void BackgroundSyncConfig::Set(QByteArray data)
         return;
     }
 
-    QSharedPointer<QDBusInterface> wmInterface = appearanceManager->getWmDbusInterface();
-    if(wmInterface)
+    QSharedPointer<AppearanceDBusProxy> dbusProxy = appearanceManager->getDBusProxy();
+    int workspaceCount = appearanceManager->getWorkspaceCount();
+    QVariantMap wallPaperUrisConfigMap = syncData.value("wallpaper_uris").toObject().toVariantMap();
+    for(auto item : wallPaperUrisConfigMap.toStdMap())
     {
-        int workspaceCount = wmInterface->call("WorkspaceCount").arguments().first().toInt();
-        QVariantMap wallPaperUrisConfigMap = syncData.value("wallpaper_uris").toObject().toVariantMap();
-        for(auto item : wallPaperUrisConfigMap.toStdMap())
+        QStringList keySlice = item.first.split("&&");
+        if(keySlice.size()<2)
         {
-            QStringList keySlice = item.first.split("&&");
-            if(keySlice.size()<2)
-            {
-                continue;
-            }
-
-            if(keySlice[1].toInt()<1)
-            {
-                return;
-            }
-
-            if(keySlice[1].toInt() > workspaceCount)
-            {
-                continue;
-            }
-
-            QString monitorName;
-            if(reverseMonitorMap.count(keySlice[0])==1)
-            {
-                monitorName = reverseMonitorMap[keySlice[0]];
-            }
-
-            wmInterface->call("SetWorkspaceBackgroundForMonitor", keySlice[1].toInt(),monitorName,item.second);
+            continue;
         }
+
+        if(keySlice[1].toInt()<1)
+        {
+            return;
+        }
+
+        if(keySlice[1].toInt() > workspaceCount)
+        {
+            continue;
+        }
+
+        QString monitorName;
+        if(reverseMonitorMap.count(keySlice[0])==1)
+        {
+            monitorName = reverseMonitorMap[keySlice[0]];
+        }
+
+        dbusProxy->SetWorkspaceBackgroundForMonitor(keySlice[1].toInt(), monitorName, item.second.toString());
     }
 }

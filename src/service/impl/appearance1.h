@@ -2,7 +2,7 @@
 #define APPEARANCE1_H
 
 #include "appearancemanager.h"
-#include "../../dbus/types/scaleFactors.h"
+#include "dbus/scaleFactors.h"
 #include <QObject>
 
 class Appearance1 : public QObject {

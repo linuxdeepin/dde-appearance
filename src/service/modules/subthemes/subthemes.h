@@ -10,12 +10,13 @@
 #include <DConfig>
 
 class QThread;
+class AppearanceManager;
 
 class Subthemes : public QObject
 {
     Q_OBJECT
 public:
-    Subthemes(QObject *parent = nullptr);
+    Subthemes(AppearanceManager *parent = nullptr);
     virtual ~Subthemes();
 
     void refreshGtkThemes();

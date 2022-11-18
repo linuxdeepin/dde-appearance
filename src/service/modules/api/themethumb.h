@@ -50,5 +50,8 @@ void CreateIconThumbnail(const QString path, const QString filename);
 void CreateCursorThumbnail(const QString path, const QString filename);
 //bool gen(QString descFile, int width, int height, float scaleFactor, QString out);
 
+void UpdateScaleFactor(double scaleFactor);
+
+
 
 #endif // THEMETHUMB_H
