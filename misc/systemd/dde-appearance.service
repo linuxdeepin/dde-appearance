@@ -3,5 +3,5 @@ Description=Deepin Appearance service
 
 [Service]
 Type=DBus
-BusName=org.deepin.daemon.Appearance1
+BusName=org.deepin.dde.Appearance1
 ExecStart=/usr/bin/dde-appearance

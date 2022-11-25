@@ -1,5 +1,5 @@
 set(DCONFIG_FILES
-    org.deepin.daemon.appearance1.dconfig.json
+    org.deepin.dde.appearance.json
 )
 
-install(FILES ${DCONFIG_FILES} DESTINATION /usr/share/dsg/configs/dde-appearance)
+install(FILES ${DCONFIG_FILES} DESTINATION /usr/share/dsg/configs/org.deepin.dde.appearance)

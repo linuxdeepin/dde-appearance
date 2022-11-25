@@ -19,7 +19,7 @@ pkg_check_modules(OPENSSL REQUIRED IMPORTED_TARGET openssl)
 
 
 qt5_add_dbus_adaptor(ADAPTER_SOURCES
-                     ../../dbus/org.deepin.daemon.Appearance1.xml
+                     ../../dbus/org.deepin.dde.Appearance1.xml
                      impl/appearance1.h
                      Appearance1)
 add_definitions(-DUSE_QT)

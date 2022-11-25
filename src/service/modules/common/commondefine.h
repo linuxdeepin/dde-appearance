@@ -1,7 +1,7 @@
 #ifndef COMMONDEFINE_H
 #define COMMONDEFINE_H
 
-#define APPEARANCESCHEMA    "org.deepin.daemon.appearance1.dconfig"
+#define APPEARANCESCHEMA    "org.deepin.dde.appearance"
 #define XSETTINGSSCHEMA     "com.deepin.xsettings"
 #define WRAPBGSCHEMA        "com.deepin.wrap.gnome.desktop.background"
 #define GNOMEBGSCHEMA       "org.gnome.desktop.background"

@@ -3,8 +3,8 @@
 #include <QJsonObject>
 #include <QDebug>
 
-const QString appearanceProcessId = "dde-appearance";
-const QString appearanceDconfJson = "org.deepin.daemon.appearance1.dconfig";
+const QString appearanceProcessId = "org.deepin.dde.appearance";
+const QString appearanceDconfJson = "org.deepin.dde.appearance";
 const QString allWallpaperUrisKey = "All_Wallpaper_Uris";
 
 PhaseWallPaper::PhaseWallPaper()

@@ -25,10 +25,10 @@
 AppearanceDBusProxy::AppearanceDBusProxy(QObject *parent)
     : QObject(parent)
     , m_wmInterface(new DCCDBusInterface("com.deepin.wm", "/com/deepin/wm", "com.deepin.wm", QDBusConnection::sessionBus(), this))
-    , m_displayInterface(new DCCDBusInterface("com.deepin.daemon.Display", "/com/deepin/daemon/Display", "com.deepin.daemon.Display", QDBusConnection::sessionBus(), this))
-    , m_xSettingsInterface(new DCCDBusInterface("com.deepin.daemon.Display", "/com/deepin/XSettings", "com.deepin.XSettings", QDBusConnection::sessionBus(), this))
+    , m_displayInterface(new DCCDBusInterface("org.deepin.dde.Display1", "/org/deepin/dde/Display1", "org.deepin.dde.Display1", QDBusConnection::sessionBus(), this))
+    , m_xSettingsInterface(new DCCDBusInterface("org.deepin.dde.XSettings1", "/org/deepin/dde/XSettings1", "org.deepin.dde.XSettings1", QDBusConnection::sessionBus(), this))
     , m_timeDateInterface(new DCCDBusInterface("org.freedesktop.timedate1", "/org/freedesktop/timedate1", "org.freedesktop.timedate1", QDBusConnection::systemBus(), this))
-    , m_sessionTimeDateInterface(new DCCDBusInterface("org.deepin.daemon.Timedate1", "/org/deepin/daemon/Timedate1", "org.deepin.daemon.Timedate1", QDBusConnection::sessionBus(), this))
+    , m_sessionTimeDateInterface(new DCCDBusInterface("org.deepin.dde.Timedate1", "/org/deepin/dde/Timedate1", "org.deepin.dde.Timedate1", QDBusConnection::sessionBus(), this))
     , nid(0)
 {
     registerScaleFactorsMetaType();
@@ -37,9 +37,9 @@ AppearanceDBusProxy::AppearanceDBusProxy(QObject *parent)
 
 void AppearanceDBusProxy::setUserInterface(const QString &userPath)
 {
-    m_userInterface = QSharedPointer<DCCDBusInterface>(new DCCDBusInterface("org.deepin.daemon.Accounts1",
+    m_userInterface = QSharedPointer<DCCDBusInterface>(new DCCDBusInterface("org.deepin.dde.Accounts1",
                                                                             userPath,
-                                                                            "org.deepin.daemon.Accounts1.User",
+                                                                            "org.deepin.dde.Accounts1.User",
                                                                             QDBusConnection::systemBus(), this));
 }
 
@@ -137,7 +137,7 @@ void AppearanceDBusProxy::SetScreenScaleFactors(const ScaleFactors &factors)
 
 QString AppearanceDBusProxy::FindUserById(const QString &uid)
 {
-    QDBusMessage accountsMessage = QDBusMessage::createMethodCall("org.deepin.daemon.Accounts1", "/org/deepin/daemon/Accounts1", "org.deepin.daemon.Accounts1", "FindUserById");
+    QDBusMessage accountsMessage = QDBusMessage::createMethodCall("org.deepin.dde.Accounts1", "/org/deepin/dde/Accounts1", "org.deepin.dde.Accounts1", "FindUserById");
     accountsMessage << uid;
     return QDBusPendingReply<QString>(QDBusConnection::systemBus().asyncCall(accountsMessage));
 }
@@ -192,28 +192,28 @@ bool AppearanceDBusProxy::nTPSession()
 // imageBlurInterface
 void AppearanceDBusProxy::Delete(const QString &file)
 {
-    QDBusMessage imageBlurMessage = QDBusMessage::createMethodCall("org.deepin.daemon.ImageEffect1", "/org/deepin/daemon/ImageBlur1", "org.deepin.daemon.ImageBlur1", "Delete");
+    QDBusMessage imageBlurMessage = QDBusMessage::createMethodCall("org.deepin.dde.ImageBlur1", "/org/deepin/dde/ImageBlur1", "org.deepin.dde.ImageBlur1", "Delete");
     imageBlurMessage << file;
     QDBusConnection::systemBus().asyncCall(imageBlurMessage);
 }
 
 QString AppearanceDBusProxy::Get(const QString &file)
 {
-    QDBusMessage imageBlurMessage = QDBusMessage::createMethodCall("org.deepin.daemon.ImageEffect1", "/org/deepin/daemon/ImageBlur1", "org.deepin.daemon.ImageBlur1", "Get");
+    QDBusMessage imageBlurMessage = QDBusMessage::createMethodCall("org.deepin.dde.ImageBlur1", "/org/deepin/dde/ImageBlur1", "org.deepin.dde.ImageBlur1", "Get");
     imageBlurMessage << file;
     return QDBusPendingReply<QString>(QDBusConnection::systemBus().asyncCall(imageBlurMessage));
 }
 // imageEffectInterface
 void AppearanceDBusProxy::Delete(const QString &effect, const QString &filename)
 {
-    QDBusMessage imageEffectMessage = QDBusMessage::createMethodCall("org.deepin.daemon.ImageEffect1", "/org/deepin/daemon/ImageEffect1", "org.deepin.daemon.ImageEffect1", "Delete");
+    QDBusMessage imageEffectMessage = QDBusMessage::createMethodCall("org.deepin.dde.ImageEffect1", "/org/deepin/dde/ImageEffect1", "org.deepin.dde.ImageEffect1", "Delete");
     imageEffectMessage << effect << filename;
     QDBusConnection::systemBus().asyncCall(imageEffectMessage);
 }
 
 QString AppearanceDBusProxy::Get(const QString &effect, const QString &filename)
 {
-    QDBusMessage imageEffectMessage = QDBusMessage::createMethodCall("org.deepin.daemon.ImageEffect1", "/org/deepin/daemon/ImageEffect1", "org.deepin.daemon.ImageEffect1", "Get");
+    QDBusMessage imageEffectMessage = QDBusMessage::createMethodCall("org.deepin.dde.ImageEffect1", "/org/deepin/dde/ImageEffect1", "org.deepin.dde.ImageEffect1", "Get");
     imageEffectMessage << effect << filename;
     QDBusConnection::systemBus().asyncCall(imageEffectMessage);
 
@@ -222,21 +222,21 @@ QString AppearanceDBusProxy::Get(const QString &effect, const QString &filename)
 // Daemon1
 void AppearanceDBusProxy::DeleteCustomWallPaper(const QString &username, const QString &file)
 {
-    QDBusMessage daemonMessage = QDBusMessage::createMethodCall("org.deepin.daemon.Daemon1", "/org/deepin/daemon/Daemon1", "org.deepin.daemon.Daemon1", "DeleteCustomWallPaper");
+    QDBusMessage daemonMessage = QDBusMessage::createMethodCall("org.deepin.dde.Daemon1", "/org/deepin/dde/Daemon1", "org.deepin.dde.Daemon1", "DeleteCustomWallPaper");
     daemonMessage << username << file;
     QDBusConnection::systemBus().asyncCall(daemonMessage);
 }
 
 QStringList AppearanceDBusProxy::GetCustomWallPapers(const QString &username)
 {
-    QDBusMessage daemonMessage = QDBusMessage::createMethodCall("org.deepin.daemon.Daemon1", "/org/deepin/daemon/Daemon1", "org.deepin.daemon.Daemon1", "GetCustomWallPapers");
+    QDBusMessage daemonMessage = QDBusMessage::createMethodCall("org.deepin.dde.Daemon1", "/org/deepin/dde/Daemon1", "org.deepin.dde.Daemon1", "GetCustomWallPapers");
     daemonMessage << username;
     return QDBusPendingReply<QStringList>(QDBusConnection::systemBus().asyncCall(daemonMessage));
 }
 
 QString AppearanceDBusProxy::SaveCustomWallPaper(const QString &username, const QString &file)
 {
-    QDBusMessage daemonMessage = QDBusMessage::createMethodCall("org.deepin.daemon.Daemon1", "/org/deepin/daemon/Daemon1", "org.deepin.daemon.Daemon1", "SaveCustomWallPaper");
+    QDBusMessage daemonMessage = QDBusMessage::createMethodCall("org.deepin.dde.Daemon1", "/org/deepin/dde/Daemon1", "org.deepin.dde.Daemon1", "SaveCustomWallPaper");
     daemonMessage << username << file;
     return QDBusPendingReply<QString>(QDBusConnection::systemBus().asyncCall(daemonMessage));
 }

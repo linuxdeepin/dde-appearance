@@ -129,8 +129,8 @@ bool AppearanceManager::init()
 
     updateMonitorMap();
 
-    new ThemeFontSyncConfig("org.deepin.daemon.Appearance1", "/org/deepin/daemon/Appearance1/sync", QSharedPointer<AppearanceManager>(this));
-    new BackgroundSyncConfig("org.deepin.daemon.Appearance1", "/org/deepin/daemon/Appearance1/Background", QSharedPointer<AppearanceManager>(this));
+    new ThemeFontSyncConfig("org.deepin.daemon.Appearance1", "/org/deepin/dde/Appearance1/sync", QSharedPointer<AppearanceManager>(this));
+    new BackgroundSyncConfig("org.deepin.daemon.Appearance1", "/org/deepin/dde/Appearance1/Background", QSharedPointer<AppearanceManager>(this));
 
     if (wallpaperURls.isEmpty()) {
         updateNewVersionData();
@@ -263,8 +263,8 @@ void AppearanceManager::handleSetScaleFactorDone()
     QString summary = tr("Set successfully");
     QStringList options{ "_logout", tr("Log Out Now"), "_later", tr("Later") };
     QMap<QString, QVariant> optionMap;
-    optionMap["x-deepin-action-_logout"] = "dbus-send,--type=method_call,--dest=com.deepin.SessionManager,"
-                                           "/com/deepin/SessionManager,com.deepin.SessionManager.RequestLogout";
+    optionMap["x-deepin-action-_logout"] = "dbus-send,--type=method_call,--dest=org.deepin.dde.SessionManager1,"
+                                           "/org/deepin/dde/SessionManager1,org.deepin.dde.SessionManager1.RequestLogout";
     optionMap["x-deepin-action-_later"] = "";
     int expireTimeout = 15 * 1000;
     dbusProxy->Notify("dde-control-center", "dialog-window-scale", summary, body, options, optionMap, expireTimeout);

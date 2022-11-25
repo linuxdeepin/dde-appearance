@@ -5,14 +5,16 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
+    app.setOrganizationName("deepin");
+    app.setApplicationName("org.deepin.dde.appearance");
     QTranslator translator;
     translator.load("/usr/share/dde-appearance/translations/dde-appearance_" + QLocale::system().name());
     app.installTranslator(&translator);
     Appearance1 *appearance = new Appearance1();
     new Appearance1Adaptor(appearance);
 
-    QDBusConnection::sessionBus().registerService("org.deepin.daemon.Appearance1");
-    QDBusConnection::sessionBus().registerObject("/org/deepin/daemon/Appearance1", "org.deepin.daemon.Appearance1", appearance);
+    QDBusConnection::sessionBus().registerService("org.deepin.dde.Appearance1");
+    QDBusConnection::sessionBus().registerObject("/org/deepin/dde/Appearance1", "org.deepin.dde.Appearance1", appearance);
 
     return app.exec();
 }

@@ -211,7 +211,7 @@ void Appearance1::handleChangeSignal(const QString& type, const QString& value)
     if (!c_propMap.contains(type))
         return;
     QVariantList args;
-    args.push_back(QVariant(QStringLiteral("/org/deepin/daemon/Appearance1")));
+    args.push_back(QVariant(QStringLiteral("/org/deepin/dde/Appearance1")));
     QVariantMap properties;
     QString propertName = c_propMap.value(type);
     if (propertName == "WindowRadius") {
@@ -224,7 +224,7 @@ void Appearance1::handleChangeSignal(const QString& type, const QString& value)
     }
     args.push_back(properties);
     args.push_back(QStringList());
-    QDBusMessage message = QDBusMessage::createSignal(QStringLiteral("/org/deepin/daemon/Appearance1"), QStringLiteral("org.freedesktop.DBus.Properties"), QStringLiteral("PropertiesChanged"));
+    QDBusMessage message = QDBusMessage::createSignal(QStringLiteral("/org/deepin/dde/Appearance1"), QStringLiteral("org.freedesktop.DBus.Properties"), QStringLiteral("PropertiesChanged"));
     message.setArguments(args);
     QDBusConnection::sessionBus().send(message);
 }
