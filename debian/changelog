@@ -1,3 +1,14 @@
+dde-appearance (1.0.2.1) unstable; urgency=medium
+
+  [ TagBuilder ]
+  * fix: 适配XSettings服务名修改(Task: 204449)(Influence: 控制中心-显示-缩放设置)
+  * fix: 优化DBus处理(Task: 204449)(Influence: 个性化服务)
+  * fix: 更新翻译文件(Task: 204449)(Influence: 个性化-设置缩放-通知)
+  * fix: 添加翻译工具依赖(Task: 204449)(Influence: 个性化-设置缩放-通知)
+  * feat: 接口更变，处理个性化服务修改冲突(Task: 207483)(Influence: 接口更变)
+
+ -- zhaoyingzhen <zhaoyingzhen@uniontech.com>  Tue, 13 Dec 2022 20:35:06 +0800
+
 dde-appearance (1.0.1) unstable; urgency=medium
 
   [ TagBuilder ]
