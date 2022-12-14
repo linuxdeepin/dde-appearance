@@ -1337,7 +1337,7 @@ QString AppearanceManager::doList(QString type)
     } else if (type == TYPECURSOR) {
         return marshal(subthemes->listCursorThemes());
     } else if (type == TYPEBACKGROUND) {
-        return marshal(backgrounds->listBackground());
+        return marshal(backgroundListVerify(backgrounds->listBackground()));
     } else if (type == TYPESTANDARDFONT) {
         return marshal(fontsManager->listStandard());
     } else if (type == TYPEMONOSPACEFONT) {
@@ -1649,6 +1649,32 @@ void AppearanceManager::updateCustomTheme(const QString &type, const QString &va
     if (!globalThemeUpdating) {
         customTheme->updateValue(type, value, globalTheme, subthemes->listGlobalThemes());
     }
+}
+
+bool AppearanceManager::isBgInUse(const QString &file)
+{
+    if (file == greeterBg) {
+        return true;
+    }
+    for (auto bg : desktopBgs) {
+        if (bg == file) {
+            return true;
+        }
+    }
+    return false;
+}
+
+QVector<Background> AppearanceManager::backgroundListVerify(const QVector<Background>& backgrounds)
+{
+    QVector<Background> bgs = backgrounds;
+    for (Background &bg : bgs) {
+        if (bg.getDeleteable()) {
+            if (isBgInUse(bg.getId())) {
+                bg.setDeletable(false);
+            }
+        }
+    }
+    return bgs;
 }
 
 void AppearanceManager::doSetCurrentWorkspaceBackground(const QString &uri)

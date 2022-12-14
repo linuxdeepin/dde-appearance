@@ -76,7 +76,7 @@ void Backgrounds::refreshBackground()
         qInfo() << "system = " << file << __FUNCTION__ << __LINE__;
         Background bg;
         bg.setId(utils::enCodeURI(file, SCHEME_FILE));
-        bg.setDeletable(true);
+        bg.setDeletable(false);
         backgrounds.push_back(bg);
     }
     fsChanged = false;

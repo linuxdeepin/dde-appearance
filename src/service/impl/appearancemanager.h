@@ -153,6 +153,8 @@ private:
     void applyGlobalTheme(KeyFile &theme, const QString &themeName, const QString &defaultTheme);
 
     void updateCustomTheme(const QString &type, const QString &value);
+    bool isBgInUse(const QString &file);
+    QVector<Background> backgroundListVerify(const QVector<Background>& backgrounds);
 
 Q_SIGNALS:
     void Changed(const QString &ty, const QString &value);
