@@ -17,10 +17,8 @@ public:
     static QString GetUserHomeDir();
     static QString GetUserDataDir();
     static QString GetUserConfigDir();
-    static QString getUserDir(const char *envName);
-    static QVector<QString> GetSystemDataDirs();
-    static QVector<QString> GetSystemConfigDirs();
-    static QVector<QString> getSystemDirs(const char *envName);
+    static QString GetUserCacheDir();
+    static QString GetUserRuntimeDir();
 };
 
 #endif // UTILS_H

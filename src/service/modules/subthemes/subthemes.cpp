@@ -8,7 +8,7 @@
 
 DCORE_USE_NAMESPACE
 
-const QString gsKeyExcludedIcon = "excluded-icon-themes";
+const QString gsKeyExcludedIcon = "Excluded_Icon_Themes";
 
 Subthemes::Subthemes(AppearanceManager *parent)
     : QObject()

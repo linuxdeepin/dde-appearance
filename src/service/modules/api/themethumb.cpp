@@ -2,7 +2,9 @@
 
 #include "themethumb.h"
 #include "../api/dfile.h"
+#include "../api/utils.h"
 #include "../common/commondefine.h"
+#include "compatibleengine.h"
 #include "keyfile.h"
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -68,7 +70,7 @@ void init()
 
 void removeUnusedScaleDirs()
 {
-    QString cacheDir = g_get_user_cache_dir();
+    QString cacheDir = utils::GetUserCacheDir();
     cacheDir+="/deepin/dde-api/theme_thumb";
     removeUnusedDirs(cacheDir+"/X*", getScaleDir());
 }
@@ -83,7 +85,7 @@ void removeAllTypesOldVersionDirs()
 
 void removeOldVersionDirs(QString scaleDir, QString type0, int version)
 {
-    QString cacheDir = g_get_user_cache_dir();
+    QString cacheDir = utils::GetUserCacheDir();
     cacheDir+="/deepin/dde-api/theme_thumb";
     QString pattern = cacheDir + "/" + scaleDir + "/" + type0 + "/-v*";
     QString usedDir = getTypeDir(type0, version);
@@ -167,20 +169,25 @@ bool genIcon(QString theme,int width,int height,double scaleFactor,QString out)
     width        = static_cast<int>(width * scaleFactor);
     height       = static_cast<int>(height * scaleFactor);
 
-    QVector<QImage*> images = getIcons(theme, iconSize);
-    QImage image = CompositeImages(images,width,height,iconSize,padding);
+    QList<QIcon> images = getIcons(theme, iconSize);
 
-    bool saveRtn = image.save(out);
-    int imagesLen = images.size();
-    for (int i = 0; i < imagesLen; ++i) {
-        if (images[i] != NULL) {
-            delete images[i];
-            images[i] = NULL;
-        }
+    QPixmap pixmap(width, height);
+    pixmap.setDevicePixelRatio(scaleFactor);
+    pixmap.fill(Qt::transparent);
+    QPainter painter;
+    painter.begin(&pixmap);
+
+    int spaceW = width - iconSize * images.size();
+    int x = (spaceW - (images.size() - 1) * padding) / 2;
+    int y = (height - iconSize) / 2;
+    int i = 0;
+
+    for (auto iter : images) {
+        iter.paint(&painter, QRect(x, y, iconSize, iconSize));
+        x += iconSize + padding;
     }
-
-    images.clear();
-    return saveRtn;
+    painter.end();
+    return pixmap.save(out);
 }
 
 bool genGtk(QString name,int width,int height,double scaleFactor,QString dest)
@@ -250,96 +257,17 @@ QVector<QImage*> getCursors(QString dir, int size)
     return images;
 }
 
-char* chooseIcon(const char *theme_name, const char **icon_names, int size)
+QList<QIcon> getIcons(QString theme, int size)
 {
-    if (!gtk_init_check(NULL, NULL)) {
-        return NULL;
-    }
-    GtkIconTheme *icon_theme = gtk_icon_theme_new();
-    if (icon_theme == NULL) {
-        qWarning() << "call gtk_icon_theme_new failed: rtn null.";
-        return NULL;
-    }
-    gtk_icon_theme_set_custom_theme(icon_theme, theme_name);
-
-    GtkIconInfo* icon_info = gtk_icon_theme_choose_icon(icon_theme, icon_names, size, GTK_ICON_LOOKUP_FORCE_SVG);
-    if (icon_info == NULL ) {
-        g_object_unref(icon_theme);
-        return NULL;
-    }
-    const char* filename = gtk_icon_info_get_filename(icon_info);
-    if (filename == NULL) {
-        qWarning() << "call gtk_icon_info_get_filename failed: rtn null.";
-        return NULL;
-    }
-    char* filename_dup = g_strdup(filename);
-    if (filename_dup == NULL) {
-        qWarning() << "call g_strdup failed: rtn null.";
-        return NULL;
-    }
-
-    g_object_unref(icon_info);
-    g_object_unref(icon_theme);
-    return filename_dup;
-}
-
-QImage* loadIcon(const QString &theme, const QStringList &iconNames, const int &size)
-{
-    int iconNamesLen = iconNames.length();
-    const char** tmp = new const char*[iconNamesLen + 1];
-    for (int i = 0; i < iconNamesLen; ++i) {
-        tmp[i] = new char[iconNames[i].toLatin1().length()];
-        memcpy(const_cast<char*>(tmp[i]), iconNames[i].toStdString().c_str(), iconNames[i].toLatin1().length() + 1);
-    }
-
-    tmp[iconNamesLen] = nullptr;
-    QString fileName = chooseIcon(theme.toStdString().c_str(), tmp, size);
-
-    for (int i = 0; i < iconNamesLen; ++i) {
-        if (tmp[i]) {
-            delete[] tmp[i];
-        }
-    }
-    if (tmp) {
-        delete[] tmp;
-    }
-
-    if (fileName == "") {
-        qWarning() << QString("choose Icon [%1] failed: ").arg(fileName);
-        return nullptr;
-    }
-    QImage *image = new QImage();
-    QImageReader reader;
-    reader.setDecideFormatFromContent(true);
-    reader.setScaledSize(QSize(size, size));
-    reader.setFileName(fileName);
-    reader.read(image);
-
-    return image;
-}
-
-QVector<QImage*> getIcons(QString theme, int size)
-{
-    QVector<QImage*> images;
+    QList<QIcon> images;
+    QIcon::setThemeName(theme);
     for(const auto &icons : qAsConst(presentIcons)) {
-        bool bAdd = true;
-        QImage* image = loadIcon(theme, icons, size);
-        if(!image) {
-            continue;
-        }
-
-        for(auto tempImage: images) {
-            if(tempImage->cacheKey() == image->cacheKey()) {
-                bAdd = false;
+        for (auto &&iconName:icons) {
+            QIcon icon(new CompatibleEngine(iconName)); // QIcon::fromTheme(iconName); DTK中DCI支持不完整，暂用CompatibleEngine处理兼容
+            if (!icon.isNull()) {
+                images.append(icon);
                 break;
             }
-        }
-
-        if(bAdd) {
-            if(image->width() != size) {
-                image->scaled(size,image->height());
-            }
-            images.push_back(image);
         }
     }
 
@@ -513,7 +441,7 @@ QString prepareOutputPath(QString type0, QString id, int version)
     QString scaleDir = getScaleDir();
     QString typeDir = getTypeDir(type0,version);
 
-    QString cacheDir = g_get_user_cache_dir();
+    QString cacheDir = utils::GetUserCacheDir();
     cacheDir+="/deepin/dde-api/theme_thumb";
     QString dirPath = cacheDir +"/"+scaleDir+"/"+typeDir;
 

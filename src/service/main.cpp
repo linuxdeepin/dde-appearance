@@ -1,10 +1,10 @@
-#include <QCoreApplication>
+#include <QGuiApplication>
 #include "appearance1adaptor.h"
 #include "impl/appearance1.h"
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication app(argc, argv);
+    QGuiApplication app(argc, argv);
     app.setOrganizationName("deepin");
     app.setApplicationName("org.deepin.dde.appearance");
     QTranslator translator;

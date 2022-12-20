@@ -6,6 +6,7 @@ add_compile_options(-DQT_NO_KEYWORDS)
 
 find_package(Qt5 REQUIRED COMPONENTS Core DBus Concurrent Gui)
 find_package(DtkCore REQUIRED)
+find_package(DtkGui REQUIRED)
 find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(QGSettings REQUIRED IMPORTED_TARGET gsettings-qt)
@@ -66,6 +67,8 @@ set(SRCS
     ./modules/api/syncconfig.cpp
     ./modules/api/sunrisesunset.h
     ./modules/api/sunrisesunset.cpp
+    ./modules/api/compatibleengine.h
+    ./modules/api/compatibleengine.cpp
     ./modules/background/format.h
     ./modules/background/format.cpp
     ./modules/background/backgrounds.cpp
@@ -113,6 +116,7 @@ target_link_libraries(dde-appearance
     PkgConfig::OPENSSL
     PkgConfig::FONTCONFIG
     ${DtkCore_LIBRARIES}
+    ${DtkGui_LIBRARIES}
 )
 
 install(TARGETS dde-appearance DESTINATION bin)

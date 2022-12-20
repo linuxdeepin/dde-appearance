@@ -36,7 +36,7 @@ bool genGtk(QString descFile,int width,int height,double scaleFactor,QString des
 QImage CompositeImages(QVector<QImage*>, int width, int height, int inconSize,int padding);
 QImage* loadXCursor(QString fileName, int size);
 QImage* fromXCurorImageToQImage(XcursorImage* image);
-QVector<QImage*> getIcons(QString theme, int size);
+QList<QIcon> getIcons(QString theme, int size);
 QVector<QImage*> getCursors(QString dir, int size);
 QString getGlobal(QString id, QString descFile);
 QString getGtk(QString id, QString descFile);
@@ -48,7 +48,6 @@ void CreateGlobalThumbnail(const QString path, const QString filename);
 void CreateGtkThumbnail(const QString path, const QString filename);
 void CreateIconThumbnail(const QString path, const QString filename);
 void CreateCursorThumbnail(const QString path, const QString filename);
-//bool gen(QString descFile, int width, int height, float scaleFactor, QString out);
 
 void UpdateScaleFactor(double scaleFactor);
 
