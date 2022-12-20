@@ -32,13 +32,12 @@
 
 DCORE_USE_NAMESPACE
 
-const QString wallpaperJsonPath = QString("%1/.cache/deepin/dde-appearance/").arg(getenv("HOME"));
+const QString wallpaperJsonPath = QString("%1/.cache/deepin/dde-appearance/").arg(utils::GetUserHomeDir());
 
 AppearanceManager::AppearanceManager(QObject *parent)
     : QObject(parent)
     , settingDconfig(APPEARANCESCHEMA)
     , dbusProxy(new AppearanceDBusProxy(this))
-//    , subthemes(new Subthemes(this))
     , backgrounds(new Backgrounds())
     , fontsManager(new FontsManager())
     , cursorChangeHandler(new CursorChangeHandler(this))
@@ -129,8 +128,8 @@ bool AppearanceManager::init()
 
     updateMonitorMap();
 
-    new ThemeFontSyncConfig("org.deepin.daemon.Appearance1", "/org/deepin/dde/Appearance1/sync", QSharedPointer<AppearanceManager>(this));
-    new BackgroundSyncConfig("org.deepin.daemon.Appearance1", "/org/deepin/dde/Appearance1/Background", QSharedPointer<AppearanceManager>(this));
+    new ThemeFontSyncConfig("org.deepin.dde.Appearance1", "/org/deepin/dde/Appearance1/sync", QSharedPointer<AppearanceManager>(this));
+    new BackgroundSyncConfig("org.deepin.dde.Appearance1", "/org/deepin/dde/Appearance1/Background", QSharedPointer<AppearanceManager>(this));
 
     if (wallpaperURls.isEmpty()) {
         updateNewVersionData();

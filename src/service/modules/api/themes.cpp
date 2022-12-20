@@ -135,6 +135,10 @@ QVector<QString> ThemesApi::scanThemeDirs(QVector<QString> dirs, QString type)
         lists.append(tmp);
     }
 
+    std::sort(lists.begin(), lists.end(), [](const QString &a, const QString &b) {
+        return QFileInfo(a).lastModified() > QFileInfo(b).lastModified();
+    });
+
     return lists;
 }
 
