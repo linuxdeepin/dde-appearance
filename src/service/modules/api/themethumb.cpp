@@ -127,8 +127,8 @@ QString getCursor(QString id, QString descFile)
     }
 
     QString out = prepareOutputPath("cursor", id, cursorVersion);
-    if (shouldGenerateNewCursor(descFile, out)) {
-        return "";
+    if (!shouldGenerateNewCursor(descFile, out)) {
+        return out;
     }
 
     double scaleFactor = getScaleFactor();
@@ -143,7 +143,7 @@ QString getCursor(QString id, QString descFile)
 
 bool genCursor(QString descFile,int width,int height,double scaleFactor,QString out)
 {
-    QString dirPath = descFile.left(descFile.lastIndexOf("/")) +"/cursors";
+    QString dirPath = descFile + "/cursors";
 
     int iconSize = static_cast<int>(baseCursorSize * scaleFactor);
     int padding  = static_cast<int>(baseCursorPadding * scaleFactor);
@@ -361,13 +361,13 @@ QString getGlobal(QString id, QString descFile)
     }
     KeyFile keyFile(',');
     keyFile.loadFile(descFile);
-    QStringList example = keyFile.getStrList("Deepin Theme","Example");
+    QStringList example = keyFile.getStrList("Deepin Theme", "Example");
     if (!example.isEmpty()) {
         QString path = example.first();
         QFileInfo file(path);
         if (file.isRelative()) {
             QFileInfo themefile(descFile);
-            file.setFile(themefile.absoluteDir(),path);
+            file.setFile(themefile.absoluteDir(), path);
             path = file.absoluteFilePath();
         }
         return path;
@@ -383,8 +383,8 @@ QString getGtk(QString id, QString descFile)
     }
 
     QString out = prepareOutputPath("gtk", id, cursorVersion);
-    if (shouldGenerateNewCursor(descFile, out)) {
-        return "";
+    if (!shouldGenerateNewCursor(descFile, out)) {
+        return out;
     }
 
     double scaleFactor = getScaleFactor();
@@ -405,8 +405,8 @@ QString getIcon(QString id, QString descFile)
     }
 
     QString out = prepareOutputPath("icon", id, iconVersion);
-    if (shouldGenerateNewCursor(descFile, out)) {
-        return "";
+    if (!shouldGenerateNew(descFile, out)) {
+        return out;
     }
 
     double scaleFactor = getScaleFactor();
@@ -452,45 +452,6 @@ QString prepareOutputPath(QString type0, QString id, int version)
     }
 
     return dirPath+"/"+id+".png";
-}
-
-
-
-void CreateGlobalThumbnail(const QString path, const QString filename)
-{
-
-}
-
-void CreateGtkThumbnail(const QString path, const QString filename)
-{
-    if (!shouldGenerateNew(path, filename)) {
-        return ;
-    }
-
-    double scaleFactor = getScaleFactor();
-    QFileInfo fileinfo(path);
-    genGtk(fileinfo.baseName(),width,height,scaleFactor,filename);
-}
-
-void CreateIconThumbnail(const QString path, const QString filename)
-{
-    if (!shouldGenerateNew(path, filename)) {
-        return ;
-    }
-
-    double scaleFactor = getScaleFactor();
-    QFileInfo fileinfo(path);
-    genIcon(fileinfo.baseName(), width, height, scaleFactor, filename);
-}
-
-void CreateCursorThumbnail(const QString path, const QString filename)
-{
-    if (!shouldGenerateNewCursor(path+"/index.theme", filename)) {
-        return ;
-    }
-    double scaleFactor = getScaleFactor();
-
-    genCursor(path+"/index.theme",width,height,scaleFactor, filename);
 }
 
 void UpdateScaleFactor(double scaleFactor)

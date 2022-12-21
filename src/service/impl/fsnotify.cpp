@@ -1,43 +1,30 @@
 #include "fsnotify.h"
 #include "../modules/common/commondefine.h"
 
+#include <QDebug>
+#include <QTimer>
+
 Fsnotify::Fsnotify(QObject *parent)
     : QObject(parent)
     , fileWatcher(new QFileSystemWatcher())
     , backgrounds(new Backgrounds())
     , prevTimestamp(0)
+    , timer(new QTimer(this))
 {
     watchGtkDirs();
     watchIconDirs();
     watchGlobalDirs();
     watchBgDirs();
-    QString tmpFilePrefix = backgrounds->getCustomWallpapersConfigDir() + "/temp-";
-    connect(fileWatcher.data(),&QFileSystemWatcher::directoryChanged,this, [ = ](const QString &path) {
-        if(path.startsWith(tmpFilePrefix)){
-            return ;
-        }
-        qint64 timestamp = QDateTime::currentDateTime().toMSecsSinceEpoch();
-        qint64 tmp = timestamp - prevTimestamp;
-        prevTimestamp = timestamp;
 
-        if(tmp > 1000)
-        {
-            if (hasEventOccurred(path, bgDirs)){
-                Q_EMIT themeFileChange(TYPEBACKGROUND);
-            } else if(hasEventOccurred(path, gtkDirs)) {
-                Q_EMIT themeFileChange(TYPEGTK);
-            } else if(hasEventOccurred(path, iconDirs)) {
-                Q_EMIT themeFileChange(TYPEICON);
-            } else if (path.contains("deepin-themes")) {
-                Q_EMIT themeFileChange(TYPEGLOBALTHEME);
-            }
-        }
-    });
+    connect(timer, &QTimer::timeout, this, &Fsnotify::onTimeOut);
+    timer->setSingleShot(true);
+    timer->setInterval(10000);
+    connect(fileWatcher.data(), &QFileSystemWatcher::directoryChanged, this, &Fsnotify::onFileChanged);
+    connect(fileWatcher.data(), &QFileSystemWatcher::fileChanged, this, &Fsnotify::onFileChanged);
 }
 
 Fsnotify::~Fsnotify()
 {
-
 }
 
 void Fsnotify::watchGtkDirs()
@@ -81,13 +68,13 @@ void Fsnotify::watchGlobalDirs()
 void Fsnotify::watchDirs(QStringList dirs)
 {
     QDir qdir;
-    //TODO 文件创建失败 监听失败
-    for(auto dir : dirs) {
-        if(!qdir.exists(dir)) {
+    // TODO 文件创建失败 监听失败
+    for (auto dir : dirs) {
+        if (!qdir.exists(dir)) {
             qdir.mkpath(dir);
             qInfo() << "mkpath:" << dir;
         }
-        if(!fileWatcher->addPath(dir)) {
+        if (!fileWatcher->addPath(dir)) {
             qInfo() << "filewatcher add path failed" << dir << __FUNCTION__;
         }
     }
@@ -95,9 +82,39 @@ void Fsnotify::watchDirs(QStringList dirs)
 
 bool Fsnotify::hasEventOccurred(QString name, QStringList lists)
 {
-    for(auto list : lists) {
-        if(list.contains(name))
+    for (auto list : lists) {
+        if (list.contains(name))
             return true;
     }
     return false;
+}
+
+void Fsnotify::onFileChanged(const QString &path)
+{
+    QString tmpFilePrefix = backgrounds->getCustomWallpapersConfigDir() + "/temp-";
+    if (path.startsWith(tmpFilePrefix)) {
+        return;
+    }
+
+    if (hasEventOccurred(path, bgDirs)) {
+        changedThemes.insert(TYPEBACKGROUND);
+    } else if (hasEventOccurred(path, gtkDirs)) {
+        changedThemes.insert(TYPEGTK);
+    } else if (hasEventOccurred(path, iconDirs)) {
+        changedThemes.insert(TYPEICON);
+    } else if (path.contains("deepin-themes")) {
+        changedThemes.insert(TYPEGLOBALTHEME);
+    }
+    if (!timer->isActive()) {
+        timer->start();
+    }
+}
+
+void Fsnotify::onTimeOut()
+{
+    qInfo() << __LINE__ << __FUNCTION__ << changedThemes;
+    for (auto &&theme : changedThemes) {
+        Q_EMIT themeFileChange(theme);
+    }
+    changedThemes.clear();
 }

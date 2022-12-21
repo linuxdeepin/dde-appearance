@@ -17,6 +17,8 @@
 #include <QTimer>
 #include <QGSettings>
 
+#include <dbus/appearanceproperty.h>
+
 class AppearanceDBusProxy;
 class Appearance1;
 class CustomTheme;
@@ -35,8 +37,11 @@ class AppearanceManager : public QObject
     };
 
 public:
-    explicit AppearanceManager(QObject *parent = nullptr);
+    explicit AppearanceManager(AppearanceProperty *prop, QObject *parent = nullptr);
     ~AppearanceManager();
+
+    static QString qtActiveColorToHexColor(const QString &activeColor);
+    static QString hexColorToQtActiveColor(const QString &hexColor);
 
 public:
     bool init();
@@ -75,7 +80,7 @@ public:
     QString doSetMonitorBackground(const QString& monitorName,const QString& imageGile);
     bool doSetWallpaperSlideShow(const QString &monitorName,const QString &wallpaperSlideShow);
     bool doSetWsLoop(const QString& monitorName,const QString& file);
-    QString doThumbnail(const QString &type,const QString &name);
+    QString doThumbnail(const QString &type, const QString &name);
     void doSetCurrentWorkspaceBackground(const QString &uri);
     QString doGetCurrentWorkspaceBackground();
     void doSetCurrentWorkspaceBackgroundForMonitor(const QString &uri, const QString &strMonitorName);
@@ -83,19 +88,20 @@ public:
     void doSetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QString &uri);
     QString doGetWorkspaceBackgroundForMonitor(const int &index,const QString &strMonitorName);
 
-    inline QString getBackground() {return background; }
-    inline double getFontSize() {return fontSize; }
-    inline QString getGLobalTheme() {return globalTheme; }
-    inline QString getGtkTheme() {return gtkTheme; }
-    inline QString getIconTheme() {return iconTheme; }
-    inline QString getCursorTheme() {return cursorTheme; }
-    inline QString getMonospaceFont() {return monospaceFont; }
-    inline double getOpacity() {return opacity; }
-    inline QString getQtActiveColor() {return qtActiveColor; }
-    inline QString getStandardFont() {return standardFont; }
-    inline QString getWallpaperSlideShow() {return wallpaperSlideShow; }
-    inline QString getWallpaperURls() {return wallpaperURls;}
-    inline int getWindowRadius() {return windowRadius; }
+    inline QString getBackground() {return property->background; }
+    inline double getFontSize() {return property->fontSize; }
+    inline QString getGLobalTheme() {return property->globalTheme; }
+    inline QString getGtkTheme() {return property->gtkTheme; }
+    inline QString getIconTheme() {return property->iconTheme; }
+    inline QString getCursorTheme() {return property->cursorTheme; }
+    inline QString getMonospaceFont() {return property->monospaceFont; }
+    inline double getOpacity() {return property->opacity; }
+    inline QString getQtActiveColor() {return property->qtActiveColor; }
+    inline QString getStandardFont() {return property->standardFont; }
+    inline QString getWallpaperSlideShow() {return property->wallpaperSlideShow; }
+    inline QString getWallpaperURls() {return property->wallpaperURls;}
+    inline int getWindowRadius() {return property->windowRadius; }
+
     inline QString getGreetBg() {return greeterBg; }
     inline QMap<QString,QString>& getMonitor() {return monitorMap; }
     inline QSharedPointer<AppearanceDBusProxy> getDBusProxy() const { return dbusProxy; }
@@ -121,8 +127,6 @@ public Q_SLOTS:
     void updateMonitorMap();
 
 private:
-    QString qtActiveColorToHexColor(const QString &activeColor) const;
-    QString hexColorToQtActiveColor(const QString &hexColor) const;
     void initCoordinate();
     void initUserObj();
     void initCurrentBgs();
@@ -161,20 +165,7 @@ Q_SIGNALS:
     void Refreshed(const QString &type);
 
 private: // PROPERTIES
-    QString background;
-    double  fontSize;
-    QString globalTheme;
-    QString currentGlobalTheme; // 当前主题，globalTheme+.light/.dark
-    QString gtkTheme;
-    QString iconTheme;
-    QString cursorTheme;
-    QString monospaceFont;
-    double  opacity;
-    QString qtActiveColor;
-    QString standardFont;
-    QString wallpaperSlideShow;
-    QString wallpaperURls;
-    int     windowRadius;
+    AppearanceProperty *property;
 
 private:
     DTK_CORE_NAMESPACE::DConfig                         settingDconfig;
@@ -207,8 +198,8 @@ private:
     QMap<QString,QSharedPointer<WallpaperLoop>>      wsLoopMap;
     CustomTheme                     *customTheme;
     bool                            globalThemeUpdating;
-
-    int  workspaceCount;
+    QString                         currentGlobalTheme; // 当前主题，globalTheme+.light/.dark
+    int                             workspaceCount;
 };
 
 #endif // APPEARANCEMANAGER_H

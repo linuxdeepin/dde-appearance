@@ -1,6 +1,7 @@
 #include "subthemes.h"
 #include "impl/appearancemanager.h"
 #include "../api/themethumb.h"
+#include "../api/utils.h"
 #include "../common/commondefine.h"
 #include <QDir>
 #include <QThread>
@@ -13,15 +14,7 @@ const QString gsKeyExcludedIcon = "Excluded_Icon_Themes";
 Subthemes::Subthemes(AppearanceManager *parent)
     : QObject()
     , themeApi(new ThemesApi(parent))
-    , thread(new QThread(this))
 {
-    moveToThread(thread);
-    thread->start(QThread::LowestPriority);
-    connect(this, &Subthemes::requestGlobalThumbnail, this, &Subthemes::createGlobalThumbnail, Qt::QueuedConnection);
-    connect(this, &Subthemes::requestGtkThumbnail, this, &Subthemes::createGtkThumbnail, Qt::QueuedConnection);
-    connect(this, &Subthemes::requestIconThumbnail, this, &Subthemes::createIconThumbnail, Qt::QueuedConnection);
-    connect(this, &Subthemes::requestCursorThumbnail, this, &Subthemes::createCursorThumbnail, Qt::QueuedConnection);
-
     refreshGtkThemes();
     refreshIconThemes();
     refreshCursorThemes();
@@ -40,10 +33,7 @@ Subthemes::Subthemes(AppearanceManager *parent)
 
 Subthemes::~Subthemes()
 {
-    thread->quit();
-    thread->wait();
 }
-
 
 void Subthemes::refreshGtkThemes()
 {
@@ -88,17 +78,7 @@ void Subthemes::refreshCursorThemes()
 void Subthemes::refreshGlobalThemes()
 {
     globalThemes.clear();
-//    // 路径同图标主题
-//    QVector<QString> themePaths = themeApi->listIconTheme();
-//    // 增加自定义主题
-//    themePaths.append("");
     QVector<QSharedPointer<Theme>> infos = getThemes(themeApi->listGlobalTheme());
-
-//    QStringList blacklist;
-//    DConfig dConfig(APPEARANCESCHEMA);
-//    if(dConfig.isValid()){
-//        blacklist = dConfig.value(gsKeyExcludedIcon).toStringList();
-//    }
 
     for (auto &&info : infos) {
         KeyFile keyFile(',');
@@ -312,14 +292,7 @@ QString Subthemes::getGtkThumbnail(QString id)
     }
 
     QString path = theme->getPath()+"/index.theme";
-    if (!checkScaleFactor()) {
-        qInfo() << "scaleFactor <= 0";
-        return "";
-    }
-
-    QString out = prepareOutputPath("gtk", id, cursorVersion);
-    Q_EMIT requestGtkThumbnail(path,out);
-    return out;
+    return getGtk(id, path);
 }
 
 QString Subthemes::getIconThumbnail(QString id)
@@ -338,15 +311,8 @@ QString Subthemes::getIconThumbnail(QString id)
         return "";
     }
 
-    QString path = theme->getPath();
-    if (!checkScaleFactor()) {
-        qInfo() << "scaleFactor <= 0";
-        return "";
-    }
-
-    QString out = prepareOutputPath("icon", id, iconVersion);
-    Q_EMIT requestIconThumbnail(path,out);
-    return out;
+    QString path = theme->getPath()+"/index.theme";
+    return getIcon(id,path);
 }
 
 QString Subthemes::getCursorThumbnail(QString id)
@@ -366,15 +332,7 @@ QString Subthemes::getCursorThumbnail(QString id)
     }
 
     QString path = theme->getPath();
-
-    if (!checkScaleFactor()) {
-        qInfo() << "scaleFactor <= 0";
-        return "";
-    }
-
-    QString out = prepareOutputPath("cursor", id, cursorVersion);
-    Q_EMIT requestCursorThumbnail(path,out);
-    return out;
+    return getCursor(id, path);
 }
 
 QVector<QSharedPointer<Theme>> Subthemes::getThemes(QVector<QString> files)
@@ -391,8 +349,7 @@ QVector<QSharedPointer<Theme>> Subthemes::getThemes(QVector<QString> files)
 
 bool Subthemes::isDeletable(QString file)
 {
-    QString home = getenv("HOME");
-
+    QString home = utils::GetUserHomeDir();
 
     if(file.indexOf(home)!=-1){
         return true;
@@ -422,24 +379,4 @@ QString Subthemes::getBasePath(QString filename)
 QMap<QString,QString>& Subthemes::getGtkThumbnailMap()
 {
     return gtkThumbnailMap;
-}
-
-void Subthemes::createGlobalThumbnail(const QString path, const QString filename)
-{
-    CreateGlobalThumbnail(path, filename);
-}
-
-void Subthemes::createGtkThumbnail(const QString path, const QString filename)
-{
-    CreateGtkThumbnail(path, filename);
-}
-
-void Subthemes::createIconThumbnail(const QString path, const QString filename)
-{
-    CreateIconThumbnail(path, filename);
-}
-
-void Subthemes::createCursorThumbnail(const QString path, const QString filename)
-{
-    CreateCursorThumbnail(path, filename);
 }

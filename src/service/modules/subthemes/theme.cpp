@@ -1,5 +1,7 @@
 #include "theme.h"
 
+#include "modules/api/utils.h"
+
 #include <QDir>
 #include <QDebug>
 
@@ -15,7 +17,7 @@ Theme::Theme(QString fileName)
 
     this->filePath = fileName.left(fileName.lastIndexOf("/"));
 
-    QString home = getenv("HOME");
+    QString home = utils::GetUserHomeDir();
     if(fileName.indexOf(home)!=-1){
         this->deletable=true;
     }else {

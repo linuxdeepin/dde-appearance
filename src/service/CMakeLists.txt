@@ -19,16 +19,28 @@ pkg_check_modules(FONTCONFIG REQUIRED IMPORTED_TARGET fontconfig)
 pkg_check_modules(OPENSSL REQUIRED IMPORTED_TARGET openssl)
 
 
-qt5_add_dbus_adaptor(ADAPTER_SOURCES
-                     ../../dbus/org.deepin.dde.Appearance1.xml
-                     impl/appearance1.h
-                     Appearance1)
+#qt5_add_dbus_adaptor(ADAPTER_SOURCES
+#                     ../../dbus/org.deepin.dde.Appearance1.xml
+#                     impl/appearance1.h
+#                     Appearance1)
 add_definitions(-DUSE_QT)
 
 set(SRCS
     ./main.cpp
-    ./impl/appearance1.h
-    ./impl/appearance1.cpp
+    ./dbus/scaleFactors.h
+    ./dbus/scaleFactors.cpp
+    ./dbus/dccdbusinterface.h
+    ./dbus/dccdbusinterface.cpp
+    ./dbus/appearancedbusproxy.h
+    ./dbus/appearancedbusproxy.cpp
+    ./dbus/appearance1adaptor.h
+    ./dbus/appearance1adaptor.cpp
+    ./dbus/appearanceproperty.h
+    ./dbus/appearanceproperty.cpp
+    ./dbus/appearance1thread.h
+    ./dbus/appearance1thread.cpp
+    ./dbus/appearance1.h
+    ./dbus/appearance1.cpp
     ./impl/appearancemanager.h
     ./impl/appearancemanager.cpp
     ./impl/fsnotify.h
@@ -78,22 +90,17 @@ set(SRCS
     ./modules/dconfig/dconfigsettings.cpp
     ./modules/dconfig/phasewallpaper.h
     ./modules/dconfig/phasewallpaper.cpp
-    ./dbus/scaleFactors.h
-    ./dbus/scaleFactors.cpp
-    ./dbus/dccdbusinterface.cpp
-    ./dbus/appearancedbusproxy.cpp
 )
 
 add_executable(dde-appearance
     ${SRCS}
-    ${ADAPTER_SOURCES}
 )
 
 
 target_include_directories(dde-appearance PUBLIC
     PkgConfig::QGSettings
     PkgConfig::DFrameworkDBus
-    PkgConfig::Gio-2.0 
+    PkgConfig::Gio-2.0
     PkgConfig::GTK3
     PkgConfig::X11
     PkgConfig::XCB
@@ -109,7 +116,7 @@ target_link_libraries(dde-appearance
     Qt5::Gui
     PkgConfig::QGSettings
     PkgConfig::DFrameworkDBus
-    PkgConfig::Gio-2.0 
+    PkgConfig::Gio-2.0
     PkgConfig::GTK3
     PkgConfig::X11
     PkgConfig::XCB

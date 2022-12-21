@@ -1,6 +1,7 @@
 #include <QGuiApplication>
-#include "appearance1adaptor.h"
-#include "impl/appearance1.h"
+#include "dbus/appearance1adaptor.h"
+#include "dbus/appearance1.h"
+#include "modules/common/commondefine.h"
 
 int main(int argc, char *argv[])
 {
@@ -13,8 +14,8 @@ int main(int argc, char *argv[])
     Appearance1 *appearance = new Appearance1();
     new Appearance1Adaptor(appearance);
 
-    QDBusConnection::sessionBus().registerService("org.deepin.dde.Appearance1");
-    QDBusConnection::sessionBus().registerObject("/org/deepin/dde/Appearance1", "org.deepin.dde.Appearance1", appearance);
+    APPEARANCEDBUS.registerService(AppearanceService);
+    APPEARANCEDBUS.registerObject(AppearancePath, AppearanceInterface, appearance);
 
     return app.exec();
 }

@@ -1,5 +1,12 @@
 #ifndef COMMONDEFINE_H
 #define COMMONDEFINE_H
+#include <QString>
+
+#define APPEARANCEDBUS QDBusConnection::sessionBus()
+
+const QString AppearanceService = "org.deepin.dde.Appearance1";
+const QString AppearancePath = "/org/deepin/dde/Appearance1";
+const QString AppearanceInterface = "org.deepin.dde.Appearance1";
 
 #define APPEARANCESCHEMA    "org.deepin.dde.appearance"
 #define XSETTINGSSCHEMA     "com.deepin.xsettings"
@@ -10,7 +17,7 @@
 #define INTERFACESCHEMA     "com.deepin.wrap.gnome.desktop.interface"
 
 #define ZONEPATH                 "/usr/share/zoneinfo/zone1970.tab"
-#define GSKEYBACKGROUND          "picture-uri"
+#define GSKEYBACKGROUND          "pictureUri"
 #define GSKEYFONTSIZE            "Font_Size"
 #define GSKEYBACKGROUNDURIS      "Background_Uris"
 #define GSKEYGLOBALTHEME            "Global_Theme"
@@ -24,7 +31,7 @@
 #define GSKEYWALLPAPERSLIDESHOW  "Wallpaper_Slideshow"
 #define GSKEYWALLPAPERURIS       "Wallpaper_Uris"
 #define GSKEYDTKWINDOWRADIUS     "dtkWindowRadius"
-#define GSKEYFONTNAME            "gtk-font-name"
+#define GSKEYFONTNAME            "gtkFontName"
 #define DCKEYALLWALLPAPER        "All_Wallpaper_Uris"
 
 #define GTK2CONFDELIM            "="
@@ -32,8 +39,8 @@
 #define GTK3KEYTHEME             "gtk-theme-name"
 #define GTK3KEYICON              "gtk-icon-theme-name"
 #define GTK3KEYCURSOR            "gtk-cursor-theme-name"
-#define XSKEYTHEME               "theme-name"
-#define XSKEYICONTHEME           "icon-theme-name"
+#define XSKEYTHEME               "themeName"
+#define XSKEYICONTHEME           "iconThemeName"
 #define XSKEYCURSORNAME          "gtkCursorThemeName"
 
 #define SYNCSERVICENAME         "com.deepin.sync.Daemon"

@@ -19,6 +19,7 @@
 #include "modules/api/utils.h"
 #include "modules/common/commondefine.h"
 #include "modules/api/keyfile.h"
+#include "dbus/appearanceproperty.h"
 #include "dbus/appearancedbusproxy.h"
 
 #include "modules/api/locale.h"
@@ -34,8 +35,9 @@ DCORE_USE_NAMESPACE
 
 const QString wallpaperJsonPath = QString("%1/.cache/deepin/dde-appearance/").arg(utils::GetUserHomeDir());
 
-AppearanceManager::AppearanceManager(QObject *parent)
+AppearanceManager::AppearanceManager(AppearanceProperty *prop, QObject *parent)
     : QObject(parent)
+    , property(prop)
     , settingDconfig(APPEARANCESCHEMA)
     , dbusProxy(new AppearanceDBusProxy(this))
     , backgrounds(new Backgrounds())
@@ -44,9 +46,6 @@ AppearanceManager::AppearanceManager(QObject *parent)
     , fsnotify(new Fsnotify())
     , detectSysClockTimer(this)
     , themeAutoTimer(this)
-    , fontSize(0)
-    , opacity(0)
-    , windowRadius(0)
     , longitude(NAN_ANGLE) // 非法经纬度，未初始化状态
     , latitude(NAN_ANGLE)
     , ntpTimeId(0)
@@ -66,28 +65,6 @@ AppearanceManager::AppearanceManager(QObject *parent)
 
     if (QGSettings::isSchemaInstalled(XSETTINGSSCHEMA)) {
         gnomeBgSetting = QSharedPointer<QGSettings>(new QGSettings(GNOMEBGSCHEMA));
-    }
-
-    if (wrapBgSetting) {
-        background = wrapBgSetting->get(GSKEYBACKGROUND).toString();
-    }
-
-    if (settingDconfig.isValid()) {
-        globalTheme = settingDconfig.value(GSKEYGLOBALTHEME).toString();
-        gtkTheme = settingDconfig.value(GSKEYGTKTHEME).toString();
-        iconTheme = settingDconfig.value(GSKEYICONTHEM).toString();
-        cursorTheme = settingDconfig.value(GSKEYCURSORTHEME).toString();
-        standardFont = settingDconfig.value(GSKEYFONTSTANDARD).toString();
-        monospaceFont = settingDconfig.value(GSKEYFONTMONOSPACE).toString();
-        fontSize = settingDconfig.value(GSKEYFONTSIZE).toDouble();
-        opacity = settingDconfig.value(GSKEYOPACITY).toDouble();
-        wallpaperSlideShow = settingDconfig.value(GSKEYWALLPAPERSLIDESHOW).toString();
-        wallpaperURls = settingDconfig.value(GSKEYWALLPAPERURIS).toString();
-    }
-
-    if (xSetting) {
-        windowRadius = xSetting->get(GSKEYDTKWINDOWRADIUS).toInt();
-        qtActiveColor = qtActiveColorToHexColor(xSetting->get(GSKEYQTACTIVECOLOR).toString());
     }
 
     init();
@@ -131,7 +108,7 @@ bool AppearanceManager::init()
     new ThemeFontSyncConfig("org.deepin.dde.Appearance1", "/org/deepin/dde/Appearance1/sync", QSharedPointer<AppearanceManager>(this));
     new BackgroundSyncConfig("org.deepin.dde.Appearance1", "/org/deepin/dde/Appearance1/Background", QSharedPointer<AppearanceManager>(this));
 
-    if (wallpaperURls.isEmpty()) {
+    if (property->wallpaperURls->isEmpty()) {
         updateNewVersionData();
     }
 
@@ -148,7 +125,7 @@ bool AppearanceManager::init()
     bool bFound = false;
 
     for (auto theme : globalList) {
-        if (theme->getId() == globalTheme) {
+        if (theme->getId() == property->globalTheme) {
             bFound = true;
             break;
         }
@@ -162,7 +139,7 @@ bool AppearanceManager::init()
     bFound = false;
 
     for (auto theme : iconList) {
-        if (theme->getId() == iconTheme) {
+        if (theme->getId() == property->iconTheme) {
             bFound = true;
             break;
         }
@@ -175,7 +152,7 @@ bool AppearanceManager::init()
     QVector<QSharedPointer<Theme>> cursorList = subthemes->listCursorThemes();
     bFound = false;
     for (auto theme : cursorList) {
-        if (theme->getId() == cursorTheme) {
+        if (theme->getId() == property->cursorTheme) {
             bFound = true;
             break;
         }
@@ -187,7 +164,7 @@ bool AppearanceManager::init()
 
     cursorChangeHandler->start();
 
-    connect(fsnotify.data(), SIGNAL(themeFileChange(QString)), this, SLOT(handlethemeFileChange(QString)));
+    connect(fsnotify.data(), SIGNAL(themeFileChange(QString)), this, SLOT(handlethemeFileChange(QString)), Qt::QueuedConnection);
 
     connect(xSetting.data(), SIGNAL(changed(const QString &)), this, SLOT(handleXsettingDConfigChange(QString)));
 
@@ -280,7 +257,7 @@ void AppearanceManager::handleTimezoneChanged(QString timezone)
     zone = timezone;
     // todo l, err := time.LoadLocation(zone)
 
-    if (gtkTheme == AUTOGTKTHEME) {
+    if (property->gtkTheme == AUTOGTKTHEME) {
         autoSetTheme(latitude, longitude);
         resetThemeAutoTimer();
     }
@@ -326,11 +303,11 @@ void AppearanceManager::handleXsettingDConfigChange(QString key)
     if (key == GSKEYQTACTIVECOLOR) {
         QString value = qtActiveColorToHexColor(xSetting->get(GSKEYQTACTIVECOLOR).toString());
 
-        qtActiveColor = value;
+        property->qtActiveColor = value;
         Q_EMIT Changed("QtActiveColor", value);
     } else if (key == GSKEYDTKWINDOWRADIUS) {
-        windowRadius = xSetting->get(GSKEYDTKWINDOWRADIUS).toInt();
-        Q_EMIT Changed("WindowRadius", QString::number(windowRadius));
+        property->windowRadius = xSetting->get(GSKEYDTKWINDOWRADIUS).toInt();
+        Q_EMIT Changed("WindowRadius", QString::number(property->windowRadius));
     }
 }
 
@@ -471,13 +448,13 @@ void AppearanceManager::handleDetectSysClockTimeOut()
 void AppearanceManager::handleUpdateToCustom(const QString &mode)
 {
     currentGlobalTheme = "custom" + mode;
-    setGlobalTheme("custom");
+    setGlobalTheme(currentGlobalTheme);
 }
 
 void AppearanceManager::handleGlobalThemeChangeTimeOut()
 {
     // 相同则为指定主题
-    if (globalTheme == currentGlobalTheme
+    if (property->globalTheme == currentGlobalTheme
         || longitude <= NAN_ANGLE
         || latitude <= NAN_ANGLE)
         return;
@@ -503,42 +480,42 @@ void AppearanceManager::setFontSize(double value)
         return;
     }
 
-    if (settingDconfig.isValid() && !qFuzzyCompare(value, fontSize)) {
+    if (settingDconfig.isValid() && !qFuzzyCompare(value, property->fontSize)) {
         settingDconfig.setValue(GSKEYFONTSIZE, value);
-        fontSize = value;
+        property->fontSize = value;
         updateCustomTheme(TYPEFONTSIZE, QString::number(value));
     }
 }
 
 void AppearanceManager::setGlobalTheme(QString value)
 {
-    if (settingDconfig.isValid() && value != globalTheme) {
+    if (settingDconfig.isValid() && value != property->globalTheme) {
         settingDconfig.setValue(GSKEYGLOBALTHEME, value);
-        globalTheme = value;
+        property->globalTheme = value;
     }
 }
 
 void AppearanceManager::setGtkTheme(QString value)
 {
-    if (settingDconfig.isValid() && value != gtkTheme) {
+    if (settingDconfig.isValid() && value != property->gtkTheme) {
         settingDconfig.setValue(GSKEYGTKTHEME, value);
-        gtkTheme = value;
+        property->gtkTheme = value;
     }
 }
 
 void AppearanceManager::setIconTheme(QString value)
 {
-    if (settingDconfig.isValid() && value != iconTheme) {
+    if (settingDconfig.isValid() && value != property->iconTheme) {
         settingDconfig.setValue(GSKEYICONTHEM, value);
-        iconTheme = value;
+        property->iconTheme = value;
     }
 }
 
 void AppearanceManager::setCursorTheme(QString value)
 {
-    if (settingDconfig.isValid() && value != cursorTheme) {
+    if (settingDconfig.isValid() && value != property->cursorTheme) {
         settingDconfig.setValue(GSKEYCURSORTHEME, value);
-        cursorTheme = value;
+        property->cursorTheme = value;
     }
 }
 
@@ -549,9 +526,9 @@ void AppearanceManager::setStandardFont(QString value)
         return;
     }
 
-    if (settingDconfig.isValid() && value != standardFont) {
+    if (settingDconfig.isValid() && value != property->standardFont) {
         settingDconfig.setValue(GSKEYFONTSTANDARD, value);
-        standardFont = value;
+        property->standardFont = value;
     }
 }
 
@@ -562,42 +539,42 @@ void AppearanceManager::setMonospaceFont(QString value)
         return;
     }
 
-    if (settingDconfig.isValid() && value != monospaceFont) {
+    if (settingDconfig.isValid() && value != property->monospaceFont) {
         settingDconfig.setValue(GSKEYFONTMONOSPACE, value);
-        monospaceFont = value;
+        property->monospaceFont = value;
     }
 }
 
 void AppearanceManager::setWindowRadius(int value)
 {
-    if (value != windowRadius && xSetting) {
+    if (value != property->windowRadius && xSetting) {
         xSetting->set(GSKEYDTKWINDOWRADIUS, value);
-        windowRadius = value;
+        property->windowRadius = value;
         updateCustomTheme(TYPWINDOWRADIUS, QString::number(value));
     }
 }
 
 void AppearanceManager::setOpacity(double value)
 {
-    if (settingDconfig.isValid() && !qFuzzyCompare(value, opacity)) {
+    if (settingDconfig.isValid() && !qFuzzyCompare(value, property->opacity)) {
         settingDconfig.setValue(GSKEYOPACITY, value);
-        opacity = value;
+        property->opacity = value;
         updateCustomTheme(TYPEWINDOWOPACITY, QString::number(value));
     }
 }
 
 void AppearanceManager::setQtActiveColor(const QString &value)
 {
-    if (value != qtActiveColor && xSetting) {
+    if (value != property->qtActiveColor && xSetting) {
         xSetting->set(GSKEYQTACTIVECOLOR, hexColorToQtActiveColor(value));
-        qtActiveColor = value;
+        property->qtActiveColor = value;
         updateCustomTheme(TYPEACTIVECOLOR, value);
     }
 }
 
 bool AppearanceManager::setWallpaperSlideShow(const QString &value)
 {
-    if (value == wallpaperSlideShow) {
+    if (value == property->wallpaperSlideShow) {
         return true;
     }
     if (!settingDconfig.isValid()) {
@@ -606,14 +583,14 @@ bool AppearanceManager::setWallpaperSlideShow(const QString &value)
     qInfo() << "value: " << value;
     qInfo() << "value: GSKEYWALLPAPERSLIDESHOW" << settingDconfig.value(GSKEYWALLPAPERSLIDESHOW);
     settingDconfig.setValue(GSKEYWALLPAPERSLIDESHOW, value);
-    wallpaperSlideShow = value;
+    property->wallpaperSlideShow = value;
 
     return true;
 }
 
 bool AppearanceManager::setWallpaperURls(const QString &value)
 {
-    if (value == wallpaperURls) {
+    if (value == property->wallpaperURls) {
         return true;
     }
     if (!settingDconfig.isValid()) {
@@ -621,12 +598,12 @@ bool AppearanceManager::setWallpaperURls(const QString &value)
     }
 
     settingDconfig.setValue(GSKEYWALLPAPERURIS, value);
-    wallpaperURls = value;
+    property->wallpaperURls = value;
 
     return true;
 }
 
-QString AppearanceManager::qtActiveColorToHexColor(const QString &activeColor) const
+QString AppearanceManager::qtActiveColorToHexColor(const QString &activeColor)
 {
     QStringList fields = activeColor.split(",");
     if (fields.size() != 4)
@@ -636,7 +613,7 @@ QString AppearanceManager::qtActiveColorToHexColor(const QString &activeColor) c
     return clr.name(clr.alpha() == 255 ? QColor::HexRgb : QColor::HexArgb).toUpper();
 }
 
-QString AppearanceManager::hexColorToQtActiveColor(const QString &hexColor) const
+QString AppearanceManager::hexColorToQtActiveColor(const QString &hexColor)
 {
     if (!QColor::isValidColor(hexColor))
         return QString();
@@ -719,9 +696,9 @@ void AppearanceManager::initWallpaperSlideshow()
     loadWSConfig();
 
     QJsonParseError err;
-    QJsonDocument doc = QJsonDocument::fromJson(wallpaperSlideShow.toLatin1(), &err);
+    QJsonDocument doc = QJsonDocument::fromJson(property->wallpaperSlideShow->toLatin1(), &err);
     if (err.error != QJsonParseError::NoError) {
-        qWarning() << "parse wallpaperSlideShow: " << wallpaperSlideShow << ",fail";
+        qWarning() << "parse wallpaperSlideShow: " << property->wallpaperSlideShow << ",fail";
         return;
     }
 
@@ -841,12 +818,12 @@ void AppearanceManager::updateNewVersionData()
             primaryMonitor = item.first;
         }
     }
-    QJsonDocument doc = QJsonDocument::fromJson(wallpaperSlideShow.toLatin1());
+    QJsonDocument doc = QJsonDocument::fromJson(property->wallpaperSlideShow->toLatin1());
     QJsonObject wallPaperSlideObj;
     if (!doc.isEmpty()) {
         for (int i = 1; i <= workspaceCount; i++) {
             QString key = QString("%1&&%2").arg(primaryMonitor).arg(i);
-            wallPaperSlideObj.insert(key, wallpaperSlideShow);
+            wallPaperSlideObj.insert(key, property->wallpaperSlideShow.data());
         }
 
         QJsonDocument tempDoc(wallPaperSlideObj);
@@ -885,9 +862,9 @@ void AppearanceManager::autoSetTheme(double latitude, double longitude)
     QString themeName;
     curr = QDateTime::currentDateTimeUtc();
     if (sunrise.secsTo(curr) >= 0 && curr.secsTo(sunset) >= 0) {
-        themeName = globalTheme + ".light";
+        themeName = property->globalTheme + ".light";
     } else {
-        themeName = globalTheme + ".dark";
+        themeName = property->globalTheme + ".dark";
     }
 
     if (currentGlobalTheme != themeName) {
@@ -1084,8 +1061,8 @@ bool AppearanceManager::doSetFonts(double size)
         return false;
     }
 
-    qDebug() << "doSetFonts, standardFont:" << standardFont << ", monospaceFont:" << monospaceFont;
-    bool bSuccess = fontsManager->setFamily(standardFont, monospaceFont, size);
+    qDebug() << "doSetFonts, standardFont:" << property->standardFont << ", property->monospaceFont:" << property->monospaceFont;
+    bool bSuccess = fontsManager->setFamily(property->standardFont, property->monospaceFont, size);
     if (!bSuccess) {
         qWarning() << "set font size error:can not set family ";
         return false;
@@ -1133,7 +1110,7 @@ bool AppearanceManager::doSetGlobalTheme(QString value)
     if (defaultTheme.isEmpty())
         return false;
     QString darkTheme = theme.getStr("Deepin Theme", "DarkTheme");
-    if (darkTheme.isEmpty() && mode == Auto)
+    if (darkTheme.isEmpty())
         mode = Light;
     switch (mode) {
     case Light:
@@ -1204,14 +1181,14 @@ bool AppearanceManager::doSetStandardFont(QString value)
         qWarning() << "set standard font error:invalid font " << value;
         return false;
     }
-    QString tmpMonoFont = monospaceFont;
+    QString tmpMonoFont = property->monospaceFont;
     QStringList fontList = fontsManager->listMonospace();
     if (!fontList.isEmpty()) {
         tmpMonoFont = fontList[0];
     }
 
-    qDebug() << "doSetStandardFont standardFont:" << standardFont << ", monospaceFont:" << monospaceFont;
-    if (!fontsManager->setFamily(value, tmpMonoFont, fontSize)) {
+    qDebug() << "doSetStandardFont standardFont:" << property->standardFont << ", monospaceFont:" << property->monospaceFont;
+    if (!fontsManager->setFamily(value, tmpMonoFont, property->fontSize)) {
         qWarning() << "set standard font error:can not set family ";
         return false;
     }
@@ -1228,14 +1205,14 @@ bool AppearanceManager::doSetMonospaceFont(QString value)
     if (!fontsManager->isFontFamily(value)) {
         return false;
     }
-    QString tmpStandardFont = standardFont;
+    QString tmpStandardFont = property->standardFont;
     QStringList fontList = fontsManager->listStandard();
     if (!fontList.isEmpty()) {
         tmpStandardFont = fontList[0];
     }
 
-    qDebug() << "doSetMonospaceFont, standardFont:" << standardFont << ", monospaceFont:" << monospaceFont;
-    if (!fontsManager->setFamily(tmpStandardFont, value, fontSize)) {
+    qDebug() << "doSetMonospaceFont, standardFont:" << property->standardFont << ", monospaceFont:" << property->monospaceFont;
+    if (!fontsManager->setFamily(tmpStandardFont, value, property->fontSize)) {
         qWarning() << "set monospace font error:can not set family ";
         return false;
     }
@@ -1280,7 +1257,7 @@ QString AppearanceManager::doGetWallpaperSlideShow(QString monitorName)
 {
     int index = dbusProxy->GetCurrentWorkspace();
 
-    QJsonDocument doc = QJsonDocument::fromJson(wallpaperSlideShow.toLatin1());
+    QJsonDocument doc = QJsonDocument::fromJson(property->wallpaperSlideShow->toLatin1());
     QVariantMap tempMap = doc.object().toVariantMap();
 
     QString key = QString("%1&&%2").arg(monitorName).arg(index);
@@ -1435,15 +1412,15 @@ void AppearanceManager::doResetFonts()
     QString defaultStandardFont, defaultMonospaceFont;
     getDefaultFonts(defaultStandardFont, defaultMonospaceFont);
 
-    if (defaultStandardFont != standardFont) {
+    if (defaultStandardFont != property->standardFont) {
         setStandardFont(defaultStandardFont);
     }
 
-    if (defaultMonospaceFont != monospaceFont) {
+    if (defaultMonospaceFont != property->monospaceFont) {
         setMonospaceFont(defaultMonospaceFont);
     }
 
-    bool bSuccess = fontsManager->setFamily(defaultStandardFont, defaultMonospaceFont, fontSize);
+    bool bSuccess = fontsManager->setFamily(defaultStandardFont, defaultMonospaceFont, property->fontSize);
     if (!bSuccess) {
         return;
     }
@@ -1455,7 +1432,7 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
 {
     bool updateValut = false;
     if (type == TYPEGTK) {
-        if (value == gtkTheme) {
+        if (value == property->gtkTheme) {
             return;
         }
 
@@ -1464,7 +1441,7 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
             updateValut = true;
         }
     } else if (type == TYPEICON) {
-        if (value == iconTheme) {
+        if (value == property->iconTheme) {
             return;
         }
 
@@ -1473,7 +1450,7 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
             updateValut = true;
         }
     } else if (type == TYPECURSOR) {
-        if (value == cursorTheme) {
+        if (value == property->cursorTheme) {
             return;
         }
 
@@ -1482,7 +1459,7 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
             updateValut = true;
         }
     } else if (type == TYPEGLOBALTHEME) {
-        if (value == globalTheme) {
+        if (value == property->globalTheme) {
             return;
         }
         if (doSetGlobalTheme(value)) {
@@ -1497,20 +1474,20 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
     } else if (type == TYPEGREETERBACKGROUND) {
         updateValut = doSetGreeterBackground(value);
     } else if (type == TYPESTANDARDFONT) {
-        if (standardFont == value) {
+        if (property->standardFont == value) {
             return;
         }
         setStandardFont(value);
         updateValut = true;
     } else if (type == TYPEMONOSPACEFONT) {
-        if (monospaceFont == value) {
+        if (property->monospaceFont == value) {
             return;
         }
         setMonospaceFont(value);
         updateValut = true;
     } else if (type == TYPEFONTSIZE) {
         double size = value.toDouble();
-        if (fontSize > size - 0.01 && fontSize < size + 0.01) {
+        if (property->fontSize > size - 0.01 && property->fontSize < size + 0.01) {
             return;
         }
         setFontSize(size);
@@ -1646,7 +1623,7 @@ void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeNam
 void AppearanceManager::updateCustomTheme(const QString &type, const QString &value)
 {
     if (!globalThemeUpdating) {
-        customTheme->updateValue(type, value, globalTheme, subthemes->listGlobalThemes());
+        customTheme->updateValue(type, value, property->globalTheme, subthemes->listGlobalThemes());
     }
 }
 

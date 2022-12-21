@@ -44,10 +44,6 @@ QString getIcon(QString id, QString descFile);
 bool shouldGenerateNew(QString descFile, QString out);
 bool shouldGenerateNewCursor(QString descFile, QString out);
 QString prepareOutputPath(QString type0, QString id, int version);
-void CreateGlobalThumbnail(const QString path, const QString filename);
-void CreateGtkThumbnail(const QString path, const QString filename);
-void CreateIconThumbnail(const QString path, const QString filename);
-void CreateCursorThumbnail(const QString path, const QString filename);
 
 void UpdateScaleFactor(double scaleFactor);
 

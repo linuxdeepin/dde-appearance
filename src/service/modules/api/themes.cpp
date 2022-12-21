@@ -69,7 +69,7 @@ QVector<QString> ThemesApi::listGlobalTheme()
 QVector<QString> ThemesApi::listGtkTheme()
 {
     QVector<QString> local;
-    QString home = getenv("HOME");
+    QString home = utils::GetUserHomeDir();
     local.push_back(home + "/.local/share/themes");
     local.push_back(home + "/.themes");
 
@@ -82,7 +82,7 @@ QVector<QString> ThemesApi::listGtkTheme()
 QVector<QString> ThemesApi::listIconTheme()
 {
     QVector<QString> local;
-    QString home = getenv("HOME");
+    QString home = utils::GetUserHomeDir();
     local.push_back(home + "/.local/share/icons");
     local.push_back(home + "/.icons");
 
@@ -95,7 +95,7 @@ QVector<QString> ThemesApi::listIconTheme()
 QVector<QString> ThemesApi::listCursorTheme()
 {
     QVector<QString> local;
-    QString home = getenv("HOME");
+    QString home = utils::GetUserHomeDir();
     local.push_back(home + "/.local/share/icons");
     local.push_back(home + "/.icons");
 
@@ -277,7 +277,7 @@ bool ThemesApi::setCursorTheme(QString name)
 QString ThemesApi::getThemePath(QString name, QString ty, QString key)
 {
     QVector<QString> dirs;
-    QString home = getenv("HOME");
+    QString home = utils::GetUserHomeDir();
     dirs.push_back(home + "/.local/share/" + key);
     dirs.push_back(home + "." + key);
     dirs.push_back("usr/lical/share/" + key);

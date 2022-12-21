@@ -75,6 +75,9 @@ static float calculateSunChangedAsUTCHour(const int &dayOfYear, const float &lat
     if (UT < 0)
         UT += 24;
 
+    if (UT >= 24)
+        UT -= 24;
+
     // 10. convert UT value to local time zone of latitude/longitude 将UT值转换为纬度/经度的本地时区
     // return UT + localOffset + daylightSavings;
     return UT;
