@@ -125,6 +125,7 @@ public Q_SLOTS:
     void handleUpdateToCustom(const QString &mode);
     void handleGlobalThemeChangeTimeOut();
     void updateMonitorMap();
+    void handlePrepareForSleep(bool sleep);
 
 private:
     void initCoordinate();

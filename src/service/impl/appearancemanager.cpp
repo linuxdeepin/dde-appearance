@@ -120,6 +120,7 @@ bool AppearanceManager::init()
     loadDefaultFontConfig();
     connect(dbusProxy.get(), &AppearanceDBusProxy::TimeUpdate, this, &AppearanceManager::handleTimeUpdate);
     connect(dbusProxy.get(), &AppearanceDBusProxy::NTPSessionChanged, this, &AppearanceManager::handleNTPChanged);
+    connect(dbusProxy.get(), &AppearanceDBusProxy::HandleForSleep, this, &AppearanceManager::handlePrepareForSleep);
 
     QVector<QSharedPointer<Theme>> globalList = subthemes->listGlobalThemes();
     bool bFound = false;
@@ -740,6 +741,20 @@ void AppearanceManager::updateMonitorMap()
         } else {
             monitorMap[monitorList[i]] = "Subsidiary" + QString::number(i);
         }
+    }
+}
+
+void AppearanceManager::handlePrepareForSleep(bool sleep)
+{
+    if (sleep)
+        return;
+
+    QJsonDocument doc = QJsonDocument::fromJson(property->wallpaperSlideShow->toLatin1());
+    QVariantMap tempMap = doc.object().toVariantMap();
+
+    for (auto it = tempMap.begin(); it != tempMap.end(); ++it) {
+        if (it.value().toString() == WSPOLICYWAKEUP)
+            autoChangeBg(it.key(), QDateTime::currentDateTime());
     }
 }
 

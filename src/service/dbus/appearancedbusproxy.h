@@ -138,6 +138,9 @@ public:
     static QStringList GetCustomWallPapers(const QString &username);
     static QString SaveCustomWallPaper(const QString &username, const QString &file);
 
+Q_SIGNALS:
+    void HandleForSleep(bool sleep);
+
 private:
     DCCDBusInterface *m_wmInterface;
     DCCDBusInterface *m_displayInterface;
@@ -145,7 +148,7 @@ private:
     DCCDBusInterface *m_timeDateInterface;
     DCCDBusInterface *m_sessionTimeDateInterface;
     QSharedPointer<DCCDBusInterface> m_userInterface;
-    uint nid;
+    uint m_nid;
 };
 
 #endif // APPEARANCEDBUSPROXY_H

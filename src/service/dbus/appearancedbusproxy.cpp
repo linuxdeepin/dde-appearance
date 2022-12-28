@@ -22,6 +22,10 @@
 
 #include <QDBusPendingReply>
 
+const QString DaemonService = QStringLiteral("org.deepin.dde.Daemon1");
+const QString DaemonPath = QStringLiteral("/org/deepin/dde/Daemon1");
+const QString DaemonInterface = QStringLiteral("org.deepin.dde.Daemon1");
+
 AppearanceDBusProxy::AppearanceDBusProxy(QObject *parent)
     : QObject(parent)
     , m_wmInterface(new DCCDBusInterface("com.deepin.wm", "/com/deepin/wm", "com.deepin.wm", QDBusConnection::sessionBus(), this))
@@ -29,10 +33,11 @@ AppearanceDBusProxy::AppearanceDBusProxy(QObject *parent)
     , m_xSettingsInterface(new DCCDBusInterface("org.deepin.dde.XSettings1", "/org/deepin/dde/XSettings1", "org.deepin.dde.XSettings1", QDBusConnection::sessionBus(), this))
     , m_timeDateInterface(new DCCDBusInterface("org.freedesktop.timedate1", "/org/freedesktop/timedate1", "org.freedesktop.timedate1", QDBusConnection::systemBus(), this))
     , m_sessionTimeDateInterface(new DCCDBusInterface("org.deepin.dde.Timedate1", "/org/deepin/dde/Timedate1", "org.deepin.dde.Timedate1", QDBusConnection::sessionBus(), this))
-    , nid(0)
+    , m_nid(0)
 {
     registerScaleFactorsMetaType();
     m_sessionTimeDateInterface->setSuffix("Session");
+    QDBusConnection::systemBus().connect(DaemonService, DaemonPath, DaemonInterface, "HandleForSleep", this, SIGNAL(HandleForSleep(bool)));
 }
 
 void AppearanceDBusProxy::setUserInterface(const QString &userPath)
@@ -48,7 +53,7 @@ void AppearanceDBusProxy::Notify(const QString &in0, const QString &in2, const Q
     QDBusMessage notifyMessage = QDBusMessage::createMethodCall("org.freedesktop.Notifications",
                                                                 "/org/freedesktop/Notifications",
                                                                 "org.freedesktop.Notifications", "Notify");
-    notifyMessage << in0 << nid << in2
+    notifyMessage << in0 << m_nid << in2
                   << summary << body << options
                   << optionMap << expireTimeout;
     QDBusConnection::sessionBus().callWithCallback(notifyMessage, this, SLOT(NotifyNid(uint)));
@@ -56,7 +61,7 @@ void AppearanceDBusProxy::Notify(const QString &in0, const QString &in2, const Q
 
 void AppearanceDBusProxy::NotifyNid(uint id)
 {
-    nid = id;
+    m_nid = id;
 }
 // wmInterface
 QString AppearanceDBusProxy::cursorTheme()
@@ -222,21 +227,21 @@ QString AppearanceDBusProxy::Get(const QString &effect, const QString &filename)
 // Daemon1
 void AppearanceDBusProxy::DeleteCustomWallPaper(const QString &username, const QString &file)
 {
-    QDBusMessage daemonMessage = QDBusMessage::createMethodCall("org.deepin.dde.Daemon1", "/org/deepin/dde/Daemon1", "org.deepin.dde.Daemon1", "DeleteCustomWallPaper");
+    QDBusMessage daemonMessage = QDBusMessage::createMethodCall(DaemonService, DaemonPath, DaemonInterface, "DeleteCustomWallPaper");
     daemonMessage << username << file;
     QDBusConnection::systemBus().asyncCall(daemonMessage);
 }
 
 QStringList AppearanceDBusProxy::GetCustomWallPapers(const QString &username)
 {
-    QDBusMessage daemonMessage = QDBusMessage::createMethodCall("org.deepin.dde.Daemon1", "/org/deepin/dde/Daemon1", "org.deepin.dde.Daemon1", "GetCustomWallPapers");
+    QDBusMessage daemonMessage = QDBusMessage::createMethodCall(DaemonService, DaemonPath, DaemonInterface, "GetCustomWallPapers");
     daemonMessage << username;
     return QDBusPendingReply<QStringList>(QDBusConnection::systemBus().asyncCall(daemonMessage));
 }
 
 QString AppearanceDBusProxy::SaveCustomWallPaper(const QString &username, const QString &file)
 {
-    QDBusMessage daemonMessage = QDBusMessage::createMethodCall("org.deepin.dde.Daemon1", "/org/deepin/dde/Daemon1", "org.deepin.dde.Daemon1", "SaveCustomWallPaper");
+    QDBusMessage daemonMessage = QDBusMessage::createMethodCall(DaemonService, DaemonPath, DaemonInterface, "SaveCustomWallPaper");
     daemonMessage << username << file;
     return QDBusPendingReply<QString>(QDBusConnection::systemBus().asyncCall(daemonMessage));
 }
