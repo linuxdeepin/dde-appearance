@@ -1,3 +1,11 @@
+dde-appearance (1.0.3.3) unstable; urgency=medium
+
+  [ TagBuilder ]
+  * fix: 修改图标缩略图获取方式(Task: 933, 0)(Influence: 控制中心-个性化-图标主题缩略图)
+  * fix: 修改主题显示顺序(Bug: 160505)(Influence: 控制中心-个性化-主题、图标主题、光标主题显示顺序)
+
+ -- zhaoyingzhen <zhaoyingzhen@uniontech.com>  Fri, 30 Dec 2022 10:11:55 +0800
+
 dde-appearance (1.0.2.1) unstable; urgency=medium
 
   [ TagBuilder ]
