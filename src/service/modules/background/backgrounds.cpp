@@ -25,9 +25,9 @@ Backgrounds::~Backgrounds()
 bool Backgrounds::deleteBackground(const QString &uri)
 {
     QVector<Background>::iterator iter = backgrounds.begin();
-
+    QString url = utils::enCodeURI(uri, "file://");
     while (iter != backgrounds.end()) {
-        if ((*iter).getId() == uri) {
+        if ((*iter).getId() == url) {
             (*iter).Delete();
             iter = backgrounds.erase(iter);
             return true;

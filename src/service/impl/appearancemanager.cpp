@@ -778,7 +778,7 @@ void AppearanceManager::doUpdateWallpaperURIs()
 
     for (int i = 0; i < monitorList.length(); i++) {
         for (int idx = 1; idx <= workspaceCount; idx++) {
-            QString wallpaperUri = dbusProxy->GetWorkspaceBackgroundForMonitor(idx, monitorList.at(i));
+            QString wallpaperUri = PhaseWallPaper::getWallpaperUri(QString::number(idx), monitorList.at(i));
             if (wallpaperUri.isEmpty())
                 continue;
 
@@ -1513,23 +1513,8 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
 
 QString AppearanceManager::doSetMonitorBackground(const QString &monitorName, const QString &imageGile)
 {
-    if (!backgrounds->isBackgroundFile(imageGile)) {
-        return "";
-    }
-
-    QString file = backgrounds->prepare(imageGile);
-
-    QString uri = utils::enCodeURI(file, SCHEME_FILE);
-
-    dbusProxy->SetCurrentWorkspaceBackgroundForMonitor(uri, monitorName);
-
-    doUpdateWallpaperURIs();
-
-    dbusProxy->Get(file);
-
-    dbusProxy->Get("", file);
-
-    return file;
+    doSetCurrentWorkspaceBackgroundForMonitor(imageGile, monitorName);
+    return imageGile;
 }
 
 QString AppearanceManager::doThumbnail(const QString &type, const QString &name)
@@ -1662,6 +1647,7 @@ void AppearanceManager::doSetCurrentWorkspaceBackground(const QString &uri)
     }
 
     PhaseWallPaper::setWallpaperUri(strIndex, "", uri);
+    doUpdateWallpaperURIs();
     return;
 }
 
@@ -1685,6 +1671,7 @@ void AppearanceManager::doSetCurrentWorkspaceBackgroundForMonitor(const QString 
     }
 
     PhaseWallPaper::setWallpaperUri(strIndex, strMonitorName, uri);
+    doUpdateWallpaperURIs();
     return;
 }
 
@@ -1701,7 +1688,8 @@ QString AppearanceManager::doGetCurrentWorkspaceBackgroundForMonitor(const QStri
 
 void AppearanceManager::doSetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QString &uri)
 {
-    return PhaseWallPaper::setWallpaperUri(QString::number(index), strMonitorName, uri);
+    PhaseWallPaper::setWallpaperUri(QString::number(index), strMonitorName, uri);
+    doUpdateWallpaperURIs();
 }
 
 QString AppearanceManager::doGetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName)

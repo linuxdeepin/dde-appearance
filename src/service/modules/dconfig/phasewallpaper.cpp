@@ -3,9 +3,12 @@
 #include <QJsonObject>
 #include <QDebug>
 
+#include <modules/api/utils.h>
+
 const QString appearanceProcessId = "org.deepin.dde.appearance";
 const QString appearanceDconfJson = "org.deepin.dde.appearance";
 const QString allWallpaperUrisKey = "All_Wallpaper_Uris";
+const QString defaultWallpaper = "file:///usr/share/wallpapers/deepin/desktop.jpg";
 
 PhaseWallPaper::PhaseWallPaper()
 {
@@ -43,6 +46,7 @@ void PhaseWallPaper::setWallpaperUri(const QString &index, const QString &strMon
         return;
     }
 
+    QString url = utils::enCodeURI(uri, "file://");
     bool shouldAddWPTypeInfo = true;
     QJsonArray allWallpaperUri = v.toJsonArray();
 
@@ -71,7 +75,7 @@ void PhaseWallPaper::setWallpaperUri(const QString &index, const QString &strMon
             }
 
             if (wpInfoObj["wpIndex"] == wpIndexKey) {
-                wpInfoObj["uri"] = uri;
+                wpInfoObj["uri"] = url;
                 shouldAddWPInfo = false;
             } else {
                 continue;
@@ -84,7 +88,7 @@ void PhaseWallPaper::setWallpaperUri(const QString &index, const QString &strMon
         wpTypeObj["wallpaperInfo"] = wpInfoArray;
         if (shouldAddWPInfo) {
             QJsonObject obj = {
-                {"uri", uri,},
+                {"uri", url,},
                 {"wpIndex", wpIndexKey}
             };
 
@@ -97,7 +101,7 @@ void PhaseWallPaper::setWallpaperUri(const QString &index, const QString &strMon
 
     if (shouldAddWPTypeInfo) {
         QJsonObject obj1 = {
-            {"uri", uri,},
+            {"uri", url,},
             {"wpIndex", wpIndexKey}
         };
         QJsonArray array = { obj1 };
@@ -119,12 +123,12 @@ QString PhaseWallPaper::getWallpaperUri(const QString &index, const QString &str
     QString shouldGetWPType = phaseWPType(index, strMonitorName);
     if (shouldGetWPType == "") {
         qWarning() << QString("set wall paper type error, index [%1] strMonitorName [%2]").arg(index, strMonitorName);
-        return "";
+        return defaultWallpaper;
     }
 
     QVariant v = DconfigSettings::ConfigValue(appearanceProcessId, appearanceDconfJson, allWallpaperUrisKey, "");
     if (!v.isValid()) {
-        return "";
+        return defaultWallpaper;
     }
 
     QJsonArray allWallpaperUri = v.toJsonArray();
@@ -156,5 +160,5 @@ QString PhaseWallPaper::getWallpaperUri(const QString &index, const QString &str
         }
     }
 
-    return "";
+    return defaultWallpaper;
 }
