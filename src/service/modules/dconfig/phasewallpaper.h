@@ -45,6 +45,7 @@ public:
 public:
     static void setWallpaperUri(const QString &index, const QString &strMonitorName, const QString &uri);
     static QString getWallpaperUri(const QString &index,const QString &strMonitorName);
+    static void resizeWorkspaceCount(int size);
 };
 
 #endif // PHASEWALLPAPERDCONFIG

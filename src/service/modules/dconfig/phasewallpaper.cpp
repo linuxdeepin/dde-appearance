@@ -8,7 +8,6 @@
 const QString appearanceProcessId = "org.deepin.dde.appearance";
 const QString appearanceDconfJson = "org.deepin.dde.appearance";
 const QString allWallpaperUrisKey = "All_Wallpaper_Uris";
-const QString defaultWallpaper = "file:///usr/share/wallpapers/deepin/desktop.jpg";
 
 PhaseWallPaper::PhaseWallPaper()
 {
@@ -46,7 +45,10 @@ void PhaseWallPaper::setWallpaperUri(const QString &index, const QString &strMon
         return;
     }
 
-    QString url = utils::enCodeURI(uri, "file://");
+    QString url;
+    if (!uri.isEmpty())
+        url = utils::enCodeURI(uri, "file://");
+
     bool shouldAddWPTypeInfo = true;
     QJsonArray allWallpaperUri = v.toJsonArray();
 
@@ -66,23 +68,31 @@ void PhaseWallPaper::setWallpaperUri(const QString &index, const QString &strMon
             continue;
         }
 
-        bool shouldAddWPInfo = true;
+        bool shouldAddWPInfo = !url.isEmpty();
         QJsonArray wpInfoArray = wpTypeObj["wallpaperInfo"].toArray();
-        for (QJsonArray::Iterator it2 = wpInfoArray.begin(); it2 != wpInfoArray.end(); ++it2) {
+        for (QJsonArray::Iterator it2 = wpInfoArray.begin(); it2 != wpInfoArray.end();) {
             QJsonObject wpInfoObj = it2[0].toObject();
             if (!wpInfoObj.contains("uri") || !wpInfoObj.contains("wpIndex")) {
+                ++it2;
                 continue;
             }
 
             if (wpInfoObj["wpIndex"] == wpIndexKey) {
                 wpInfoObj["uri"] = url;
                 shouldAddWPInfo = false;
+                shouldAddWPTypeInfo = false;
+                if (url.isEmpty()) {
+                    it2 = wpInfoArray.erase(it2);
+                    continue;
+                }
             } else {
+                ++it2;
                 continue;
             }
 
             it2[0] = wpInfoObj;
             shouldAddWPTypeInfo = false;
+            ++it2;
         }
 
         wpTypeObj["wallpaperInfo"] = wpInfoArray;
@@ -123,12 +133,12 @@ QString PhaseWallPaper::getWallpaperUri(const QString &index, const QString &str
     QString shouldGetWPType = phaseWPType(index, strMonitorName);
     if (shouldGetWPType == "") {
         qWarning() << QString("set wall paper type error, index [%1] strMonitorName [%2]").arg(index, strMonitorName);
-        return defaultWallpaper;
+        return QString();
     }
 
     QVariant v = DconfigSettings::ConfigValue(appearanceProcessId, appearanceDconfJson, allWallpaperUrisKey, "");
     if (!v.isValid()) {
-        return defaultWallpaper;
+        return QString();
     }
 
     QJsonArray allWallpaperUri = v.toJsonArray();
@@ -160,5 +170,45 @@ QString PhaseWallPaper::getWallpaperUri(const QString &index, const QString &str
         }
     }
 
-    return defaultWallpaper;
+    return QString();
+}
+// 删除多余工作区的配置，保证新建的工作区壁纸随机
+void PhaseWallPaper::resizeWorkspaceCount(int size)
+{
+    QVariant v = DconfigSettings::ConfigValue(appearanceProcessId, appearanceDconfJson, allWallpaperUrisKey, "");
+    if (!v.isValid()) {
+        return;
+    }
+
+    QJsonArray allWallpaperUri = v.toJsonArray();
+
+    bool bSave = false;
+    for (QJsonArray::Iterator it1 = allWallpaperUri.begin(); it1 != allWallpaperUri.end(); ++it1) {
+        QJsonObject wpTypeObj = it1[0].toObject();
+        if (!wpTypeObj.contains("wallpaperInfo")) {
+            continue;
+        }
+
+        QJsonArray wpInfoArray = wpTypeObj["wallpaperInfo"].toArray();
+        for (QJsonArray::Iterator it2 = wpInfoArray.begin(); it2 != wpInfoArray.end();) {
+            QJsonObject wpInfoObj = it2[0].toObject();
+            if (wpInfoObj.contains("wpIndex")) {
+                bool ok;
+                int index = wpInfoObj["wpIndex"].toString().split("+").first().toInt(&ok);
+                if (ok && index > size) {
+                    it2 = wpInfoArray.erase(it2);
+                    bSave = true;
+                    continue;
+                }
+            }
+            ++it2;
+        }
+
+        wpTypeObj["wallpaperInfo"] = wpInfoArray;
+        it1[0] = wpTypeObj;
+    }
+
+    if (bSave) {
+        DconfigSettings::ConfigSaveValue(appearanceProcessId, appearanceDconfJson, allWallpaperUrisKey, allWallpaperUri.toVariantList());
+    }
 }

@@ -96,7 +96,8 @@ bool AppearanceManager::init()
 
     connect(dbusProxy.get(), &AppearanceDBusProxy::workspaceCountChanged, this, &AppearanceManager::handleWmWorkspaceCountChanged);
     workspaceCount = dbusProxy->WorkspaceCount();
-    connect(dbusProxy.get(), &AppearanceDBusProxy::WorkspaceSwitched, this, &AppearanceManager::handleWmWorkspaceSwithched);
+    // TODO: 非必须，测试几轮后删除
+//    connect(dbusProxy.get(), &AppearanceDBusProxy::WorkspaceSwitched, this, &AppearanceManager::handleWmWorkspaceSwithched);
     connect(dbusProxy.get(), &AppearanceDBusProxy::SetScaleFactorStarted, this, &AppearanceManager::handleSetScaleFactorStarted);
     connect(dbusProxy.get(), &AppearanceDBusProxy::SetScaleFactorDone, this, &AppearanceManager::handleSetScaleFactorDone);
 
@@ -198,6 +199,7 @@ void AppearanceManager::deleteThermByType(const QString &ty, const QString &name
         // todo log
     }
 }
+
 void AppearanceManager::handleWmWorkspaceCountChanged(int count)
 {
     workspaceCount = count;
@@ -219,6 +221,7 @@ void AppearanceManager::handleWmWorkspaceCountChanged(int count)
         settingDconfig.setValue(GSKEYBACKGROUNDURIS, bgs);
     }
 
+    PhaseWallPaper::resizeWorkspaceCount(workspaceCount);
     doUpdateWallpaperURIs();
 }
 
@@ -365,7 +368,8 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
         }
     } else if (key == DCKEYALLWALLPAPER) {
         type = TYPEALLWALLPAPER;
-        value = settingDconfig.value(key).toString();
+        QVariant wallpaper  = settingDconfig.value(key);
+        value = QJsonDocument::fromVariant(wallpaper).toJson();
         QDir dir;
         if (!dir.exists(wallpaperJsonPath)) {
             bool res = dir.mkpath(wallpaperJsonPath);
@@ -378,7 +382,7 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
         QFile file(wallpaperJsonPath + "config.json");
         if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
             QTextStream textStream(&file);
-            textStream << QString(QJsonDocument::fromVariant(value).toJson());
+            textStream << value;
             textStream.flush();
             file.close();
         } else {
@@ -798,7 +802,7 @@ void AppearanceManager::doUpdateWallpaperURIs()
 
     for (int i = 0; i < monitorList.length(); i++) {
         for (int idx = 1; idx <= workspaceCount; idx++) {
-            QString wallpaperUri = PhaseWallPaper::getWallpaperUri(QString::number(idx), monitorList.at(i));
+            QString wallpaperUri = getWallpaperUri(QString::number(idx), monitorList.at(i));
             if (wallpaperUri.isEmpty())
                 continue;
 
@@ -1660,6 +1664,41 @@ QVector<Background> AppearanceManager::backgroundListVerify(const QVector<Backgr
     return bgs;
 }
 
+QString AppearanceManager::getWallpaperUri(const QString &index, const QString &monitorName)
+{
+    bool ok;
+    index.toInt(&ok);
+    if (!ok)
+        return QString();
+
+    QString wallpaper = PhaseWallPaper::getWallpaperUri(index, monitorName);
+    if (wallpaper.isEmpty()) {
+        // 如果为空则随机给一个
+        QVector<Background> backgroudlist = backgrounds->listBackground();
+        QVariant wallpaperVar = settingDconfig.value(DCKEYALLWALLPAPER);
+        QString value = QJsonDocument::fromVariant(wallpaperVar).toJson();
+        QStringList bglist;
+        for (auto &&bg : backgroudlist) {
+            const QString &id = bg.getId();
+            if (!value.contains(id)) {
+                bglist.append(id);
+            }
+        }
+
+        if (!bglist.isEmpty()) {
+            wallpaper = bglist.at(QRandomGenerator::global()->generate() % bglist.size());
+        } else if (!backgroudlist.isEmpty()) {
+            const Background &bg = backgroudlist.at(QRandomGenerator::global()->generate() % backgroudlist.size());
+            wallpaper = bg.getId();
+        } else {
+            wallpaper = "file:///usr/share/wallpapers/deepin/desktop.jpg";
+        }
+
+        PhaseWallPaper::setWallpaperUri(index, monitorName, wallpaper);
+    }
+    return wallpaper;
+}
+
 void AppearanceManager::doSetCurrentWorkspaceBackground(const QString &uri)
 {
     QString strIndex = QString::number(getCurrentDesktopIndex());
@@ -1668,7 +1707,7 @@ void AppearanceManager::doSetCurrentWorkspaceBackground(const QString &uri)
         return;
     }
 
-    PhaseWallPaper::setWallpaperUri(strIndex, "", uri);
+    PhaseWallPaper::setWallpaperUri(strIndex, dbusProxy->primary(), uri);
     doUpdateWallpaperURIs();
     return;
 }
@@ -1681,7 +1720,7 @@ QString AppearanceManager::doGetCurrentWorkspaceBackground()
         return "";
     }
 
-    return PhaseWallPaper::getWallpaperUri(strIndex, "");
+    return getWallpaperUri(strIndex, dbusProxy->primary());
 }
 
 void AppearanceManager::doSetCurrentWorkspaceBackgroundForMonitor(const QString &uri, const QString &strMonitorName)
@@ -1705,7 +1744,7 @@ QString AppearanceManager::doGetCurrentWorkspaceBackgroundForMonitor(const QStri
         return "";
     }
 
-    return PhaseWallPaper::getWallpaperUri(strIndex, strMonitorName);
+    return getWallpaperUri(strIndex, strMonitorName);
 }
 
 void AppearanceManager::doSetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QString &uri)
@@ -1716,7 +1755,7 @@ void AppearanceManager::doSetWorkspaceBackgroundForMonitor(const int &index, con
 
 QString AppearanceManager::doGetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName)
 {
-    return PhaseWallPaper::getWallpaperUri(QString::number(index), strMonitorName);
+    return getWallpaperUri(QString::number(index), strMonitorName);
 }
 
 void AppearanceManager::autoChangeBg(QString monitorSpace, QDateTime date)

@@ -217,8 +217,7 @@ QString Appearance1Thread::GetWorkspaceBackgroundForMonitor(const int &index, co
 QString Appearance1Thread::List(const QString &ty, const QDBusMessage &message)
 {
     QMutexLocker locker(&mutex);
-    QString type = ty.toLower();
-    APPEARANCEDBUS.send(message.createReply(appearanceManager->doList(type)));
+    APPEARANCEDBUS.send(message.createReply(appearanceManager->doList(ty.toLower())));
     return QString();
 }
 

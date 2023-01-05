@@ -18,7 +18,7 @@ void Background::setId(QString id)
     this->id = id;
 }
 
-QString Background::getId()
+QString Background::getId() const
 {
     return id;
 }

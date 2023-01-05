@@ -13,7 +13,7 @@ public:
     Background();
     ~Background();
     void setId(QString id);
-    QString getId();
+    QString getId() const;
     bool getDeleteable();
     void setDeletable(bool deletable);
     void Delete();
