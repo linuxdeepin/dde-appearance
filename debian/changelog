@@ -1,3 +1,11 @@
+dde-appearance (1.0.4) unstable; urgency=medium
+
+  [ TagBuilder ]
+  * fix: 个性化服务添加唤醒时设置壁纸(Task: 232189)(Influence: 待机唤起时壁纸处理)
+  * fix: 完善壁纸幻灯片功能(Bug: 181813)(Influence: 桌面右键-壁纸与屏保-自动更换壁纸)
+
+ -- lvpeilong <lvpeilong@uniontech.com>  Fri, 06 Jan 2023 16:30:45 +0800
+
 dde-appearance (1.0.3.3) unstable; urgency=medium
 
   [ TagBuilder ]
