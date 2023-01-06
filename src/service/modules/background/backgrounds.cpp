@@ -41,7 +41,7 @@ bool Backgrounds::deleteBackground(const QString &uri)
 
 void Backgrounds::init()
 {
-    QString configPath = g_get_user_config_dir();
+    QString configPath = utils::GetUserConfigDir();
     customWallpapersConfigDir = configPath + "/deepin/dde-daemon/appearance/custom-wallpapers";
     QDir qdir;
     if (!qdir.exists(customWallpapersConfigDir)) {

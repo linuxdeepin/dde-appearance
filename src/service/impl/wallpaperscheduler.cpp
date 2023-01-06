@@ -11,24 +11,28 @@
 
 WallpaperScheduler::WallpaperScheduler(BGCHANGEFUNC func)
     :stopScheduler(false)
+    , lastSetBgTime(QDateTime::currentDateTimeUtc())
 {
     this->bgChangeFunc =func;
-    connect(&changeTimer, SIGNAL(timeout()), this, SLOT(handleDetectSysClockTimeOut()));
+    connect(&changeTimer, &QTimer::timeout, this, &WallpaperScheduler::handleChangeTimeOut);
 }
 
 void WallpaperScheduler::setInterval(QString monitorSpace, qint64 interval)
 {
+    if (interval <= 0) {
+        stop();
+        return;
+    }
+
     this->monitorSpace = monitorSpace;
-    this->interval =    interval;
-    stopScheduler =false;
+    this->interval = interval * 1000;
+    stopScheduler = false;
     QDateTime curr = QDateTime::currentDateTimeUtc();
 
     qint64 elapsed = lastSetBgTime.secsTo(curr);
-
-    if(elapsed < interval)
-    {
-        changeTimer.start(static_cast<int>(interval - elapsed));
-    }else {
+    if (elapsed < this->interval) {
+        changeTimer.start(static_cast<int>(this->interval - elapsed));
+    } else {
         handleChangeTimeOut();
     }
 }
@@ -41,6 +45,7 @@ void WallpaperScheduler::setLastChangeTime(QDateTime date)
 void WallpaperScheduler::stop()
 {
     stopScheduler = true;
+    changeTimer.stop();
 }
 
 void WallpaperScheduler::handleChangeTimeOut()
@@ -84,7 +89,7 @@ QStringList WallpaperLoop::getNotShowed()
 
     for(auto iter : allList)
     {
-        if(showedList.indexOf(iter) == -1)
+        if(!showedList.contains(iter))
         {
             retList.push_back(iter);
         }
@@ -94,11 +99,9 @@ QStringList WallpaperLoop::getNotShowed()
 
 QString WallpaperLoop::getNext()
 {
-    mutex.lock();
     QString next = getNextShow();
     if(!next.isEmpty())
     {
-        mutex.unlock();
         return next;
     }
 
@@ -136,16 +139,12 @@ void WallpaperLoop::addToShow(QString file)
 {
     file = utils::deCodeURI(file);
 
-    mutex.lock();
     showedList.push_back(file);
-    mutex.unlock();
 }
 
 void WallpaperLoop::notifyFileChange()
 {
-    mutex.lock();
     fileChange = true;
-    mutex.unlock();
 }
 
 WallpaperLoopConfigManger::WallpaperLoopConfigManger()
@@ -180,19 +179,12 @@ WallpaperLoopConfigManger::WallpaperLoopConfigMap WallpaperLoopConfigManger::loa
         wallpaperLoopConfigMap[key]=config;
 
         QJsonObject wlConfigObj = obj[key].toObject();
-
-        for(auto wlConfigObjKey :wlConfigObj.keys())
-        {
-            if(wlConfigObjKey == "LastChange")
-            {
-                wallpaperLoopConfigMap[key].lastChange = QDateTime::fromString(wlConfigObj[key].toString(), "yyyy-MM-dd hh:mm:ss");
-            }
-
-            if(wlConfigObjKey == "Showed")
-            {
-                QJsonArray arr = wlConfigObj[key].toArray();
-                for(auto iter :arr)
-                {
+        for (auto it = wlConfigObj.begin(); it != wlConfigObj.end(); it++) {
+            if (it.key() == "LastChange") {
+                wallpaperLoopConfigMap[key].lastChange = QDateTime::fromString(it.value().toString(), "yyyy-MM-dd hh:mm:ss");
+            } else if (it.key() == "Showed") {
+                QJsonArray arr = it.value().toArray();
+                for (auto iter : arr) {
                     wallpaperLoopConfigMap[key].showedList.push_back(iter.toString());
                 }
             }
@@ -227,12 +219,12 @@ bool WallpaperLoopConfigManger::save(QString fileName)
     for(auto wallPaperConfig : wallpaperLoopConfigMap.toStdMap())
     {
         QJsonObject config;
-        config["LastChange"] = wallPaperConfig.second.lastChange.toString();
+        config["LastChange"] = wallPaperConfig.second.lastChange.toString("yyyy-MM-dd hh:mm:ss");
 
         QJsonArray showedArr;
         for(auto showedFile : wallPaperConfig.second.showedList)
         {
-            showedArr.push_back(showedArr);
+            showedArr.push_back(showedFile);
         }
         config["Showed"] = showedArr;
 

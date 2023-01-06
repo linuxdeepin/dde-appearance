@@ -434,7 +434,7 @@ void ThemesApi::doSetGtk3Prop(QString key, QString value, QString file, KeyFile 
 
 bool ThemesApi::setQTTheme()
 {
-    QString config = g_get_user_config_dir();
+    QString config = utils::GetUserConfigDir();
     config += "/Trolltech.conf";
     return setQt4Theme(config);
 }

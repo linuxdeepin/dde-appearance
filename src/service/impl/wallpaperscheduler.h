@@ -53,9 +53,8 @@ private:
 private:
     QStringList         showedList;
     bool                fileChange;
-    QString             allList;
+    QStringList         allList;
     QSharedPointer<QRandomGenerator>    rander;
-    QMutex              mutex;
     Backgrounds         backgrounds;
 };
 

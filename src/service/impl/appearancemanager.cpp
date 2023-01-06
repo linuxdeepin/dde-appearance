@@ -111,7 +111,7 @@ bool AppearanceManager::init()
     if (property->wallpaperURls->isEmpty()) {
         updateNewVersionData();
     }
-
+    initWallpaperSlideshow();
     zone = dbusProxy->timezone();
 
     connect(dbusProxy.get(), &AppearanceDBusProxy::TimezoneChanged, this, &AppearanceManager::handleTimezoneChanged);
@@ -711,7 +711,7 @@ void AppearanceManager::initWallpaperSlideshow()
             wsSchedulerMap[iter.first] = wallpaperScheduler;
         }
 
-        if (wsLoopMap.count(iter.second.toString()) != 1) {
+        if (!wsLoopMap.contains(iter.first)) {
             wsLoopMap[iter.first] = QSharedPointer<WallpaperLoop>(new WallpaperLoop());
         }
 
@@ -722,9 +722,14 @@ void AppearanceManager::initWallpaperSlideshow()
                     qWarning() << "failed to change background after login";
                 }
             } else {
-                uint sec = iter.second.toString().toUInt();
+                bool ok;
+                uint sec = iter.second.toString().toUInt(&ok);
                 if (wsSchedulerMap.count(iter.first) == 1) {
-                    wsSchedulerMap[iter.first]->setInterval(iter.first, sec);
+                    if (ok) {
+                        wsSchedulerMap[iter.first]->setInterval(iter.first, sec);
+                    } else {
+                        wsSchedulerMap[iter.first]->stop();
+                    }
                 }
             }
         }
@@ -754,7 +759,7 @@ void AppearanceManager::handlePrepareForSleep(bool sleep)
 
     for (auto it = tempMap.begin(); it != tempMap.end(); ++it) {
         if (it.value().toString() == WSPOLICYWAKEUP)
-            autoChangeBg(it.key(), QDateTime::currentDateTime());
+            autoChangeBg(it.key(), QDateTime::currentDateTimeUtc());
     }
 }
 
@@ -985,6 +990,7 @@ void AppearanceManager::updateWSPolicy(QString policy)
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(policy.toLatin1(), &error);
     if (error.error != QJsonParseError::NoError) {
+        qWarning() << "json error:" << policy << error.errorString();
         return;
     }
     loadWSConfig();
@@ -1001,13 +1007,14 @@ void AppearanceManager::updateWSPolicy(QString policy)
             wsLoopMap[iter.first] = QSharedPointer<WallpaperLoop>(new WallpaperLoop());
         }
 
-        if (curMonitorSpace == iter.first && WallpaperLoopConfigManger::isValidWSPolicy(policy)) {
+        if (curMonitorSpace == iter.first && WallpaperLoopConfigManger::isValidWSPolicy(iter.second.toString())) {
             bool bOk;
-            int nSec = policy.toInt(&bOk);
+            int nSec = iter.second.toString().toInt(&bOk);
             if (bOk) {
-                wsSchedulerMap[iter.first]->setLastChangeTime(QDateTime::currentDateTime());
+                QDateTime curr = QDateTime::currentDateTimeUtc();
+                wsSchedulerMap[iter.first]->setLastChangeTime(curr);
                 wsSchedulerMap[iter.first]->setInterval(iter.first, nSec);
-                saveWSConfig(iter.first, QDateTime::currentDateTime());
+                saveWSConfig(iter.first, curr);
             } else {
                 wsSchedulerMap[iter.first]->stop();
             }
@@ -1728,14 +1735,14 @@ void AppearanceManager::autoChangeBg(QString monitorSpace, QDateTime date)
 
     QString strIndex = QString::number(getCurrentDesktopIndex());
 
-    int index = monitorSpace.indexOf("&&");
-    if (index == -1) {
+    QStringList monitorlist = monitorSpace.split("&&");
+    if (monitorlist.size() != 2) {
         qWarning() << "monitorSpace format error";
         return;
     }
 
-    if (strIndex == monitorSpace.right(index + 2)) {
-        doSetMonitorBackground(monitorSpace.left(index), file);
+    if (strIndex == monitorlist.at(1)) {
+        doSetMonitorBackground(monitorlist.at(0), file);
     }
 
     saveWSConfig(monitorSpace, date);
@@ -1743,7 +1750,7 @@ void AppearanceManager::autoChangeBg(QString monitorSpace, QDateTime date)
 
 bool AppearanceManager::changeBgAfterLogin(QString monitorSpace)
 {
-    QString runDir = g_get_user_runtime_dir();
+    QString runDir = utils::GetUserRuntimeDir();
 
     QFile file("/proc/self/sessionid");
     if (!file.open(QIODevice::ReadOnly)) {
@@ -1770,7 +1777,7 @@ bool AppearanceManager::changeBgAfterLogin(QString monitorSpace)
     }
 
     if (needChangeBg) {
-        autoChangeBg(monitorSpace, QDateTime::currentDateTime());
+        autoChangeBg(monitorSpace, QDateTime::currentDateTimeUtc());
         fileTemp.write(currentSessionId.toLatin1());
     }
 
