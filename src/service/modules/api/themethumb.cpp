@@ -172,7 +172,6 @@ bool genIcon(QString theme,int width,int height,double scaleFactor,QString out)
     QList<QIcon> images = getIcons(theme, iconSize);
 
     QPixmap pixmap(width, height);
-    pixmap.setDevicePixelRatio(scaleFactor);
     pixmap.fill(Qt::transparent);
     QPainter painter;
     painter.begin(&pixmap);
