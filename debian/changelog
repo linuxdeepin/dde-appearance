@@ -1,3 +1,12 @@
+dde-appearance (1.0.4.1) unstable; urgency=medium
+
+  [ Deepin Packages Builder ]
+  * fix: 新建工作区时随机给一个壁纸(Bug: 181837)(Influence: 新建工作区-壁纸变化)
+  * fix: 修改主题缩略图模糊问题(Bug: 182545)(Influence: 屏幕缩放不为1时，控制中心-个性化-图标主题-缩略图)
+  * fix: 修改主题未选中问题(Bug: 181807)(Influence: 控制中心-个性化-图标)
+
+ -- caixiangrong <caixiangrong@uniontech.com>  Tue, 10 Jan 2023 14:23:01 +0800
+
 dde-appearance (1.0.4) unstable; urgency=medium
 
   [ TagBuilder ]
