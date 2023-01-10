@@ -4,10 +4,7 @@
 #include <QObject>
 #include <QUrl>
 #include <QDir>
-#include <QDebug>
-//#include <glib.h>
 #include <gio/gio.h>
-#include <QMutex>
 #include <functional>
 
 #include "../api/keyfile.h"

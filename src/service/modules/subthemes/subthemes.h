@@ -9,6 +9,7 @@
 #include <vector>
 #include <DConfig>
 
+class QTimer;
 class QThread;
 class AppearanceManager;
 
@@ -48,6 +49,9 @@ public:
     QString getBasePath(QString filename);
     QMap<QString,QString>& getGtkThumbnailMap();
 
+private Q_SLOTS:
+    void init();
+
 private:
     QSharedPointer<ThemesApi>          themeApi;
     QVector<QSharedPointer<Theme>>     gtkThemes;
@@ -55,6 +59,9 @@ private:
     QVector<QSharedPointer<Theme>>     cursorThemes;
     QVector<QSharedPointer<Theme>>     globalThemes;
     QMap<QString,QString>              gtkThumbnailMap;
+    int                                initStatus;
+    QTimer                             *timer;
+    QStringList                        thumbnailThemes;
 };
 
 #endif

@@ -9,7 +9,6 @@
 #include <QTimer>
 #include <QRandomGenerator>
 #include <QSharedPointer>
-#include <QMutex>
 
 class WallpaperScheduler : public QObject
 {

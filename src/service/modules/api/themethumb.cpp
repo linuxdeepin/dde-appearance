@@ -419,18 +419,22 @@ QString getIcon(QString id, QString descFile)
 
 bool shouldGenerateNew(QString descFile, QString out)
 {
-    QFileInfo outFileInfo(out);qInfo()<<descFile<<out<<outFileInfo.exists();
+    QFileInfo outFileInfo(out);
     if (!outFileInfo.exists()) {
         return true;
     }
     QFileInfo descFileInfo(descFile);
+    if (descFileInfo.isFile()) {
+        descFileInfo = QFileInfo(descFileInfo.dir().absolutePath());
+    }
+
     return descFileInfo.lastModified() > outFileInfo.lastModified();
 }
 
 bool shouldGenerateNewCursor(QString descFile, QString out)
 {
     QString dir = DFile::dir(descFile);
-    descFile = dir+"/"+"cursors"+"/"+"left_ptr";
+    descFile = dir;
 
     return shouldGenerateNew(descFile,out);
 }

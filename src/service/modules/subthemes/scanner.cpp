@@ -2,6 +2,8 @@
 #include "../api/utils.h"
 #include "../common/commondefine.h"
 
+#include <QDebug>
+
 Scanner::Scanner(QObject *parent)
     :QObject (parent)
 {

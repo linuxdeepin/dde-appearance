@@ -200,6 +200,18 @@ QStringList KeyFile::getMainKeys()
     return mainKeys;
 }
 
+void KeyFile::removeSection(const QString &section)
+{
+    mainKeyMap.remove(section);
+}
+
+void KeyFile::removeKey(const QString &section, const QString &key)
+{
+    if (mainKeyMap.contains(section)) {
+        mainKeyMap[section].remove(key);
+    }
+}
+
 void KeyFile::print()
 {
     std::cout << "sectionMap: " << std::endl;

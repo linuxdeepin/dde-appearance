@@ -97,18 +97,17 @@ void CustomTheme::openCustomTheme()
     QDir home = QDir::home();
     home.cd(CUSTOMTHEMEPATH);
     m_customTheme->loadFile(home.absoluteFilePath(THEMEFILE));
-    if (m_customTheme->getStr("Deepin Theme", "Name").isEmpty()) {
-        m_customTheme->setKey("Deepin Theme", "Name", "Custom");
-        m_customTheme->setKey("Deepin Theme", "DefaultTheme", "DefaultTheme");
-        m_customTheme->setKey("Deepin Theme", "DarkTheme", "DarkTheme");
-        m_customTheme->setKey("Deepin Theme", "Example", "/usr/share/dde-appearance/custom.svg");
-    }
+    m_customTheme->removeSection("Deepin Theme");
+    m_customTheme->setKey("Deepin Theme", "Name", "Custom");
+    m_customTheme->setKey("Deepin Theme", "DefaultTheme", "DefaultTheme");
+    m_customTheme->setKey("Deepin Theme", "DarkTheme", "DarkTheme");
+    m_customTheme->setKey("Deepin Theme", "Example", "/usr/share/dde-appearance/custom.svg");
 }
 
 void CustomTheme::saveCustomTheme()
 {
     QDir home = QDir::home();
-    home.mkdir(CUSTOMTHEMEPATH);
+    home.mkpath(CUSTOMTHEMEPATH);
     home.cd(CUSTOMTHEMEPATH);
     m_customTheme->saveToFile(home.absoluteFilePath(THEMEFILE));
 }

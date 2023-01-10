@@ -27,7 +27,8 @@ public:
     bool saveToFile(const QString &filePath);
     bool loadFile(const QString &filePath);
     QStringList getMainKeys();
-
+    void removeSection(const QString &section);
+    void removeKey(const QString &section, const QString &key);
 
     // for test
     void print();

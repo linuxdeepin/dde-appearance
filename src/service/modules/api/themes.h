@@ -6,9 +6,7 @@
 
 #include <QObject>
 #include <QMutex>
-#include <QDBusInterface>
-#include <string>
-#include <vector>
+#include <QSharedPointer>
 #include <QGSettings>
 
 class AppearanceManager;

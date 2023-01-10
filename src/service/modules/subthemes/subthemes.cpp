@@ -10,25 +10,30 @@
 DCORE_USE_NAMESPACE
 
 const QString gsKeyExcludedIcon = "Excluded_Icon_Themes";
+// 初始化用定时器空闲时延时处理
+enum SubthemesInitStatus {
+    initBegin,
+    initGtkThemes = initBegin,
+    initGlobalThemes,
+    initCursorThemes,
+    initCursorThumbnail,
+    initIconThemes,
+    initIconThumbnail,
+    initFinished,
+};
 
 Subthemes::Subthemes(AppearanceManager *parent)
-    : QObject()
+    : QObject(parent)
     , themeApi(new ThemesApi(parent))
+    , initStatus(initBegin)
+    , timer(new QTimer(this))
 {
-    refreshGtkThemes();
-    refreshIconThemes();
-    refreshCursorThemes();
-    refreshGlobalThemes();
+    connect(timer, &QTimer::timeout, this, &Subthemes::init);
+    timer->start(500);
+
     gtkThumbnailMap["deepin"] ="light";
     gtkThumbnailMap["deepin-dark"] ="dark";
     gtkThumbnailMap["deepin-auto"] ="auto";
-
-    for (auto &&theme : cursorThemes) {
-        getCursorThumbnail(theme->getId());
-    }
-    for (auto &&theme : iconThemes) {
-        getIconThumbnail(theme->getId());
-    }
 }
 
 Subthemes::~Subthemes()
@@ -379,4 +384,48 @@ QString Subthemes::getBasePath(QString filename)
 QMap<QString,QString>& Subthemes::getGtkThumbnailMap()
 {
     return gtkThumbnailMap;
+}
+
+void Subthemes::init()
+{
+    switch (initStatus) {
+    case initGtkThemes:
+        listGtkThemes();
+        break;
+    case initGlobalThemes:
+        listGlobalThemes();
+        break;
+    case initCursorThemes:
+        listCursorThemes();
+        for (auto &&theme : cursorThemes) {
+            thumbnailThemes << theme->getId();
+        }
+        break;
+    case initCursorThumbnail:
+        if (!thumbnailThemes.isEmpty()) {
+            getCursorThumbnail(thumbnailThemes.takeFirst());
+            return;
+        }
+        break;
+    case initIconThemes:
+        listIconThemes();
+        for (auto &&theme : iconThemes) {
+            thumbnailThemes << theme->getId();
+        }
+        break;
+    case initIconThumbnail:
+        if (!thumbnailThemes.isEmpty()) {
+            getIconThumbnail(thumbnailThemes.takeFirst());
+            return;
+        }
+        break;
+    case initFinished:
+    default:
+        timer->stop();
+        timer->deleteLater();
+        timer = nullptr;
+        return;
+        break;
+    }
+    initStatus++;
 }

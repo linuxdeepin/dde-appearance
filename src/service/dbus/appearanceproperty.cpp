@@ -54,4 +54,7 @@ AppearanceProperty::AppearanceProperty()
     , wallpaperURls("WallpaperURls")
     , windowRadius("WindowRadius")
 {
+    fontSize.init(0.0);
+    opacity.init(0.0);
+    windowRadius.init(0);
 }

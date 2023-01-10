@@ -155,12 +155,13 @@ private:
     QString marshal(const QStringList& strs);
     QString marshal(const QVector<QSharedPointer<FontsManager::Family>>& strs);
     int getCurrentDesktopIndex();
-    void applyGlobalTheme(KeyFile &theme, const QString &themeName, const QString &defaultTheme);
+    void applyGlobalTheme(KeyFile &theme, const QString &themeName, const QString &defaultTheme, const QString &themePath);
 
     void updateCustomTheme(const QString &type, const QString &value);
     bool isBgInUse(const QString &file);
     QVector<Background> backgroundListVerify(const QVector<Background>& backgrounds);
     QString getWallpaperUri(const QString &index, const QString &monitorName);
+    void initGlobalTheme();
 
 Q_SIGNALS:
     void Changed(const QString &ty, const QString &value);

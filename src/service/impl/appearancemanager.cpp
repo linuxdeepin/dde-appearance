@@ -123,22 +123,10 @@ bool AppearanceManager::init()
     connect(dbusProxy.get(), &AppearanceDBusProxy::NTPSessionChanged, this, &AppearanceManager::handleNTPChanged);
     connect(dbusProxy.get(), &AppearanceDBusProxy::HandleForSleep, this, &AppearanceManager::handlePrepareForSleep);
 
-    QVector<QSharedPointer<Theme>> globalList = subthemes->listGlobalThemes();
-    bool bFound = false;
-
-    for (auto theme : globalList) {
-        if (theme->getId() == property->globalTheme) {
-            bFound = true;
-            break;
-        }
-    }
-    if (!bFound) {
-        setGlobalTheme(DEFAULTICONTHEME);
-        doSetGlobalTheme(DEFAULTICONTHEME);
-    }
+    initGlobalTheme();
 
     QVector<QSharedPointer<Theme>> iconList = subthemes->listIconThemes();
-    bFound = false;
+    bool bFound = false;
 
     for (auto theme : iconList) {
         if (theme->getId() == property->iconTheme) {
@@ -283,6 +271,7 @@ void AppearanceManager::handlethemeFileChange(QString theme)
 {
     if (theme == TYPEGLOBALTHEME) {
         subthemes->refreshGlobalThemes();
+        initGlobalTheme();
         Q_EMIT Refreshed(TYPEGLOBALTHEME);
     } else if (theme == TYPEBACKGROUND) {
         backgrounds->notifyChanged();
@@ -1140,13 +1129,13 @@ bool AppearanceManager::doSetGlobalTheme(QString value)
         mode = Light;
     switch (mode) {
     case Light:
-        applyGlobalTheme(theme, defaultTheme, defaultTheme);
+        applyGlobalTheme(theme, defaultTheme, defaultTheme, themePath);
         currentGlobalTheme = value;
         break;
     case Dark: {
         if (darkTheme.isEmpty())
             return false;
-        applyGlobalTheme(theme, darkTheme, defaultTheme);
+        applyGlobalTheme(theme, darkTheme, defaultTheme, themePath);
         currentGlobalTheme = value;
     } break;
     case Auto: {
@@ -1531,6 +1520,9 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
         if (ok) {
             setOpacity(opacity);
         }
+    } else if (type == TYPEWALLPAPER) {
+        doSetCurrentWorkspaceBackground(value);
+        updateValut = true;
     }
     if (updateValut) {
         updateCustomTheme(type, value);
@@ -1600,7 +1592,7 @@ int AppearanceManager::getCurrentDesktopIndex()
     return dbusProxy->GetCurrentWorkspace();
 }
 
-void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeName, const QString &defaultTheme)
+void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeName, const QString &defaultTheme, const QString &themePath)
 {
     globalThemeUpdating = true;
     QString defTheme = (defaultTheme.isEmpty() || defaultTheme == themeName) ? QString() : defaultTheme;
@@ -1612,9 +1604,22 @@ void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeNam
         if (!themeValue.isEmpty())
             doSetByType(type, themeValue);
     };
+    auto setGlobalFile = [&theme, &themeName, &defTheme, &themePath, this](const QString &key, const QString &type) {
+        QString themeValue = theme.getStr(themeName, key);
+        if (themeValue.isEmpty() && !defTheme.isEmpty())
+            themeValue = theme.getStr(defTheme, key);
+        if (!themeValue.isEmpty()) {
+            themeValue = utils::deCodeURI(themeValue);
+            QFileInfo fileInfo(themeValue);
+            if (!fileInfo.isAbsolute()) {
+                themeValue = themePath + "/" + themeValue;
+            }
+            doSetByType(type, themeValue);
+        }
+    };
 
-    setGlobalItem("Wallpaper", TYPEBACKGROUND);
-    setGlobalItem("LockBackground", TYPEGREETERBACKGROUND);
+    setGlobalFile("Wallpaper", TYPEWALLPAPER);
+    setGlobalFile("LockBackground", TYPEGREETERBACKGROUND);
     setGlobalItem("IconTheme", TYPEICON);
     setGlobalItem("CursorTheme", TYPECURSOR);
     setGlobalItem("AppTheme", TYPEGTK);
@@ -1697,6 +1702,40 @@ QString AppearanceManager::getWallpaperUri(const QString &index, const QString &
         PhaseWallPaper::setWallpaperUri(index, monitorName, wallpaper);
     }
     return wallpaper;
+}
+
+void AppearanceManager::initGlobalTheme()
+{
+    QVector<QSharedPointer<Theme>> globalList = subthemes->listGlobalThemes();
+    bool bFound = false;
+
+    if (property->globalTheme->isEmpty())
+        property->globalTheme = DEFAULTGLOBALTHEME;
+
+    QString globalID = property->globalTheme->split(".").first();
+    for (auto theme : globalList) {
+        if (theme->getId() == globalID) {
+            bFound = true;
+            break;
+        }
+    }
+    if (!bFound) {
+        for (auto theme : globalList) {
+            if (theme->getId() == DEFAULTGLOBALTHEME) {
+                bFound = true;
+                break;
+            }
+        }
+        if (bFound) {
+            setGlobalTheme(DEFAULTGLOBALTHEME);
+            doSetGlobalTheme(DEFAULTGLOBALTHEME);
+        } else if (!globalList.isEmpty()) {
+            setGlobalTheme(globalList.first()->getId());
+            doSetGlobalTheme(globalList.first()->getId());
+        } else {
+            setGlobalTheme(DEFAULTGLOBALTHEME);
+        }
+    }
 }
 
 void AppearanceManager::doSetCurrentWorkspaceBackground(const QString &uri)

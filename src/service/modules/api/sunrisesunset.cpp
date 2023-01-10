@@ -55,10 +55,10 @@ static float calculateSunChangedAsUTCHour(const int &dayOfYear, const float &lat
     // 7a. calculate the Sun's local hour angle 计算太阳的本地时角
     float cosH = (sin((M_PI / 180.0) * ZENITH) - (sinDec * sin((M_PI / 180.0) * lat))) / (cosDec * cos((M_PI / 180.0) * lat));
 
-    if (cosH > 1) // the sun never rises on this location (on the specified date) 太阳永远不会在这个位置升起（在指定的日期）
+    if (cosH > 1) // the sun never rises on this location (on the specified date) 太阳永远不会在这个位置升起（在指定的日期）长夜
         return 100;
 
-    if (cosH < -1) // the sun never sets on this location (on the specified date) 太阳永远不会落在这个位置（在指定的日期）
+    if (cosH < -1) // the sun never sets on this location (on the specified date) 太阳永远不会落在这个位置（在指定的日期）长昼
         return -100;
 
     // 7b. finish calculating H and convert into hours 完成计算H并转换为小时
@@ -87,14 +87,13 @@ bool SunriseSunset::getSunriseSunset(double latitude, double longitude, double u
 {
     int dayOfYear = date.dayOfYear();
     float sunriseUT = calculateSunChangedAsUTCHour(dayOfYear, latitude, longitude, utcOffset, CalcSunType::Sunrise);
-    if (sunriseUT < 0 || sunriseUT > 24) // 小于0 长昼 大于24长夜
-        return false;
-    float sunsetUT = calculateSunChangedAsUTCHour(dayOfYear, latitude, longitude, utcOffset, CalcSunType::Sunset);
-    if (sunsetUT < 0 || sunsetUT > 24) // 小于0 长昼 大于24长夜
-        return false;
 
-    sunrise = QDateTime(date, QTime::fromMSecsSinceStartOfDay(static_cast<int>(sunriseUT * 3600 * 1000)));
-    sunset = QDateTime(date, QTime::fromMSecsSinceStartOfDay(static_cast<int>(sunsetUT * 3600 * 1000)));
-    qInfo()<<__FUNCTION__<<date<<latitude<<longitude<<sunrise<<sunset;
+    float sunsetUT = calculateSunChangedAsUTCHour(dayOfYear, latitude, longitude, utcOffset, CalcSunType::Sunset);
+    if (sunsetUT <= -100) // 长昼 返回的sunrise-sunset区间用于判断当前是否为白天
+        sunsetUT = 100;
+
+    sunrise = QDateTime(date, QTime()).addMSecs(static_cast<int>(sunriseUT * 3600 * 1000));
+    sunset = QDateTime(date, QTime()).addMSecs(static_cast<int>(sunsetUT * 3600 * 1000));
+    qInfo() << __FUNCTION__ << date << latitude << longitude << sunriseUT << sunrise << sunsetUT << sunset;
     return true;
 }

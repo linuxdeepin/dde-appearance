@@ -102,6 +102,8 @@ void Fsnotify::onFileChanged(const QString &path)
         changedThemes.insert(TYPEGTK);
     } else if (hasEventOccurred(path, iconDirs)) {
         changedThemes.insert(TYPEICON);
+    } else if (path.contains(".cache")) { // 自定义不延时
+        Q_EMIT themeFileChange(TYPEGLOBALTHEME);
     } else if (path.contains("deepin-themes")) {
         changedThemes.insert(TYPEGLOBALTHEME);
     }

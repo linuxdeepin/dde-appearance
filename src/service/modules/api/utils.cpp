@@ -2,7 +2,6 @@
 #include "../common/commondefine.h"
 
 #include <QFile>
-#include <QMutex>
 #include <QDir>
 #include <QUrl>
 #include <QStandardPaths>
@@ -19,8 +18,7 @@ bool utils::WriteStringToFile(QString filename, QString content)
     if (filename.length() == 0) {
         return false;
     }
-    QMutex writeMutex = QMutex();
-    writeMutex.lock();
+
     QString swapFile = filename + "/.swap";
     QDir dir(swapFile);
     if (!dir.mkpath(swapFile)) {
@@ -34,12 +32,7 @@ bool utils::WriteStringToFile(QString filename, QString content)
     file.write(content.toLatin1(), content.length());
     file.close();
 
-    if (!file.rename(filename))
-        return false;
-
-    writeMutex.unlock();
-
-    return true;
+    return file.rename(filename);
 }
 
 bool utils::isURI(QString uri)
