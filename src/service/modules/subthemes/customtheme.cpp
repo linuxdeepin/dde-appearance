@@ -20,8 +20,9 @@
  */
 #include "customtheme.h"
 #include "theme.h"
-#include "../api/keyfile.h"
-#include "../common/commondefine.h"
+#include "modules/api/keyfile.h"
+#include "modules/api/utils.h"
+#include "modules/common/commondefine.h"
 
 #include <QDir>
 #include <QDebug>
@@ -125,11 +126,23 @@ void CustomTheme::copyTheme(const QString &themePath, const QStringList &keys)
     if (darkTheme.isEmpty())
         darkTheme = defaultTheme;
 
+    const QStringList fileItem = { "Wallpaper", "LockBackground" };
+    auto setKey = [fileItem, themePath, this](const QString &section, const QString &key, const QString &oldValue) {
+        QString value = oldValue;
+        if (fileItem.contains(key)) {
+            value = utils::deCodeURI(value);
+            QFileInfo fileInfo(value);
+            if (!fileInfo.isAbsolute()) {
+                value = themePath + "/" + value;
+            }
+        }
+        m_customTheme->setKey(section, key, value);
+    };
     for (auto &&key : keys) {
         QString value = theme.getStr(defaultTheme, key);
-        m_customTheme->setKey("DefaultTheme", key, value);
+        setKey("DefaultTheme", key, value);
 
         value = theme.getStr(darkTheme, key, value);
-        m_customTheme->setKey("DarkTheme", key, value);
+        setKey("DarkTheme", key, value);
     }
 }
