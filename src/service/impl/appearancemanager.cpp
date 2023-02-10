@@ -1622,7 +1622,7 @@ void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeNam
         }
     };
 
-    setGlobalFile("Wallpaper", TYPEWALLPAPER);
+    setGlobalFile("Wallpaper", TYPEBACKGROUND);
     setGlobalFile("LockBackground", TYPEGREETERBACKGROUND);
     setGlobalItem("IconTheme", TYPEICON);
     setGlobalItem("CursorTheme", TYPECURSOR);
