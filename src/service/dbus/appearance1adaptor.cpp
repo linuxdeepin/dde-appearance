@@ -248,5 +248,3 @@ QString Appearance1Adaptor::Thumbnail(const QString &ty, const QString &name, co
     // handle method call org.deepin.dde.Appearance1.Thumbnail
     return parent()->Thumbnail(ty, name, message);
 }
-
-#include "appearance1adaptor.moc"
