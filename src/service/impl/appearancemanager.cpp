@@ -1091,7 +1091,7 @@ bool AppearanceManager::doSetFonts(double size)
         qWarning() << "set font size error:can not set qt theme ";
         return false;
     }
-
+    setFontSize(size);
     return true;
 }
 
@@ -1147,6 +1147,7 @@ bool AppearanceManager::doSetGlobalTheme(QString value)
     } break;
     }
 
+    setGlobalTheme(value);
     return true;
 }
 
@@ -1169,6 +1170,7 @@ bool AppearanceManager::doSetGtkTheme(QString value)
     if (!ddeKWinTheme.isEmpty()) {
         dbusProxy->SetDecorationDeepinTheme(ddeKWinTheme);
     }
+    setGtkTheme(value);
     return subthemes->setGtkTheme(value);
 }
 
@@ -1182,6 +1184,7 @@ bool AppearanceManager::doSetIconTheme(QString value)
         return false;
     }
 
+    setIconTheme(value);
     return setDQtTheme({ QTKEYICON }, { value });
 }
 
@@ -1191,6 +1194,7 @@ bool AppearanceManager::doSetCursorTheme(QString value)
         return false;
     }
 
+    setCursorTheme(value);
     return subthemes->setCursorTheme(value);
 }
 
@@ -1419,7 +1423,7 @@ void AppearanceManager::doResetSettingBykeys(QStringList keys)
 {
     QStringList keyList = settingDconfig.keyList();
     for (auto item : keys) {
-        if (keyList.contains(item)) {
+        if (!keyList.contains(item)) {
             continue;
         }
         settingDconfig.reset(item);
