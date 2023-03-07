@@ -115,4 +115,4 @@ target_link_libraries(dde-appearance
     ${DtkGui_LIBRARIES}
 )
 
-install(TARGETS dde-appearance DESTINATION bin)
+install(TARGETS dde-appearance DESTINATION ${CMAKE_INSTALL_BINDIR})
