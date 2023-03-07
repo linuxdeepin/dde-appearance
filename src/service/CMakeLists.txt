@@ -14,7 +14,6 @@ find_package(DtkGui REQUIRED)
 find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(QGSettings REQUIRED IMPORTED_TARGET gsettings-qt)
-pkg_check_modules(DFrameworkDBus REQUIRED IMPORTED_TARGET dframeworkdbus)
 pkg_check_modules(Gio-2.0 REQUIRED IMPORTED_TARGET gio-2.0)
 pkg_check_modules(X11 REQUIRED IMPORTED_TARGET xcursor xfixes x11)
 pkg_check_modules(GTK3 REQUIRED IMPORTED_TARGET gtk+-3.0 gdk-3.0)
@@ -100,26 +99,12 @@ add_executable(dde-appearance
     ${SRCS}
 )
 
-
-target_include_directories(dde-appearance PUBLIC
-    PkgConfig::QGSettings
-    PkgConfig::DFrameworkDBus
-    PkgConfig::Gio-2.0
-    PkgConfig::GTK3
-    PkgConfig::X11
-    PkgConfig::XCB
-    PkgConfig::OPENSSL
-    PkgConfig::FONTCONFIG
-
-)
-
 target_link_libraries(dde-appearance
     Qt5::Core
     Qt5::DBus
     Qt5::Concurrent
     Qt5::Gui
     PkgConfig::QGSettings
-    PkgConfig::DFrameworkDBus
     PkgConfig::Gio-2.0
     PkgConfig::GTK3
     PkgConfig::X11
