@@ -226,7 +226,7 @@ void AppearanceManager::handleSetScaleFactorStarted()
 {
     QString body = tr("Setting display scaling");
     QString summary = tr("Display scaling");
-    dbusProxy->Notify("dde-control-center", "dialog-window-scale", summary, body, {}, {}, 0);
+    qInfo() << body << ":" << summary;
 }
 
 void AppearanceManager::handleSetScaleFactorDone()
