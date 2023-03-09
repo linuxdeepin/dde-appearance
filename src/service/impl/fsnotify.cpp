@@ -7,6 +7,7 @@
 
 #include <QDebug>
 #include <QTimer>
+#include <QStandardPaths>
 
 Fsnotify::Fsnotify(QObject *parent)
     : QObject(parent)
@@ -36,8 +37,11 @@ void Fsnotify::watchGtkDirs()
     auto home = qgetenv("HOME");
     gtkDirs.append(home + "/.local/share/themes");
     gtkDirs.append(home + "/.themes");
-    gtkDirs.append("/usr/local/share/themes");
-    gtkDirs.append("/usr/share/themes");
+    for (const QString &basedir : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)) {
+        const QString path = QDir(basedir).filePath("themes");
+        if (QFile::exists(path))
+            gtkDirs.append(path);
+    }
     watchDirs(gtkDirs);
 }
 
@@ -46,8 +50,11 @@ void Fsnotify::watchIconDirs()
     auto home = qgetenv("HOME");
     iconDirs.append(home + "/.local/share/icons");
     iconDirs.append(home + "/.icons");
-    iconDirs.append("/usr/local/share/icons");
-    iconDirs.append("/usr/share/icons");
+    for (const QString &basedir : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)) {
+        const QString path = QDir(basedir).filePath("icons");
+        if (QFile::exists(path))
+            iconDirs.append(path);
+    }
     watchDirs(iconDirs);
 }
 
@@ -64,8 +71,11 @@ void Fsnotify::watchGlobalDirs()
     globalDirs.append(home.absoluteFilePath(".cache/deepin/dde-appearance/deepin-themes/"));
     globalDirs.append(home.absoluteFilePath(".local/share/deepin-themes"));
     globalDirs.append(home.absoluteFilePath(".deepin-themes"));
-    globalDirs.append("/usr/local/share/deepin-themes");
-    globalDirs.append("/usr/share/deepin-themes");
+    for (const QString &basedir : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)) {
+        const QString path = QDir(basedir).filePath("deepin-themes");
+        if (QFile::exists(path))
+            iconDirs.append(path);
+    }
     watchDirs(globalDirs);
 }
 
