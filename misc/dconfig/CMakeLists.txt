@@ -2,4 +2,4 @@ set(DCONFIG_FILES
     org.deepin.dde.appearance.json
 )
 
-install(FILES ${DCONFIG_FILES} DESTINATION /usr/share/dsg/configs/org.deepin.dde.appearance)
+install(FILES ${DCONFIG_FILES} DESTINATION ${CMAKE_INSTALL_DATADIR}/dsg/configs/org.deepin.dde.appearance)
