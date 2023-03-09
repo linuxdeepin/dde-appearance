@@ -15,6 +15,8 @@
 #include <X11/Xcursor/Xcursor.h>
 #include <X11/extensions/Xfixes.h>
 
+#include <QStandardPaths>
+
 ThemesApi::ThemesApi(AppearanceManager *parent)
     : QObject(parent)
     , scanner(new Scanner())
@@ -65,7 +67,11 @@ QVector<QString> ThemesApi::listGlobalTheme()
     local.push_back(home.absoluteFilePath(".deepin-themes"));
 
     QVector<QString> sys;
-    sys.push_back("/usr/share/deepin-themes");
+    for (const QString &basedir : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)) {
+        const QString path = QDir(basedir).filePath("deepin-themes");
+        if (QFile::exists(path))
+            sys.push_back(path);
+    }
 
     return doListTheme(local, sys, TYPEGLOBALTHEME);
 }
@@ -78,7 +84,11 @@ QVector<QString> ThemesApi::listGtkTheme()
     local.push_back(home + "/.themes");
 
     QVector<QString> sys;
-    sys.push_back("/usr/share/themes");
+    for (const QString &basedir : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)) {
+        const QString path = QDir(basedir).filePath("themes");
+        if (QFile::exists(path))
+            sys.push_back(path);
+    }
 
     return doListTheme(local, sys, TYPEGTK);
 }
@@ -91,20 +101,33 @@ QVector<QString> ThemesApi::listIconTheme()
     local.push_back(home + "/.icons");
 
     QVector<QString> sys;
-    sys.push_back("/usr/share/icons");
+    for (const QString &basedir : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)) {
+        const QString path = QDir(basedir).filePath("icons");
+        if (QFile::exists(path))
+            sys.push_back(path);
+    }
 
     return doListTheme(local, sys, TYPEICON);
 }
 
 QVector<QString> ThemesApi::listCursorTheme()
 {
+    const QString xcursor_env = qEnvironmentVariable("XCURSOR_PATH");
+    QVector<QString> paths = xcursor_env.split(':', Qt::SkipEmptyParts).toVector();;
+    if (!paths.isEmpty())
+        return paths;
+
     QVector<QString> local;
     QString home = utils::GetUserHomeDir();
     local.push_back(home + "/.local/share/icons");
     local.push_back(home + "/.icons");
 
     QVector<QString> sys;
-    sys.push_back("/usr/share/icons");
+    for (const QString &basedir : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)) {
+        const QString path = QDir(basedir).filePath("icons");
+        if (QFile::exists(path))
+            sys.push_back(path);
+    }
 
     return doListTheme(local, sys, TYPECURSOR);
 }
@@ -284,8 +307,11 @@ QString ThemesApi::getThemePath(QString name, QString ty, QString key)
     QString home = utils::GetUserHomeDir();
     dirs.push_back(home + "/.local/share/" + key);
     dirs.push_back(home + "." + key);
-    dirs.push_back("usr/lical/share/" + key);
-    dirs.push_back("/usr/share/" + key);
+    for (const QString &basedir : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)) {
+        const QString path = QDir(basedir).filePath(key);
+        if (QFile::exists(path))
+            dirs.push_back(path);
+    }
 
     for (auto dir : dirs) {
         QString tmp = dir + "/" + name;
