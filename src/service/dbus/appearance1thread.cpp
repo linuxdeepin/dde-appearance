@@ -208,7 +208,7 @@ QString Appearance1Thread::List(const QString &ty, const QDBusMessage &message)
 void Appearance1Thread::Reset(const QDBusMessage &message)
 {
     QMutexLocker locker(&mutex);
-    QStringList keys{ GSKEYGTKTHEME, GSKEYICONTHEM, GSKEYCURSORTHEME, GSKEYFONTSIZE };
+    QStringList keys{GSKEYGLOBALTHEME, GSKEYGTKTHEME, GSKEYICONTHEM, GSKEYCURSORTHEME, GSKEYFONTSIZE};
 
     appearanceManager->doResetSettingBykeys(keys);
 
