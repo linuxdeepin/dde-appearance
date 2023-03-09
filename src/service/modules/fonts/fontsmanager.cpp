@@ -324,7 +324,7 @@ QString FontsManager::fontMatch(QString family)
     {
         return nullptr;
     }
-    
+
     FcConfigSubstitute(nullptr, pat, FcMatchPattern);
     FcDefaultSubstitute(pat);
 
@@ -360,47 +360,53 @@ QString FontsManager::fontMatch(QString family)
 
 QString FontsManager::configContent(QString standard, QString monospace)
 {
-    QString retString = QString::asprintf(R"(<?xml version="1.0"?>
-                                           <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
-                                           <fontconfig>
-                                               <match target="pattern">
-                                                   <test qual="any" name="family">
-                                                       <string>serif</string>
-                                                   </test>
-                                                   <edit name="family" mode="assign" binding="strong">
-                                                       <string>%s</string>
-                                                       <string>%s</string>
-                                                   </edit>
-                                               </match>
+    QString retString = QString::asprintf(
+    R"(
+<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+<fontconfig>
+    <match target="pattern">
+        <test qual="any" name="family">
+            <string>serif</string>
+        </test>
+        <edit name="family" mode="assign" binding="strong">
+            <string>%s</string>
+            <string>%s</string>
+        </edit>
+    </match>
 
-                                               <match target="pattern">
-                                                   <test qual="any" name="family">
-                                                       <string>sans-serif</string>
-                                                   </test>
-                                                   <edit name="family" mode="assign" binding="strong">
-                                                       <string>%s</string>
-                                                       <string>%s</string>
-                                                   </edit>
-                                               </match>
+    <match target="pattern">
+        <test qual="any" name="family">
+            <string>sans-serif</string>
+        </test>
+        <edit name="family" mode="assign" binding="strong">
+            <string>%s</string>
+            <string>%s</string>
+        </edit>
+    </match>
 
-                                               <match target="pattern">
-                                                   <test qual="any" name="family">
-                                                       <string>monospace</string>
-                                                   </test>
-                                                   <edit name="family" mode="assign" binding="strong">
-                                                       <string>%s</string>
-                                                       <string>%s</string>
-                                                       <string>%s</string>
-                                                   </edit>
-                                               </match>
+    <match target="pattern">
+        <test qual="any" name="family">
+            <string>monospace</string>
+        </test>
+        <edit name="family" mode="assign" binding="strong">
+            <string>%s</string>
+            <string>%s</string>
+            <string>%s</string>
+        </edit>
+    </match>
 
-                                               <match target="font">
-                                                   <edit name="rgba"><const>rgb</const></edit>
-                                               </match>
-                                           </fontconfig>)",
-                                          standard.toLatin1().data(), "Noto Sans",
-                                          standard.toLatin1().data(), "Noto Sans",
-                                          monospace.toLatin1().data(), "Noto Mono", standard.toLatin1().data());
+    <match target="font">
+        <edit name="rgba"><const>rgb</const></edit>
+    </match>
+ </fontconfig>)",
+    standard.toLatin1().data(),
+    "Noto Sans",
+    standard.toLatin1().data(),
+    "Noto Sans",
+    monospace.toLatin1().data(),
+    "Noto Mono",
+    standard.toLatin1().data());
     return retString;
 }
 

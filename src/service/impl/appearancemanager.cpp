@@ -1206,11 +1206,11 @@ bool AppearanceManager::doSetStandardFont(QString value)
     }
     QString tmpMonoFont = property->monospaceFont;
     QStringList fontList = fontsManager->listMonospace();
-    if (!fontList.isEmpty()) {
+    if (tmpMonoFont.isEmpty() && !fontList.isEmpty()) {
         tmpMonoFont = fontList[0];
     }
 
-    qDebug() << "doSetStandardFont standardFont:" << property->standardFont << ", monospaceFont:" << property->monospaceFont;
+    qDebug() << "doSetStandardFont standardFont:" << property->standardFont << ", monospaceFont:" << tmpMonoFont;
     if (!fontsManager->setFamily(value, tmpMonoFont, property->fontSize)) {
         qWarning() << "set standard font error:can not set family ";
         return false;
@@ -1230,11 +1230,11 @@ bool AppearanceManager::doSetMonospaceFont(QString value)
     }
     QString tmpStandardFont = property->standardFont;
     QStringList fontList = fontsManager->listStandard();
-    if (!fontList.isEmpty()) {
+    if (tmpStandardFont.isEmpty() && !fontList.isEmpty()) {
         tmpStandardFont = fontList[0];
     }
 
-    qDebug() << "doSetMonospaceFont, standardFont:" << property->standardFont << ", monospaceFont:" << property->monospaceFont;
+    qDebug() << "doSetMonospaceFont, standardFont:" << tmpStandardFont << ", monospaceFont:" << property->monospaceFont;
     if (!fontsManager->setFamily(tmpStandardFont, value, property->fontSize)) {
         qWarning() << "set monospace font error:can not set family ";
         return false;
