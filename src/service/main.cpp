@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
     app.setOrganizationName("deepin");
-    app.setApplicationName("dde-appearance");
+    app.setApplicationName("org.deepin.dde.appearance");
     QTranslator translator;
     QString languagePath = QStandardPaths::locate(QStandardPaths::GenericDataLocation,
                                                   QString("dde-appearance/translations"),
