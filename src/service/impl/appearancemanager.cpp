@@ -628,7 +628,10 @@ QString AppearanceManager::hexColorToQtActiveColor(const QString &hexColor)
 void AppearanceManager::initCoordinate()
 {
     QString context;
-    QFile file(ZONEPATH);
+    QString zonepath = ZONEPATH;
+    if (qEnvironmentVariableIsSet("TZDIR"))
+        zonepath = qEnvironmentVariable("TZDIR") + "/zone1970.tab";
+    QFile file(zonepath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return;
     }
