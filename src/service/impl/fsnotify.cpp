@@ -74,7 +74,7 @@ void Fsnotify::watchGlobalDirs()
     for (const QString &basedir : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)) {
         const QString path = QDir(basedir).filePath("deepin-themes");
         if (QFile::exists(path))
-            iconDirs.append(path);
+            globalDirs.append(path);
     }
     watchDirs(globalDirs);
 }
