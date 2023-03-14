@@ -1629,7 +1629,7 @@ void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeNam
         }
     };
 
-    setGlobalFile("Wallpaper", TYPEBACKGROUND);
+    setGlobalFile("Wallpaper", TYPEWALLPAPER);
     setGlobalFile("LockBackground", TYPEGREETERBACKGROUND);
     setGlobalItem("IconTheme", TYPEICON);
     setGlobalItem("CursorTheme", TYPECURSOR);
@@ -1638,10 +1638,6 @@ void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeNam
     setGlobalItem("MonospaceFont", TYPEMONOSPACEFONT);
     setGlobalItem("FontSize", TYPEFONTSIZE);
     setGlobalItem("ActiveColor", TYPEACTIVECOLOR);
-    //    setGlobalItem("DockBackground", TYPESTANDARDFONT);
-    //    setGlobalItem("DockOpacity", TYPEDOCKOPACITY);
-    //    setGlobalItem("LauncherBackground", TYPEBACKGROUND);
-    //    setGlobalItem("LauncherOpacity", TYPESTANDARDFONT);
     setGlobalItem("WindowRadius", TYPWINDOWRADIUS);
     setGlobalItem("WindowOpacity", TYPEWINDOWOPACITY);
     globalThemeUpdating = false;
@@ -1751,15 +1747,7 @@ void AppearanceManager::initGlobalTheme()
 
 void AppearanceManager::doSetCurrentWorkspaceBackground(const QString &uri)
 {
-    QString strIndex = QString::number(getCurrentDesktopIndex());
-    if (strIndex == "") {
-        qWarning() << "error getting current desktop index through wm";
-        return;
-    }
-
-    PhaseWallPaper::setWallpaperUri(strIndex, dbusProxy->primary(), uri);
-    doUpdateWallpaperURIs();
-    return;
+    return doSetCurrentWorkspaceBackgroundForMonitor(uri, dbusProxy->primary());
 }
 
 QString AppearanceManager::doGetCurrentWorkspaceBackground()
