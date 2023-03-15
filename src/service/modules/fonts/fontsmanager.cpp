@@ -361,8 +361,7 @@ QString FontsManager::fontMatch(QString family)
 QString FontsManager::configContent(QString standard, QString monospace)
 {
     QString retString = QString::asprintf(
-    R"(
-<?xml version="1.0"?>
+    R"(<?xml version="1.0"?>
 <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
 <fontconfig>
     <match target="pattern">
