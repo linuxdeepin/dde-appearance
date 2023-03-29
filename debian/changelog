@@ -1,3 +1,13 @@
+dde-appearance (1.0.5) unstable; urgency=medium
+
+  [ Deepin Packages Builder ]
+  * fix: wrong format of fontconfig file
+  * fix: 控制中心设置主题壁纸没有跟随改变
+  * fix: reset ApplicationName as org.deepin.dde.appearance
+  * fix: 调用DBus接口恢复个性化设置失效
+
+ -- dengbo <dengbo@uniontech.com>  Wed, 29 Mar 2023 14:28:42 +0800
+
 dde-appearance (1.0.4.1) unstable; urgency=medium
 
   [ Deepin Packages Builder ]
