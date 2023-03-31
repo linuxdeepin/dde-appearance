@@ -1,3 +1,10 @@
+dde-appearance (1.0.6) unstable; urgency=medium
+
+  [ Deepin Packages Builder ]
+  * release dde-appearance 1.0.6
+
+ -- dengbo <dengbo@uniontech.com>  Fri, 31 Mar 2023 11:26:15 +0800
+
 dde-appearance (1.0.5) unstable; urgency=medium
 
   [ Deepin Packages Builder ]
