@@ -18,7 +18,10 @@ Build-Depends: debhelper (>= 9),
    libxcb-randr0-dev,
    libxcb-render0-dev,
    qttools5-dev-tools,
-   libssl-dev
+   libssl-dev,
+   libkf5globalaccel-dev,
+   libkf5windowsystem-dev,
+   libkf5config-dev,
 Standards-Version: 3.9.8
 Homepage: http://www.deepin.org
 

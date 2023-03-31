@@ -12,6 +12,9 @@ find_package(Qt5 REQUIRED COMPONENTS Core DBus Concurrent Gui)
 find_package(DtkCore REQUIRED)
 find_package(DtkGui REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(KF5Config REQUIRED)
+find_package(KF5WindowSystem REQUIRED)
+find_package(KF5GlobalAccel REQUIRED)
 
 pkg_check_modules(QGSettings REQUIRED IMPORTED_TARGET gsettings-qt)
 pkg_check_modules(Gio-2.0 REQUIRED IMPORTED_TARGET gio-2.0)
@@ -44,6 +47,8 @@ set(SRCS
     ./dbus/appearance1thread.cpp
     ./dbus/appearance1.h
     ./dbus/appearance1.cpp
+    ./dbus/deepinwmfaker.h
+    ./dbus/deepinwmfaker.cpp
     ./impl/appearancemanager.h
     ./impl/appearancemanager.cpp
     ./impl/fsnotify.h
@@ -95,8 +100,16 @@ set(SRCS
     ./modules/dconfig/phasewallpaper.cpp
 )
 
+qt5_add_dbus_adaptor(
+    wm_SRCS
+    ../../dbus/com.deepin.wm.xml
+    ./dbus/deepinwmfaker.h
+    DeepinWMFaker
+)
+
 add_executable(dde-appearance
     ${SRCS}
+    ${wm_SRCS}
 )
 
 target_link_libraries(dde-appearance
@@ -113,6 +126,9 @@ target_link_libraries(dde-appearance
     PkgConfig::FONTCONFIG
     ${DtkCore_LIBRARIES}
     ${DtkGui_LIBRARIES}
+    KF5::ConfigCore
+    KF5::WindowSystem
+    KF5::GlobalAccel
 )
 
 install(TARGETS dde-appearance DESTINATION ${CMAKE_INSTALL_BINDIR})

@@ -5,6 +5,8 @@
 #include <QGuiApplication>
 #include "dbus/appearance1adaptor.h"
 #include "dbus/appearance1.h"
+#include "wmadaptor.h"
+#include "dbus/deepinwmfaker.h"
 #include "modules/common/commondefine.h"
 
 int main(int argc, char *argv[])
@@ -23,6 +25,9 @@ int main(int argc, char *argv[])
 
     APPEARANCEDBUS.registerService(AppearanceService);
     APPEARANCEDBUS.registerObject(AppearancePath, AppearanceInterface, appearance);
+
+    DeepinWMFaker faker;
+    WmAdaptor wmAdaptor(&faker);
 
     return app.exec();
 }
