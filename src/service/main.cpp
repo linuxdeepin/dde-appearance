@@ -28,6 +28,8 @@ int main(int argc, char *argv[])
 
     DeepinWMFaker faker;
     WmAdaptor wmAdaptor(&faker);
+    QDBusConnection::sessionBus().registerService("com.deepin.wm");
+    QDBusConnection::sessionBus().registerObject("/com/deepin/wm", "com.deepin.wm", &faker);
 
     return app.exec();
 }
