@@ -1,3 +1,10 @@
+dde-appearance (1.0.7) unstable; urgency=medium
+
+  [ Deepin Packages Builder ]
+  * chore: merge deepin-wm-dbus
+
+ -- dengbo <dengbo@uniontech.com>  Mon, 3 Apr 2023 14:38:15 +0800
+
 dde-appearance (1.0.6) unstable; urgency=medium
 
   [ Deepin Packages Builder ]
