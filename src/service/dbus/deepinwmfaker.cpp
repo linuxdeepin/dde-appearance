@@ -659,8 +659,8 @@ QStringList DeepinWMFaker::GetAccel(const QString &id) const
 static QMap<QString, QList<QKeySequence>> getShoutcutListFromKDEConfigFile()
 {
     // 认为系统配置文件中存储的快捷键为默认值
-    KConfig kglobalshortcutsrc("/etc/xdg/kglobalshortcutsrc");
-    KConfigGroup kwin(&kglobalshortcutsrc, "kwin");
+    KConfig kglobalshortcutsrc("/etc/xdg/deepin-kglobalshortcutsrc");
+    KConfigGroup kwin(&kglobalshortcutsrc, "deepin-kwin");
 
     if (!kwin.isValid())
         return {};
