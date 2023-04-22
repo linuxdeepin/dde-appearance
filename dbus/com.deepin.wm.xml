@@ -8,248 +8,191 @@
 
     <method name="SwitchApplication">
         <arg type="b" name="backward" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
 
     <method name="TileActiveWindow">
         <arg type="u" name="side" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
 
     <method name="BeginToMoveActiveWindow">
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
 
     <method name="ToggleActiveWindowMaximize">
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="MinimizeActiveWindow">
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="ShowWorkspace">
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="ShowWindow">
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="ShowAllWindow">
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
 
     <method name="PerformAction">
         <arg type="i" name="type" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
 
     <method name="PreviewWindow">
         <arg type="u" name="xid" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="CancelPreviewWindow">
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
 
     <method name="GetCurrentWorkspaceBackground">
         <arg type="s" name="result" direction="out"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="SetCurrentWorkspaceBackground">
         <arg type="s" name="uri" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="GetWorkspaceBackground">
         <arg type="i" name="index" direction="in"/>
         <arg type="s" name="result" direction="out"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="SetWorkspaceBackground">
         <arg type="i" name="index" direction="in"/>
         <arg type="s" name="uri" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="SetTransientBackground">
         <arg type="s" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
 
     <method name="GetCurrentWorkspaceBackgroundForMonitor">
         <arg type="s" name="strMonitorName" direction="in"/>
         <arg type="s" name="result" direction="out"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="SetCurrentWorkspaceBackgroundForMonitor">
         <arg type="s" name="uri" direction="in"/>
         <arg type="s" name="strMonitorName" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="GetWorkspaceBackgroundForMonitor">
         <arg type="i" name="index" direction="in"/>
         <arg type="s" name="strMonitorName" direction="in"/>
         <arg type="s" name="result" direction="out"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="SetWorkspaceBackgroundForMonitor">
         <arg type="i" name="index" direction="in"/>
         <arg type="s" name="strMonitorName" direction="in"/>
         <arg type="s" name="uri" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="SetTransientBackgroundForMonitor">
         <arg type="s" name="uri" direction="in"/>
         <arg type="s" name="strMonitorName" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
 
     <method name="GetCurrentWorkspace">
         <arg type="i" name="index" direction="out"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="WorkspaceCount">
         <arg type="i" name="count" direction="out"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="SetCurrentWorkspace">
         <arg type="i" name="index" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="PreviousWorkspace">
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="NextWorkspace">
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
 
     <method name="GetAllAccels">
         <arg type="s" name="data" direction="out"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="GetAccel">
         <arg type="s" name="id" direction="in"/>
         <arg type="as" name="data" direction="out"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="GetDefaultAccel">
         <arg type="s" name="id" direction="in"/>
         <arg type="as" name="data" direction="out"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="SetAccel">
         <arg type="s" name="data" direction="in"/>
         <arg type="b" name="result" direction="out"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="RemoveAccel">
         <arg type="s" name="id" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
 
     <method name="SetDecorationTheme">
         <arg type="s" name="themeType" direction="in"/>
         <arg type="s" name="themeName" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="SetDecorationDeepinTheme">
         <arg type="s" name="deepinThemeName" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
-
     <signal name="WorkspaceBackgroundChanged">
         <arg type="i" name="index"/>
         <arg type="s" name="newUri"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </signal>
 
     <signal name="WorkspaceBackgroundChangedForMonitor">
         <arg type="i" name="index"/>
         <arg type="s" name="strMonitorName"/>
         <arg type="s" name="uri"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </signal>
 
     <signal name="compositingEnabledChanged">
         <arg type="b" name="enabled"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </signal>
     <signal name="wmCompositingEnabledChanged">
         <arg type="b" name="enabled"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </signal>
     <signal name="workspaceCountChanged">
         <arg type="i" name="count"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </signal>
 
     <signal name="BeginToMoveActiveWindowChanged">
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </signal>
     <signal name="SwitchApplicationChanged">
         <arg type="b" name="backward"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </signal>
     <signal name="TileActiveWindowChanged">
         <arg type="i" name="side"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </signal>
     <signal name="ToggleActiveWindowMaximizeChanged">
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </signal>
     <signal name="ShowAllWindowChanged">
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </signal>
     <signal name="ShowWindowChanged">
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </signal>
     <signal name="ShowWorkspaceChanged">
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </signal>
     <signal name="ResumeCompositorChanged">
         <arg type="i" name="reason"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </signal>
     <signal name="SuspendCompositorChanged">
         <arg type="i" name="reason"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </signal>
 
     <method name="ChangeCurrentWorkspaceBackground">
         <arg type="s" name="uri" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
 
     <method name="SwitchToWorkspace">
         <arg type="b" name="backward" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="PresentWindows">
         <arg type="au" name="xids" direction="in"/>
         <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QList&lt;uint&gt;"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="EnableZoneDetected">
         <arg type="b" name="enabled" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
 
     <signal name="WorkspaceSwitched">
         <arg type="i" name="from"/>
         <arg type="i" name="to"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </signal>
 
     <method name="GetMultiTaskingStatus">
         <arg type="b" name="isActive" direction="out"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="SetMultiTaskingStatus">
         <arg type="b" name="isActive" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="GetIsShowDesktop">
         <arg type="b" name="isShowDesktop" direction="out"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
     <method name="SetShowDesktop">
         <arg type="b" name="isShowDesktop" direction="in"/>
-        <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
     </method>
 </interface>
