@@ -1,3 +1,9 @@
+dde-appearance (1.0.8) unstable; urgency=medium
+
+  * fix: 桌面无法设置壁纸
+
+ -- dengbo <dengbo@uniontech.com>  Sun, 23 Apr 2023 17:53:20 +0800
+
 dde-appearance (1.0.7) unstable; urgency=medium
 
   [ Deepin Packages Builder ]
