@@ -109,12 +109,13 @@ bool FontsManager::setFamily(QString standard, QString monospace, double size)
     QDir dir(filePath.left(filePath.lastIndexOf("/")));
     if(!dir.exists())
     {
-        dir.mkdir(dir.currentPath());
+        qDebug() << "will create Folder" << dir.path();
+        dir.mkpath(dir.path());
     }
 
     QFile file(filePath);
     if (!file.open(QIODevice::WriteOnly)) {
-        qWarning() << "file open error";
+        qWarning() << "file:" << file.fileName() <<" open error";
         return false;
     }
     file.write(content.toLatin1(),content.length());
