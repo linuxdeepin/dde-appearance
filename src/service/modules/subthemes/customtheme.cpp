@@ -24,7 +24,7 @@ CustomTheme::CustomTheme(QObject *parent)
 void CustomTheme::updateValue(const QString &type, const QString &value, const QString &oldTheme, const QVector<QSharedPointer<Theme>> &globalThemes)
 {
     static const QMap<QString, QString> typekeyMap = {
-        { TYPEBACKGROUND, "Wallpaper" },
+        { TYPEWALLPAPER, "Wallpaper" },
         { TYPEGREETERBACKGROUND, "LockBackground" },
         { TYPEICON, "IconTheme" },
         { TYPECURSOR, "CursorTheme" },
@@ -33,9 +33,7 @@ void CustomTheme::updateValue(const QString &type, const QString &value, const Q
         { TYPEMONOSPACEFONT, "MonospaceFont" },
         { TYPEFONTSIZE, "FontSize" },
         { TYPEACTIVECOLOR, "ActiveColor" },
-//        { TYPESTANDARDFONT, "DockBackground" },
         { TYPEDOCKOPACITY, "DockOpacity" },
-//        { TYPESTANDARDFONT, "LauncherOpacity" },
         { TYPWINDOWRADIUS, "WindowRadius" },
         { TYPEWINDOWOPACITY, "WindowOpacity" }
     };

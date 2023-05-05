@@ -166,6 +166,7 @@ private:
     QVector<Background> backgroundListVerify(const QVector<Background>& backgrounds);
     QString getWallpaperUri(const QString &index, const QString &monitorName);
     void initGlobalTheme();
+    bool isSkipSetWallpaper(const QString &themePath);
 
 Q_SIGNALS:
     void Changed(const QString &ty, const QString &value);

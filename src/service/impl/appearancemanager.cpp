@@ -814,6 +814,10 @@ void AppearanceManager::doUpdateWallpaperURIs()
     }
 
     setPropertyWallpaperURIs(monitorWallpaperUris);
+    // 如果是用户自己设置的桌面壁纸, 需要将主题更新为自定义
+    if (!monitorWallpaperUris.first().startsWith("/usr/share/wallpapers/deepin")) {
+        updateCustomTheme(TYPEWALLPAPER, monitorWallpaperUris.first());
+    }
 }
 
 void AppearanceManager::setPropertyWallpaperURIs(QMap<QString, QString> monitorWallpaperUris)
@@ -1617,6 +1621,10 @@ void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeNam
     };
     auto setGlobalFile = [&theme, &themeName, &defTheme, &themePath, this](const QString &key, const QString &type) {
         QString themeValue = theme.getStr(themeName, key);
+        // 如果是用户自定义的桌面壁纸, 切换主题的外观时, 不重新设置壁纸
+        if (isSkipSetWallpaper(themePath) && type == TYPEWALLPAPER) {
+            return;
+        }
         if (themeValue.isEmpty() && !defTheme.isEmpty())
             themeValue = theme.getStr(defTheme, key);
         if (!themeValue.isEmpty()) {
@@ -1641,6 +1649,31 @@ void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeNam
     setGlobalItem("WindowRadius", TYPWINDOWRADIUS);
     setGlobalItem("WindowOpacity", TYPEWINDOWOPACITY);
     globalThemeUpdating = false;
+}
+
+// 自定义主题在切换主题外观时跳过设置桌面壁纸
+bool AppearanceManager::isSkipSetWallpaper(const QString &themePath)
+{
+    if (!themePath.endsWith("custom")) {
+        return false;
+    }
+
+    KeyFile theme(',');
+    theme.loadFile(themePath + "/index.theme");
+    QStringList themeNames {"DefaultTheme", "DarkTheme"};
+    for (const auto &name : themeNames) {
+        QString themeName = theme.getStr("Deepin Theme", name);
+        if (themeName.isEmpty()) {
+            continue;
+        }
+
+        QString themeValue = theme.getStr(themeName, "Wallpaper");
+        if (!themeValue.startsWith("/usr/share/wallpapers/deepin")) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void AppearanceManager::updateCustomTheme(const QString &type, const QString &value)
