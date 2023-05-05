@@ -1958,9 +1958,9 @@ QString AppearanceManager::marshal(const QVector<QSharedPointer<FontsManager::Fa
     for (auto iter : strs) {
         QJsonObject obj;
         obj["Id"] = iter->id;
-        obj["Name"] = iter->id;
-        obj["Styles"] = iter->id;
-        obj["Show"] = iter->id;
+        obj["Name"] = iter->name.isEmpty() ? iter->id : iter->name;
+        obj["Styles"] = QJsonArray::fromStringList(iter->styles);
+        obj["Show"] = iter->show;
         arr.push_back(obj);
     }
 
