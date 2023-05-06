@@ -67,7 +67,6 @@ const QString AppearanceInterface = "org.deepin.dde.Appearance1";
 #define DEFAULTLANGDELIM        "|"
 #define	DEFAULTNAMEDELIM        ","
 #define SPACETYPEMONO           "100"
-#define DEFAULTFONTCONFIGFILE   "/usr/share/deepin-default-settings/fontconfig.json"
 
 #define TYPEGTK                 "gtk"
 #define TYPEICON                "icon"

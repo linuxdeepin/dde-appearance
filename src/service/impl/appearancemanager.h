@@ -142,8 +142,6 @@ private:
     void updateNewVersionData();
     void autoSetTheme(double latitude, double longitude);
     void resetThemeAutoTimer();
-    void loadDefaultFontConfig();
-    void getDefaultFonts(QString& standard,QString& monospace);
     void updateThemeAuto(bool enable);
     void enableDetectSysClock(bool enable);
     void updateWSPolicy(QString policy);
@@ -186,7 +184,6 @@ private:
     QSharedPointer<FontsManager>    fontsManager;
     QMap<QString,QString>           monitorMap;
     QMap<QString,coordinate>        coordinateMap;
-    QMap<QString,fontConfigItem>    defaultFontConfigMap;
     double                          longitude;
     double                          latitude;
     QStringList                     desktopBgs;
