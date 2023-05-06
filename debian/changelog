@@ -1,3 +1,12 @@
+dde-appearance (1.0.9) unstable; urgency=medium
+
+  * fix: wrong systemd type
+  * fix: 切换主题外观桌面壁纸被替换
+  * fix: error form font to json
+  * fix: folder not be created and font not setted
+
+ -- dengbo <dengbo@uniontech.com>  Sat, 6 May 2023 10:21:50 +0800
+
 dde-appearance (1.0.8) unstable; urgency=medium
 
   * fix: 桌面无法设置壁纸
