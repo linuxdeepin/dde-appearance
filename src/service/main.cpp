@@ -2,12 +2,17 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include <QGuiApplication>
 #include "dbus/appearance1adaptor.h"
 #include "dbus/appearance1.h"
 #include "wmadaptor.h"
 #include "dbus/deepinwmfaker.h"
 #include "modules/common/commondefine.h"
+
+#include <DLog>
+
+#include <QGuiApplication>
+
+using Dtk::Core::DLogManager;
 
 int main(int argc, char *argv[])
 {
@@ -20,6 +25,10 @@ int main(int argc, char *argv[])
                                                   QStandardPaths::LocateDirectory);
     translator.load(languagePath+"/dde-appearance_" + QLocale::system().name());
     app.installTranslator(&translator);
+
+    DLogManager::registerJournalAppender();
+    DLogManager::registerConsoleAppender();
+ 
     Appearance1 *appearance = new Appearance1();
     new Appearance1Adaptor(appearance);
 
