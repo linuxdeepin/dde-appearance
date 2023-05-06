@@ -36,6 +36,7 @@ public:
     bool isFontFamily(QString value);
     bool isFontSizeValid(double size);
     bool setFamily(QString standard, QString monospace, double size);
+    bool reset();
     QStringList listMonospace();
     QStringList listStandard();
     QSharedPointer<Family> getFamily(QString id);

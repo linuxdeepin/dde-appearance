@@ -140,6 +140,17 @@ bool FontsManager::setFamily(QString standard, QString monospace, double size)
     return true;
 }
 
+bool FontsManager::reset()
+{
+    if (!QFile::remove(filePath)) {
+        qWarning() << "failed to remove file " << filePath;
+        return false;
+    }
+
+    xSetting->reset(GSKEYFONTNAME);
+    return true;
+}
+
 QStringList FontsManager::listMonospace()
 {
     QStringList retList;

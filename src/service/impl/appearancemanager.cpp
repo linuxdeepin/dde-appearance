@@ -122,7 +122,6 @@ bool AppearanceManager::init()
     connect(dbusProxy.get(), &AppearanceDBusProxy::TimezoneChanged, this, &AppearanceManager::handleTimezoneChanged);
     connect(dbusProxy.get(), &AppearanceDBusProxy::NTPChanged, this, &AppearanceManager::handleTimeUpdate);
 
-    loadDefaultFontConfig();
     connect(dbusProxy.get(), &AppearanceDBusProxy::TimeUpdate, this, &AppearanceManager::handleTimeUpdate);
     connect(dbusProxy.get(), &AppearanceDBusProxy::NTPSessionChanged, this, &AppearanceManager::handleNTPChanged);
     connect(dbusProxy.get(), &AppearanceDBusProxy::HandleForSleep, this, &AppearanceManager::handlePrepareForSleep);
@@ -910,60 +909,6 @@ void AppearanceManager::resetThemeAutoTimer()
     qDebug() << "change theme after:" << interval << curr << changeTime;
 }
 
-void AppearanceManager::loadDefaultFontConfig()
-{
-    QFile file(DEFAULTFONTCONFIGFILE);
-    if (!file.open(QIODevice::ReadOnly)) {
-        return;
-    }
-
-    QJsonParseError jsonError;
-    QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &jsonError);
-    if (jsonError.error != QJsonParseError::NoError) {
-        qDebug() << "json error!" << jsonError.errorString();
-        return;
-    }
-
-    QVariantMap rootMap = doc.object().toVariantMap();
-    for (auto item : rootMap.toStdMap()) {
-        AppearanceManager::fontConfigItem fontConfig;
-        QVariantMap itemMap = item.second.toJsonObject().toVariantMap();
-        if (!itemMap.value("Standard").toString().isEmpty()) {
-            fontConfig.Standard = itemMap.value("Standard").toString();
-        }
-
-        if (!itemMap.value("Mono").toString().isEmpty()) {
-            fontConfig.Monospace = itemMap.value("Mono").toString();
-        }
-
-        defaultFontConfigMap[item.first] = fontConfig;
-    }
-}
-
-void AppearanceManager::getDefaultFonts(QString &standard, QString &monospace)
-{
-    if (defaultFontConfigMap.empty()) {
-        standard = DEFAULTSTANDARDFONT;
-        monospace = DEFAULTMONOSPACEFONT;
-        return;
-    }
-
-    QVector<QString> languages = Locale::instance()->getLanguageNames();
-    for (auto lang : languages) {
-        if (defaultFontConfigMap.count(lang) != 0) {
-            standard = defaultFontConfigMap[lang].Standard;
-            monospace = defaultFontConfigMap[lang].Monospace;
-            return;
-        }
-    }
-
-    if (defaultFontConfigMap.count("en_US") == 1) {
-        standard = defaultFontConfigMap["en_US"].Standard;
-        monospace = defaultFontConfigMap["en_US"].Monospace;
-    }
-    return;
-}
-
 void AppearanceManager::updateThemeAuto(bool enable)
 {
     enableDetectSysClock(enable);
@@ -1439,18 +1384,7 @@ void AppearanceManager::doResetSettingBykeys(QStringList keys)
 
 void AppearanceManager::doResetFonts()
 {
-    QString defaultStandardFont, defaultMonospaceFont;
-    getDefaultFonts(defaultStandardFont, defaultMonospaceFont);
-
-    if (defaultStandardFont != property->standardFont) {
-        setStandardFont(defaultStandardFont);
-    }
-
-    if (defaultMonospaceFont != property->monospaceFont) {
-        setMonospaceFont(defaultMonospaceFont);
-    }
-
-    bool bSuccess = fontsManager->setFamily(defaultStandardFont, defaultMonospaceFont, property->fontSize);
+    bool bSuccess = fontsManager->reset();
     if (!bSuccess) {
         return;
     }
