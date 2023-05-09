@@ -502,7 +502,7 @@ int FontsManager::appendFontinfo(FcInfo** list, FcPattern* pat, int idx)
 
     *list = tmp;
 
-    tmp[idx].family = reinterpret_cast<char*>(FcPatternFormat(pat, reinterpret_cast<FcChar8*>(const_cast<char*>("%{family})"))));
+    tmp[idx].family = reinterpret_cast<char*>(FcPatternFormat(pat, reinterpret_cast<FcChar8*>(const_cast<char*>("%{family}"))));
     tmp[idx].familylang = reinterpret_cast<char*>(FcPatternFormat(pat, reinterpret_cast<FcChar8*>(const_cast<char*>("%{familylang}"))));
     tmp[idx].style = reinterpret_cast<char*>(FcPatternFormat(pat, reinterpret_cast<FcChar8*>(const_cast<char*>("%{style}"))));
     tmp[idx].lang = reinterpret_cast<char*>(FcPatternFormat(pat, reinterpret_cast<FcChar8*>(const_cast<char*>("%{lang}"))));
