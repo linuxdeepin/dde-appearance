@@ -35,15 +35,11 @@ Q_GLOBAL_STATIC_WITH_ARGS(QGSettings, _gsettings_dde_zone, ("com.deepin.dde.zone
 #define GsettingsZoneLeftUp "leftUp"
 #endif // DISABLE_DEEPIN_WM
 
-#define DBUS_APPEARANCE_SERVICE "com.deepin.daemon.Appearance"
-#define DBUS_APPEARANCE_OBJ "/com/deepin/daemon/Appearance"
-#define DBUS_APPEARANCE_INTF "com.deepin.daemon.Appearance"
-
 #define DeepinWMConfigName "deepinwmrc"
 #define DeepinWMGeneralGroupName "General"
 #define DeepinWMWorkspaceBackgroundGroupName "WorkspaceBackground"
 
-#define KWinConfigName "kwinrc"
+#define KWinConfigName "deepin-kwinrc"
 #define KWinCloseWindowGroupName "Script-closewindowaction"
 #define KWinRunCommandGroupName "Script-runcommandaction"
 
@@ -491,39 +487,9 @@ void DeepinWMFaker::SetCurrentWorkspaceBackground(const QString &uri)
 
 QString DeepinWMFaker::GetWorkspaceBackgroundForMonitor(const int index,const QString &strMonitorName) const
 {
-    QUrl uri = getWorkspaceBackgroundForMonitor(index, strMonitorName);
-    if (uri.isEmpty()) {
-        uri = _gsettings_dde_appearance->get(GsettingsBackgroundUri).toStringList().value(index - 1);
-        if (index == 1) {
-            if(!QFileInfo(uri.path()).isFile()) {
-                uri = defaultFirstBackgroundUri;
-            }
-        } else {
-            if (!QFileInfo(uri.path()).isFile()) {
-                QDBusInterface remoteApp(DBUS_APPEARANCE_SERVICE, DBUS_APPEARANCE_OBJ, DBUS_APPEARANCE_INTF);
-                QDBusReply<QString> reply = remoteApp.call( "List", "background");
-
-                QJsonDocument json = QJsonDocument::fromJson(reply.value().toUtf8());
-                QJsonArray arr = json.array();
-                if (!arr.isEmpty()) {
-                    auto p = arr.constBegin();
-                    while (p != arr.constEnd()) {
-                        auto o = p->toObject();
-                        if (!o.value("Id").isUndefined() && !o.value("Deletable").toBool()) {
-                            if(o.value("Id").toString().contains(defaultSecondBackgroundUri)) {
-                                uri = o.value("Id").toString();
-                                break;
-                            }
-                        }
-                        ++p;
-                    }
-                }
-            }
-        }
-        const QString &workSpaceBackgroundUri = uri.toString();
-        setWorkspaceBackgroundForMonitor(index, strMonitorName, workSpaceBackgroundUri);
-    }
-    return uri.toString();
+    QDBusInterface interface("org.deepin.dde.Appearance1", "/org/deepin/dde/Appearance1", "org.deepin.dde.Appearance1");
+    const QDBusReply<QString> reply = interface.call("GetWorkspaceBackgroundForMonitor", index, strMonitorName);
+    return reply.value();
 }
 
 void DeepinWMFaker::SetWorkspaceBackgroundForMonitor(const int index, const QString &strMonitorName, const QString &uri)
@@ -767,12 +733,12 @@ bool DeepinWMFaker::SetAccel(const QString &data)
 
         if (seq.isEmpty()) {
              qDebug() << "WARNING: got an empty key sequence for accel string:" << accelStr;
-        } 
+        }
 
         if(!qgetenv("WAYLAND_DISPLAY").isEmpty()) {
             m_globalAccel->stealShortcutSystemwide(seq);
         }
-        
+
         accelList.append(seq);
     }
 
@@ -930,12 +896,12 @@ void DeepinWMFaker::SwitchApplication(bool backward)
 }
 
 void DeepinWMFaker::TileActiveWindow(uint side)
-{   
+{
     Q_EMIT TileActiveWindowChanged(side);
 }
 
 void DeepinWMFaker::ToggleActiveWindowMaximize()
-{   
+{
     Q_EMIT ToggleActiveWindowMaximizeChanged();
 }
 
@@ -1221,6 +1187,9 @@ QString DeepinWMFaker::getWorkspaceBackgroundForMonitor(const int index, const Q
 }
 void DeepinWMFaker::setWorkspaceBackgroundForMonitor(const int index, const QString &strMonitorName, const QString &uri) const
 {
+    QDBusInterface interface("org.deepin.dde.Appearance1", "/org/deepin/dde/Appearance1", "org.deepin.dde.Appearance1");
+    interface.call("SetWorkspaceBackgroundForMonitor", index, strMonitorName, uri);
+
     m_deepinWMWorkspaceBackgroundGroup->writeEntry(QString("%1%2%3").arg(index).arg("@" ,strMonitorName), uri);
     m_deepinWMConfig->sync();
 
