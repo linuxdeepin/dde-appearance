@@ -43,7 +43,7 @@ Q_GLOBAL_STATIC_WITH_ARGS(QGSettings, _gsettings_dde_zone, ("com.deepin.dde.zone
 #define DeepinWMGeneralGroupName "General"
 #define DeepinWMWorkspaceBackgroundGroupName "WorkspaceBackground"
 
-#define KWinConfigName "deepin-kwinrc"
+#define KWinConfigName "kwinrc"
 #define KWinCloseWindowGroupName "Script-closewindowaction"
 #define KWinRunCommandGroupName "Script-runcommandaction"
 
@@ -659,7 +659,7 @@ QStringList DeepinWMFaker::GetAccel(const QString &id) const
 static QMap<QString, QList<QKeySequence>> getShoutcutListFromKDEConfigFile()
 {
     // 认为系统配置文件中存储的快捷键为默认值
-    KConfig kglobalshortcutsrc("/etc/xdg/deepin-kglobalshortcutsrc");
+    KConfig kglobalshortcutsrc("/etc/xdg/kglobalshortcutsrc");
     KConfigGroup kwin(&kglobalshortcutsrc, "deepin-kwin");
 
     if (!kwin.isValid())
