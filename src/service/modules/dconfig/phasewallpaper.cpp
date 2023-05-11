@@ -6,6 +6,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QDebug>
+#include <QFile>
 
 #include <modules/api/utils.h>
 
@@ -169,7 +170,10 @@ QString PhaseWallPaper::getWallpaperUri(const QString &index, const QString &str
             }
 
             if (obj["wpIndex"] == wpIndexKey) {
-                return obj["uri"].toString();
+                auto wallpaper = obj["uri"].toString();
+                auto wallpaperPath = QUrl(wallpaper).toLocalFile();
+                QFile file(wallpaperPath);
+                return file.exists() ? wallpaper : QString();
             }
         }
     }
