@@ -1,3 +1,11 @@
+dde-appearance (1.1.0) unstable; urgency=medium
+
+  * fix: 控制中心不显示窗管相关快捷键
+  * chore: remove deepin- prefix
+  * fix: alpha 升级到beta 设置壁纸白屏
+
+ -- dengbo <dengbo@uniontech.com>  Thu, 11 May 2023 17:38:50 +0800
+
 dde-appearance (1.0.9) unstable; urgency=medium
 
   * fix: wrong systemd type
