@@ -541,20 +541,19 @@ QSharedPointer<FontsManager::Family> FontsManager::fcInfoToFamily(FcInfo* info)
     QStringList familyNames = familyName.split(DEFAULTNAMEDELIM);
     QStringList familyLangs = QString(info->familylang).split(DEFAULTNAMEDELIM);
 
-    QString family;
+    QString family = familyName;
     int index = familyLangs.indexOf(DEFAULTLANG);
-    if(index != -1 && index<familyNames.size())
-    {
-        family = familyNames[index];
-        if(family.indexOf(")") == family.length()-1)
+    // only check blacklist for en, if the font only have other lang, then skip
+    if(index != -1) {
+        if(index < familyNames.size())
         {
-            family = family.mid(0,family.length()-1);
+            family = familyNames[index];
         }
-    }
 
-    if(familyBlacklist.contains(family) || family.isEmpty())
-    {
-        return nullptr;
+        if(familyBlacklist.contains(family) || family.isEmpty())
+        {
+            return nullptr;
+        }
     }
 
     QStringList langs = QString(info->lang).split(DEFAULTLANGDELIM);
