@@ -112,10 +112,11 @@ QVector<QString> ThemesApi::listIconTheme()
 
 QVector<QString> ThemesApi::listCursorTheme()
 {
-    const QString xcursor_env = qEnvironmentVariable("XCURSOR_PATH");
-    QVector<QString> paths = xcursor_env.split(':', Qt::SkipEmptyParts).toVector();;
-    if (!paths.isEmpty())
-        return paths;
+    if (qEnvironmentVariableIsSet("XCURSOR_PATH")) {
+        const QString xcursor_env = qEnvironmentVariable("XCURSOR_PATH");
+        QVector<QString> paths = xcursor_env.split(':', Qt::SkipEmptyParts).toVector();
+        return doListTheme(QVector<QString>(), paths, TYPECURSOR);
+    }
 
     QVector<QString> local;
     QString home = utils::GetUserHomeDir();

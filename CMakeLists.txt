@@ -9,11 +9,10 @@ project(dde-appearance)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include(GNUInstallDirs)
-
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX /usr)
 endif ()
+include(GNUInstallDirs)
 
 add_subdirectory(src)
 add_subdirectory(misc)
