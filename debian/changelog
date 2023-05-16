@@ -1,3 +1,9 @@
+dde-appearance (1.1.1) unstable; urgency=medium
+
+  * add Conflicts: dde-kwin.
+
+ -- LiChengGang <lichenggang@uniontech.com>  Tue, 16 May 2023 11:19:58 +0800
+
 dde-appearance (1.1.0) unstable; urgency=medium
 
   * fix: 控制中心不显示窗管相关快捷键
