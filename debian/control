@@ -30,5 +30,6 @@ Architecture: any
 Depends:
    ${misc:Depends},
    ${shlibs:Depends},
+Conflicts: dde-kwin
 Description: deepin desktop-environment - dde-appearance module
  dde appearance Provides application resource management and control services for the dde desktop environment.
