@@ -102,7 +102,6 @@ set(SRCS
 
 qt5_add_dbus_adaptor(
     wm_SRCS
-    ../../dbus/com.deepin.wm.xml
     ./dbus/deepinwmfaker.h
     DeepinWMFaker
 )
