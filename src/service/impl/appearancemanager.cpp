@@ -26,7 +26,6 @@
 #include "dbus/appearanceproperty.h"
 #include "dbus/appearancedbusproxy.h"
 
-#include "modules/api/locale.h"
 #include "modules/api/sunrisesunset.h"
 #include "modules/api/themethumb.h"
 #include "modules/dconfig/phasewallpaper.h"
@@ -1570,6 +1569,11 @@ void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeNam
             doSetByType(type, themeValue);
         }
     };
+
+    // 如果是用户自定义主题, 切换外观时只单独更新外观选项
+    if (themePath.endsWith("custom")) {
+        return setGlobalItem("AppTheme", TYPEGTK);
+    }
 
     setGlobalFile("Wallpaper", TYPEWALLPAPER);
     setGlobalFile("LockBackground", TYPEGREETERBACKGROUND);
