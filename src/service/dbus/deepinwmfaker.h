@@ -13,6 +13,7 @@ class KWindowSystem;
 class KConfig;
 class KConfigGroup;
 class KGlobalAccel;
+class Appearance1;
 
 class DeepinWMFaker : public QObject, protected QDBusContext
 {
@@ -26,7 +27,7 @@ class DeepinWMFaker : public QObject, protected QDBusContext
     Q_PROPERTY(int cursorSize READ cursorSize WRITE setCursorSize)
 
 public:
-    explicit DeepinWMFaker(QObject *parent = nullptr);
+    explicit DeepinWMFaker(Appearance1 *appearance);
     ~DeepinWMFaker();
 
     enum Action {

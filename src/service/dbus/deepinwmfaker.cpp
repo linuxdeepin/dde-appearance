@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "deepinwmfaker.h"
+#include "appearance1.h"
 
 #include <QDBusConnection>
 #include <QDBusMessage>
@@ -297,8 +298,8 @@ static const QMap<QString, QString> SpecialRequireShiftKeyMap = {
     {"asciitilde", "~"}
 };
 
-DeepinWMFaker::DeepinWMFaker(QObject *parent)
-    : QObject(parent)
+DeepinWMFaker::DeepinWMFaker(Appearance1* appearance)
+    : QObject(appearance)
     , m_windowSystem(KWindowSystem::self())
     , m_deepinWMConfig(new KConfig(DeepinWMConfigName, KConfig::CascadeConfig))
     , m_deepinWMGeneralGroup(new KConfigGroup(m_deepinWMConfig->group(DeepinWMGeneralGroupName)))
@@ -360,6 +361,15 @@ DeepinWMFaker::DeepinWMFaker(QObject *parent)
             AllDeepinWMKWinAccelsMap.insert(iter.key(), iter.value());
         }
     }
+
+    connect(appearance,
+            &Appearance1::Changed,
+            this,
+            [=](const QString& key, const QString& value) {
+                if (key == "gtk") {
+                    SetDecorationDeepinTheme(value.contains("dark") ? "dark" : "light");
+                }
+            });
 }
 
 DeepinWMFaker::~DeepinWMFaker()
@@ -917,6 +927,8 @@ void DeepinWMFaker::SetDecorationTheme(const QString &type, const QString &name)
     m_kwinConfig->group("deepin-chameleon").writeEntry("theme", type + "/" + name);
 
     syncConfigForKWin();
+    QDBusInterface interface_kwin(KWinDBusService, KWinDBusPath);
+    interface_kwin.call("reconfigure");
 }
 
 void DeepinWMFaker::SetDecorationDeepinTheme(const QString &name)
