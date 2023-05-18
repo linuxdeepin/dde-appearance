@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     APPEARANCEDBUS.registerService(AppearanceService);
     APPEARANCEDBUS.registerObject(AppearancePath, AppearanceInterface, appearance);
 
-    DeepinWMFaker faker;
+    DeepinWMFaker faker(appearance);
     WmAdaptor wmAdaptor(&faker);
     QDBusConnection::sessionBus().registerService("com.deepin.wm");
     QDBusConnection::sessionBus().registerObject("/com/deepin/wm", "com.deepin.wm", &faker);
