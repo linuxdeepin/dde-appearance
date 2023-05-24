@@ -310,7 +310,7 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
 {
     QString type;
     QString value;
-    bool bSuccess = false;
+    bool bSuccess = true;
     if (key == GSKEYGLOBALTHEME) {
         type = TYPEGLOBALTHEME;
         value = settingDconfig.value(key).toString();
@@ -828,8 +828,10 @@ void AppearanceManager::setPropertyWallpaperURIs(QMap<QString, QString> monitorW
 
     doc.setObject(monitorObj);
     QString wallPaperUriVal = doc.toJson(QJsonDocument::Compact);
-
-    settingDconfig.setValue(GSKEYWALLPAPERURIS, wallPaperUriVal);
+    if (settingDconfig.isValid() && wallPaperUriVal != property->wallpaperURls) {
+        settingDconfig.setValue(GSKEYWALLPAPERURIS, wallPaperUriVal);
+        property->wallpaperURls = wallPaperUriVal;
+    }
 }
 
 void AppearanceManager::updateNewVersionData()
@@ -1207,7 +1209,6 @@ bool AppearanceManager::doSetBackground(QString value)
     }
 
     QString file = backgrounds->prepare(value);
-
     QString uri = utils::enCodeURI(file, SCHEME_FILE);
 
     dbusProxy->ChangeCurrentWorkspaceBackground(uri);
@@ -1479,8 +1480,15 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
 
 QString AppearanceManager::doSetMonitorBackground(const QString &monitorName, const QString &imageGile)
 {
-    doSetCurrentWorkspaceBackgroundForMonitor(imageGile, monitorName);
-    return imageGile;
+    if (!backgrounds->isBackgroundFile(imageGile)) {
+        return QString();
+    }
+
+    QString file = backgrounds->prepare(imageGile);
+
+    QString uri = utils::enCodeURI(file, SCHEME_FILE);
+    doSetCurrentWorkspaceBackgroundForMonitor(uri, monitorName);
+    return uri;
 }
 
 QString AppearanceManager::doThumbnail(const QString &type, const QString &name)
