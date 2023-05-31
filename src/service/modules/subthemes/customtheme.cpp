@@ -13,10 +13,8 @@
 #include <QDir>
 #include <QStandardPaths>
 
-static QString custonThemePath()
-{
-    return QString("%1/dde-appearance/deepin-themes/custom").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation));
-}
+const QString CUSTOMTHEMEPATH =
+        QString("%1/dde-appearance/deepin-themes/custom").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation));
 
 #define THEMEFILE "index.theme"
 
@@ -83,9 +81,9 @@ void CustomTheme::updateValue(const QString &type, const QString &value, const Q
 
 void CustomTheme::openCustomTheme()
 {
-    QDir home = QDir::home();
-    home.cd(custonThemePath());
-    m_customTheme->loadFile(home.absoluteFilePath(THEMEFILE));
+    QDir root = QDir::root();
+    root.cd(CUSTOMTHEMEPATH);
+    m_customTheme->loadFile(root.absoluteFilePath(THEMEFILE));
     m_customTheme->removeSection("Deepin Theme");
     m_customTheme->setKey("Deepin Theme", "Name", "Custom");
     m_customTheme->setKey("Deepin Theme", "DefaultTheme", "DefaultTheme");
@@ -95,10 +93,10 @@ void CustomTheme::openCustomTheme()
 
 void CustomTheme::saveCustomTheme()
 {
-    QDir home = QDir::home();
-    home.mkpath(custonThemePath());
-    home.cd(custonThemePath());
-    m_customTheme->saveToFile(home.absoluteFilePath(THEMEFILE));
+    QDir root = QDir::root();
+    root.mkpath(CUSTOMTHEMEPATH);
+    root.cd(CUSTOMTHEMEPATH);
+    m_customTheme->saveToFile(root.absoluteFilePath(THEMEFILE));
 }
 
 void CustomTheme::copyTheme(const QString &themePath, const QStringList &keys)

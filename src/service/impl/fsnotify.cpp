@@ -3,11 +3,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "fsnotify.h"
+
 #include "../modules/common/commondefine.h"
 
 #include <QDebug>
-#include <QTimer>
 #include <QStandardPaths>
+#include <QTimer>
 
 Fsnotify::Fsnotify(QObject *parent)
     : QObject(parent)
@@ -28,9 +29,7 @@ Fsnotify::Fsnotify(QObject *parent)
     connect(fileWatcher.data(), &QFileSystemWatcher::fileChanged, this, &Fsnotify::onFileChanged);
 }
 
-Fsnotify::~Fsnotify()
-{
-}
+Fsnotify::~Fsnotify() { }
 
 void Fsnotify::watchGtkDirs()
 {
@@ -68,7 +67,8 @@ void Fsnotify::watchGlobalDirs()
 {
     QStringList globalDirs;
     QDir home = QDir::home();
-    globalDirs.append(home.absoluteFilePath(".cache/deepin/dde-appearance/deepin-themes/"));
+    globalDirs.append(home.absoluteFilePath(
+            QString("%1/dde-appearance/deepin-themes/").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation))));
     globalDirs.append(home.absoluteFilePath(".local/share/deepin-themes"));
     globalDirs.append(home.absoluteFilePath(".deepin-themes"));
     for (const QString &basedir : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)) {
@@ -116,7 +116,9 @@ void Fsnotify::onFileChanged(const QString &path)
         changedThemes.insert(TYPEGTK);
     } else if (hasEventOccurred(path, iconDirs)) {
         changedThemes.insert(TYPEICON);
-    } else if (path.contains(".cache")) { // 自定义不延时
+    } else if (path.contains(".config") || path.contains(".cache")) { // 自定义不延时
+        // TODO: if config path is set to other place and not contain .cache
+        // This will not work
         Q_EMIT themeFileChange(TYPEGLOBALTHEME);
     } else if (path.contains("deepin-themes")) {
         changedThemes.insert(TYPEGLOBALTHEME);

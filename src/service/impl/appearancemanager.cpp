@@ -36,7 +36,7 @@
 
 DCORE_USE_NAMESPACE
 
-const QString wallpaperJsonPath = QString("%1/.cache/deepin/dde-appearance/").arg(utils::GetUserHomeDir());
+const QString wallpaperJsonPath = QString("%1/dde-appearance/").arg(utils::GetUserConfigDir());
 
 AppearanceManager::AppearanceManager(AppearanceProperty *prop, QObject *parent)
     : QObject(parent)

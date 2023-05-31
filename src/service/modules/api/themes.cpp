@@ -62,7 +62,7 @@ QVector<QString> ThemesApi::listGlobalTheme()
 {
     QVector<QString> local;
     QDir home = QDir::home();
-    local.push_back(home.absoluteFilePath(".cache/deepin/dde-appearance/deepin-themes/"));
+    local.push_back(QString("%1/dde-appearance/deepin-themes/").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation)));
     local.push_back(home.absoluteFilePath(".local/share/deepin-themes"));
     local.push_back(home.absoluteFilePath(".deepin-themes"));
 
