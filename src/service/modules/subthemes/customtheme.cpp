@@ -8,10 +8,14 @@
 #include "modules/api/utils.h"
 #include "modules/common/commondefine.h"
 
+#include <QStandardPaths>
 #include <QDir>
 #include <QDebug>
 
-#define CUSTOMTHEMEPATH ".cache/deepin/dde-appearance/deepin-themes/custom/"
+static QString custonThemePath() {
+    return QString("%1/dde-appearance/deepin-themes/custom").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation));
+}
+
 #define THEMEFILE "index.theme"
 
 CustomTheme::CustomTheme(QObject *parent)
@@ -78,7 +82,7 @@ void CustomTheme::updateValue(const QString &type, const QString &value, const Q
 void CustomTheme::openCustomTheme()
 {
     QDir home = QDir::home();
-    home.cd(CUSTOMTHEMEPATH);
+    home.cd(custonThemePath());
     m_customTheme->loadFile(home.absoluteFilePath(THEMEFILE));
     m_customTheme->removeSection("Deepin Theme");
     m_customTheme->setKey("Deepin Theme", "Name", "Custom");
@@ -90,8 +94,8 @@ void CustomTheme::openCustomTheme()
 void CustomTheme::saveCustomTheme()
 {
     QDir home = QDir::home();
-    home.mkpath(CUSTOMTHEMEPATH);
-    home.cd(CUSTOMTHEMEPATH);
+    home.mkpath(custonThemePath());
+    home.cd(custonThemePath());
     m_customTheme->saveToFile(home.absoluteFilePath(THEMEFILE));
 }
 
