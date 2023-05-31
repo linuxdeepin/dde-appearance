@@ -32,15 +32,20 @@ int main(int argc, char *argv[])
     Appearance1 *appearance = new Appearance1();
     new Appearance1Adaptor(appearance);
 
-    APPEARANCEDBUS.registerService(AppearanceService);
-    APPEARANCEDBUS.registerObject(AppearancePath, AppearanceInterface, appearance);
+    bool appearanceRegister = APPEARANCEDBUS.registerService(AppearanceService);
+    bool appearanceObjectRegister = APPEARANCEDBUS.registerObject(AppearancePath, AppearanceInterface, appearance);
+
+    if (!appearanceRegister || ! appearanceObjectRegister) {
+        qWarning() << "appearance dbus service already registed";
+        return -1;
+    }
 
     DeepinWMFaker faker(appearance);
     WmAdaptor wmAdaptor(&faker);
-    bool registerServiceSuccessed = QDBusConnection::sessionBus().registerService("com.deepin.wm");
-    bool registerObjectSuccessed = QDBusConnection::sessionBus().registerObject("/com/deepin/wm", "com.deepin.wm", &faker);
-    if (!registerObjectSuccessed || !registerObjectSuccessed) {
-        qWarning() << "dbus service already registed";
+    bool registerWmServiceSuccessed = QDBusConnection::sessionBus().registerService("com.deepin.wm");
+    bool registerWmObjectSuccessed = QDBusConnection::sessionBus().registerObject("/com/deepin/wm", "com.deepin.wm", &faker);
+    if (!registerWmServiceSuccessed || !registerWmObjectSuccessed) {
+        qWarning() << "wm dbus service already registed";
         return -1;
     }
 
