@@ -37,8 +37,12 @@ int main(int argc, char *argv[])
 
     DeepinWMFaker faker(appearance);
     WmAdaptor wmAdaptor(&faker);
-    QDBusConnection::sessionBus().registerService("com.deepin.wm");
-    QDBusConnection::sessionBus().registerObject("/com/deepin/wm", "com.deepin.wm", &faker);
+    bool registerServiceSuccessed = QDBusConnection::sessionBus().registerService("com.deepin.wm");
+    bool registerObjectSuccessed = QDBusConnection::sessionBus().registerObject("/com/deepin/wm", "com.deepin.wm", &faker);
+    if (!registerObjectSuccessed || !registerObjectSuccessed) {
+        qWarning() << "dbus service already registed";
+        return -1;
+    }
 
     return app.exec();
 }
