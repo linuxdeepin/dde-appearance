@@ -3,16 +3,18 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "customtheme.h"
-#include "theme.h"
+
 #include "modules/api/keyfile.h"
 #include "modules/api/utils.h"
 #include "modules/common/commondefine.h"
+#include "theme.h"
 
-#include <QStandardPaths>
-#include <QDir>
 #include <QDebug>
+#include <QDir>
+#include <QStandardPaths>
 
-static QString custonThemePath() {
+static QString custonThemePath()
+{
     return QString("%1/dde-appearance/deepin-themes/custom").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation));
 }
 
@@ -27,27 +29,27 @@ CustomTheme::CustomTheme(QObject *parent)
 
 void CustomTheme::updateValue(const QString &type, const QString &value, const QString &oldTheme, const QVector<QSharedPointer<Theme>> &globalThemes)
 {
-    static const QMap<QString, QString> typekeyMap = {
-        { TYPEWALLPAPER, "Wallpaper" },
-        { TYPEGREETERBACKGROUND, "LockBackground" },
-        { TYPEICON, "IconTheme" },
-        { TYPECURSOR, "CursorTheme" },
-        { TYPEGTK, "AppTheme" },
-        { TYPESTANDARDFONT, "StandardFont" },
-        { TYPEMONOSPACEFONT, "MonospaceFont" },
-        { TYPEFONTSIZE, "FontSize" },
-        { TYPEACTIVECOLOR, "ActiveColor" },
-        { TYPEDOCKOPACITY, "DockOpacity" },
-        { TYPWINDOWRADIUS, "WindowRadius" },
-        { TYPEWINDOWOPACITY, "WindowOpacity" }
-    };
+    static const QMap<QString, QString> typekeyMap = { { TYPEWALLPAPER, "Wallpaper" },
+                                                       { TYPEGREETERBACKGROUND, "LockBackground" },
+                                                       { TYPEICON, "IconTheme" },
+                                                       { TYPECURSOR, "CursorTheme" },
+                                                       { TYPEGTK, "AppTheme" },
+                                                       { TYPESTANDARDFONT, "StandardFont" },
+                                                       { TYPEMONOSPACEFONT, "MonospaceFont" },
+                                                       { TYPEFONTSIZE, "FontSize" },
+                                                       { TYPEACTIVECOLOR, "ActiveColor" },
+                                                       { TYPEDOCKOPACITY, "DockOpacity" },
+                                                       { TYPWINDOWRADIUS, "WindowRadius" },
+                                                       { TYPEWINDOWOPACITY, "WindowOpacity" } };
     if (!typekeyMap.contains(type))
         return;
+
     enum GolbalThemeMode {
         Light = 1,
         Dark = 2,
         Auto = 3,
     };
+
     QString themeId = oldTheme;
     GolbalThemeMode mode = Auto;
     QString modeStr;
