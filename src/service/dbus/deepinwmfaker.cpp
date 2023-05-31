@@ -50,6 +50,8 @@ Q_GLOBAL_STATIC_WITH_ARGS(QGSettings, _gsettings_dde_zone, ("com.deepin.dde.zone
 // kwin dbus
 #define KWinDBusService "org.kde.KWin"
 #define KWinDBusPath "/KWin"
+#define KWinDBusInterface "org.kde.KWin"
+
 #define KWinDBusCompositorInterface "org.kde.kwin.Compositing"
 #define KWinDBusCompositorPath "/Compositor"
 const char defaultFirstBackgroundUri[] = "file:///usr/share/wallpapers/deepin/desktop.jpg";
@@ -927,7 +929,7 @@ void DeepinWMFaker::SetDecorationTheme(const QString &type, const QString &name)
     m_kwinConfig->group("deepin-chameleon").writeEntry("theme", type + "/" + name);
 
     syncConfigForKWin();
-    QDBusInterface interface_kwin(KWinDBusService, KWinDBusPath);
+    QDBusInterface interface_kwin(KWinDBusService, KWinDBusPath, KWinDBusInterface);
     interface_kwin.call("reconfigure");
 }
 
