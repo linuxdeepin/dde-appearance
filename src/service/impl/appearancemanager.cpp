@@ -812,6 +812,11 @@ void AppearanceManager::doUpdateWallpaperURIs()
     }
 
     setPropertyWallpaperURIs(monitorWallpaperUris);
+
+    if (monitorWallpaperUris.isEmpty()) {
+        return;
+    }
+
     // 如果是用户自己设置的桌面壁纸, 需要将主题更新为自定义
     if (!monitorWallpaperUris.first().startsWith("/usr/share/wallpapers/deepin")) {
         updateCustomTheme(TYPEWALLPAPER, monitorWallpaperUris.first());
