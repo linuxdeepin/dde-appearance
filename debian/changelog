@@ -1,3 +1,10 @@
+dde-appearance (1.1.2) unstable; urgency=medium
+
+  * check the dbus register
+  * move custom theme config from .cache to .config
+
+ -- chenhongtao <chenhongtao@deepin.org>  Mon, 12 Jun 2023 13:19:58 +0800
+
 dde-appearance (1.1.1) unstable; urgency=medium
 
   * add Conflicts: dde-kwin.
