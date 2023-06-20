@@ -461,7 +461,7 @@ static void setWorkspaceBackgroundForDeepinWM(const int index, const QString &ur
 
 QString DeepinWMFaker::GetWorkspaceBackground(const int index) const
 {
-    if (!m_transientBackgroundUri.isEmpty() && index == m_windowSystem->currentDesktop()) {
+    if (!m_transientBackgroundUri.isEmpty() && index == GetCurrentWorkspace()) {
         return m_transientBackgroundUri;
     }
 
@@ -489,12 +489,12 @@ void DeepinWMFaker::SetWorkspaceBackground(const int index, const QString &uri)
 
 QString DeepinWMFaker::GetCurrentWorkspaceBackground() const
 {
-    return GetWorkspaceBackground(m_windowSystem->currentDesktop());
+    return GetWorkspaceBackground(GetCurrentWorkspace());
 }
 
 void DeepinWMFaker::SetCurrentWorkspaceBackground(const QString &uri)
 {
-    SetWorkspaceBackground(m_windowSystem->currentDesktop(), uri);
+    SetWorkspaceBackground(GetCurrentWorkspace(), uri);
 }
 
 QString DeepinWMFaker::GetWorkspaceBackgroundForMonitor(const int index,const QString &strMonitorName) const
@@ -516,12 +516,12 @@ QString DeepinWMFaker::GetCurrentWorkspaceBackgroundForMonitor(const QString &st
 }
 void DeepinWMFaker::SetCurrentWorkspaceBackgroundForMonitor(const QString &uri, const QString &strMonitorName)
 {
-    SetWorkspaceBackgroundForMonitor(  m_windowSystem->currentDesktop(), strMonitorName, uri );
+    SetWorkspaceBackgroundForMonitor(GetCurrentWorkspace(), strMonitorName, uri );
 }
 
 void DeepinWMFaker::SetTransientBackground(const QString &uri)
 {
-    int current = m_windowSystem->currentDesktop();
+    int current = GetCurrentWorkspace();
 
     m_transientBackgroundUri = uri;
 #ifndef DISABLE_DEEPIN_WM
@@ -553,19 +553,20 @@ void DeepinWMFaker::ChangeCurrentWorkspaceBackground(const QString &uri)
 
 int DeepinWMFaker::GetCurrentWorkspace() const
 {
-    return m_windowSystem->currentDesktop();
+    QDBusReply<int> reply = QDBusInterface(KWinDBusService, KWinDBusPath, KWinDBusInterface).call("currentDesktop");
+    return reply.value();
 }
 
 int DeepinWMFaker::WorkspaceCount() const
 {
-    return m_windowSystem->numberOfDesktops();
+    return QDBusInterface(KWinDBusService, "/VirtualDesktopManager", "org.kde.KWin.VirtualDesktopManager").property("count").value<int>();
 }
 
 void DeepinWMFaker::SetCurrentWorkspace(const int index)
 {
     // 切换工作区时关闭壁纸预览
     quitTransientBackground();
-    m_windowSystem->setCurrentDesktop(index);
+    QDBusInterface(KWinDBusService, KWinDBusPath, KWinDBusInterface).call("setCurrentDesktop", index);
 }
 
 void DeepinWMFaker::NextWorkspace()
@@ -575,7 +576,7 @@ void DeepinWMFaker::NextWorkspace()
 //    ++current < m_windowSystem->numberOfDesktops() ? current : loopback ? 0 : --current;
 //    SetCurrentWorkspace(current);
 
-   SetCurrentWorkspace(m_windowSystem->currentDesktop() + 1);
+   SetCurrentWorkspace(GetCurrentWorkspace() + 1);
 }
 
 void DeepinWMFaker::PreviousWorkspace()
@@ -585,7 +586,7 @@ void DeepinWMFaker::PreviousWorkspace()
 //    --current >= 0 ? current : loopback ? --(m_windowSystem->numberOfDesktops()) : 0;
 //    SetCurrentWorkspace(current);
 
-    SetCurrentWorkspace(m_windowSystem->currentDesktop() - 1);
+    SetCurrentWorkspace(GetCurrentWorkspace() - 1);
 }
 
 /*!
@@ -1240,7 +1241,7 @@ void DeepinWMFaker::quitTransientBackground()
     if (!m_transientBackgroundUri.isEmpty()) {
         m_transientBackgroundUri.clear();
 
-        Q_EMIT WorkspaceBackgroundChanged(m_windowSystem->currentDesktop(), GetCurrentWorkspaceBackground());
+        Q_EMIT WorkspaceBackgroundChanged(GetCurrentWorkspace(), GetCurrentWorkspaceBackground());
     }
 
 #ifndef DISABLE_DEEPIN_WM
@@ -1248,7 +1249,7 @@ void DeepinWMFaker::quitTransientBackground()
         // 在退出预览时不同步deepin-wm的设置
         QSignalBlocker blocker(_gsettings_dde_appearance);
         Q_UNUSED(blocker)
-        setWorkspaceBackgroundForDeepinWM(m_windowSystem->currentDesktop(), m_deepinWMBackgroundUri);
+        setWorkspaceBackgroundForDeepinWM(GetCurrentWorkspace(), m_deepinWMBackgroundUri);
         m_deepinWMBackgroundUri.clear();
     }
 #endif // DISABLE_DEEPIN_WM
@@ -1271,7 +1272,7 @@ void DeepinWMFaker::onGsettingsDDEAppearanceChanged(const QString &key)
 
         // 更新值
         if (!m_deepinWMBackgroundUri.isEmpty()) {
-            m_deepinWMBackgroundUri = uris.value(m_windowSystem->currentDesktop());
+            m_deepinWMBackgroundUri = uris.value(GetCurrentWorkspace());
         }
     }
 }
