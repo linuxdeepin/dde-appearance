@@ -315,6 +315,9 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
         type = TYPEGLOBALTHEME;
         value = settingDconfig.value(key).toString();
         bSuccess = doSetGlobalTheme(value);
+        if (bSuccess) {
+            setGlobalTheme(value);
+        }
     } else if (key == GSKEYGTKTHEME) {
         type = TYPEGTK;
         value = settingDconfig.value(key).toString();
@@ -1105,7 +1108,6 @@ bool AppearanceManager::doSetGlobalTheme(QString value)
     } break;
     }
 
-    setGlobalTheme(value);
     return true;
 }
 
@@ -1718,11 +1720,11 @@ void AppearanceManager::initGlobalTheme()
             }
         }
         if (bFound) {
-            setGlobalTheme(DEFAULTGLOBALTHEME);
             doSetGlobalTheme(DEFAULTGLOBALTHEME);
+            setGlobalTheme(DEFAULTGLOBALTHEME);
         } else if (!globalList.isEmpty()) {
-            setGlobalTheme(globalList.first()->getId());
             doSetGlobalTheme(globalList.first()->getId());
+            setGlobalTheme(globalList.first()->getId());
         } else {
             setGlobalTheme(DEFAULTGLOBALTHEME);
         }
