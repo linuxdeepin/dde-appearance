@@ -184,7 +184,7 @@ QVector<Background> Backgrounds::listBackground()
 {
     backgroundsMu->lock();
 
-    if (backgrounds.length() == 0 && fsChanged)
+    if (backgrounds.length() == 0 || fsChanged)
         refreshBackground();
 
     backgroundsMu->unlock();
