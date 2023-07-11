@@ -16,8 +16,8 @@
 // 属性获取不能在线程中，需先初始化
 Appearance1Thread::Appearance1Thread()
     : QObject(nullptr)
-    , thread(new QThread(this))
     , property(new AppearanceProperty)
+    , thread(new QThread(this))
 {
     // 属性初始化
     DTK_CORE_NAMESPACE::DConfig settingDconfig(APPEARANCESCHEMA);
@@ -152,6 +152,7 @@ void Appearance1Thread::setWindowRadius(int value)
 
 void Appearance1Thread::Delete(const QString &ty, const QString &name, const QDBusMessage &message)
 {
+    Q_UNUSED(message);
     QMutexLocker locker(&mutex);
     appearanceManager->deleteThermByType(ty, name);
 }
@@ -207,6 +208,7 @@ QString Appearance1Thread::List(const QString &ty, const QDBusMessage &message)
 
 void Appearance1Thread::Reset(const QDBusMessage &message)
 {
+    Q_UNUSED(message);
     QMutexLocker locker(&mutex);
     QStringList keys{GSKEYGLOBALTHEME, GSKEYGTKTHEME, GSKEYICONTHEM, GSKEYCURSORTHEME, GSKEYFONTSIZE};
 
@@ -217,24 +219,28 @@ void Appearance1Thread::Reset(const QDBusMessage &message)
 
 void Appearance1Thread::Set(const QString &ty, const QString &value, const QDBusMessage &message)
 {
+    Q_UNUSED(message);
     QMutexLocker locker(&mutex);
     appearanceManager->doSetByType(ty.toLower(), value);
 }
 
 void Appearance1Thread::SetCurrentWorkspaceBackground(const QString &uri, const QDBusMessage &message)
 {
+    Q_UNUSED(message);
     QMutexLocker locker(&mutex);
     appearanceManager->doSetCurrentWorkspaceBackground(uri);
 }
 
 void Appearance1Thread::SetCurrentWorkspaceBackgroundForMonitor(const QString &uri, const QString &strMonitorName, const QDBusMessage &message)
 {
+    Q_UNUSED(message);
     QMutexLocker locker(&mutex);
     appearanceManager->doSetCurrentWorkspaceBackgroundForMonitor(uri, strMonitorName);
 }
 
 void Appearance1Thread::SetMonitorBackground(const QString &monitorName, const QString &imageGile, const QDBusMessage &message)
 {
+    Q_UNUSED(message);
     QMutexLocker locker(&mutex);
     QString file = appearanceManager->doSetMonitorBackground(monitorName, imageGile);
 
@@ -245,24 +251,28 @@ void Appearance1Thread::SetMonitorBackground(const QString &monitorName, const Q
 
 void Appearance1Thread::SetScaleFactor(double scale, const QDBusMessage &message)
 {
+    Q_UNUSED(message);
     QMutexLocker locker(&mutex);
     appearanceManager->setScaleFactor(scale);
 }
 
 void Appearance1Thread::SetScreenScaleFactors(ScaleFactors scaleFactors, const QDBusMessage &message)
 {
+    Q_UNUSED(message);
     QMutexLocker locker(&mutex);
     appearanceManager->setScreenScaleFactors(scaleFactors);
 }
 
 void Appearance1Thread::SetWallpaperSlideShow(const QString &monitorName, const QString &slideShow, const QDBusMessage &message)
 {
+    Q_UNUSED(message);
     QMutexLocker locker(&mutex);
     appearanceManager->doSetWallpaperSlideShow(monitorName, slideShow);
 }
 
 void Appearance1Thread::SetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QString &uri, const QDBusMessage &message)
 {
+    Q_UNUSED(message);
     QMutexLocker locker(&mutex);
     appearanceManager->doSetWorkspaceBackgroundForMonitor(index, strMonitorName, uri);
 }

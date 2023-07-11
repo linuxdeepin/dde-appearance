@@ -33,6 +33,7 @@
 #include "modules/subthemes/customtheme.h"
 
 #define NAN_ANGLE (-200.0) // 异常经纬度
+#define DEFAULT_WORKSPACE_COUNT (2) // 默认工作区数量
 
 DCORE_USE_NAMESPACE
 
@@ -56,7 +57,6 @@ AppearanceManager::AppearanceManager(AppearanceProperty *prop, QObject *parent)
     , themeAutoTimer(this)
     , customTheme(new CustomTheme())
     , globalThemeUpdating(false)
-    , workspaceCount(0)
 {
     if (QGSettings::isSchemaInstalled(XSETTINGSSCHEMA)) {
         xSetting = QSharedPointer<QGSettings>(new QGSettings(XSETTINGSSCHEMA));
@@ -98,9 +98,6 @@ bool AppearanceManager::init()
     }
 
     connect(dbusProxy.get(), &AppearanceDBusProxy::workspaceCountChanged, this, &AppearanceManager::handleWmWorkspaceCountChanged);
-    workspaceCount = dbusProxy->WorkspaceCount();
-    // TODO: 非必须，测试几轮后删除
-//    connect(dbusProxy.get(), &AppearanceDBusProxy::WorkspaceSwitched, this, &AppearanceManager::handleWmWorkspaceSwithched);
     connect(dbusProxy.get(), &AppearanceDBusProxy::SetScaleFactorStarted, this, &AppearanceManager::handleSetScaleFactorStarted);
     connect(dbusProxy.get(), &AppearanceDBusProxy::SetScaleFactorDone, this, &AppearanceManager::handleSetScaleFactorDone);
 
@@ -120,9 +117,7 @@ bool AppearanceManager::init()
 
     connect(dbusProxy.get(), &AppearanceDBusProxy::TimezoneChanged, this, &AppearanceManager::handleTimezoneChanged);
     connect(dbusProxy.get(), &AppearanceDBusProxy::NTPChanged, this, &AppearanceManager::handleTimeUpdate);
-
     connect(dbusProxy.get(), &AppearanceDBusProxy::TimeUpdate, this, &AppearanceManager::handleTimeUpdate);
-    connect(dbusProxy.get(), &AppearanceDBusProxy::NTPSessionChanged, this, &AppearanceManager::handleNTPChanged);
     connect(dbusProxy.get(), &AppearanceDBusProxy::HandleForSleep, this, &AppearanceManager::handlePrepareForSleep);
 
     initGlobalTheme();
@@ -192,7 +187,6 @@ void AppearanceManager::deleteThermByType(const QString &ty, const QString &name
 
 void AppearanceManager::handleWmWorkspaceCountChanged(int count)
 {
-    workspaceCount = count;
     QStringList bgs = settingDconfig.value(GSKEYBACKGROUNDURIS).toStringList();
 
     if (bgs.size() < count) {
@@ -211,12 +205,13 @@ void AppearanceManager::handleWmWorkspaceCountChanged(int count)
         settingDconfig.setValue(GSKEYBACKGROUNDURIS, bgs);
     }
 
-    PhaseWallPaper::resizeWorkspaceCount(workspaceCount);
+    PhaseWallPaper::resizeWorkspaceCount(getWorkspaceCount());
     doUpdateWallpaperURIs();
 }
 
 void AppearanceManager::handleWmWorkspaceSwithched(int from, int to)
 {
+    Q_UNUSED(from);
     dbusProxy->SetCurrentWorkspace(to);
 }
 
@@ -791,6 +786,12 @@ void AppearanceManager::iso6709Parsing(QString city, QString coordinates)
     coordinateMap[city] = cdn;
 }
 
+int AppearanceManager::getWorkspaceCount()
+{
+    const auto count = dbusProxy->WorkspaceCount();
+    return count > 0 ? count : DEFAULT_WORKSPACE_COUNT;
+}
+
 void AppearanceManager::doUpdateWallpaperURIs()
 {
     QMap<QString, QString> monitorWallpaperUris;
@@ -798,7 +799,7 @@ void AppearanceManager::doUpdateWallpaperURIs()
     QStringList monitorList = dbusProxy->ListOutputNames();
 
     for (int i = 0; i < monitorList.length(); i++) {
-        for (int idx = 1; idx <= workspaceCount; idx++) {
+        for (int idx = 1; idx <= getWorkspaceCount(); idx++) {
             QString wallpaperUri = getWallpaperUri(QString::number(idx), monitorList.at(i));
             if (wallpaperUri.isEmpty())
                 continue;
@@ -852,6 +853,7 @@ void AppearanceManager::updateNewVersionData()
     }
     QJsonDocument doc = QJsonDocument::fromJson(property->wallpaperSlideShow->toLatin1());
     QJsonObject wallPaperSlideObj;
+    const auto workspaceCount = getWorkspaceCount();
     if (!doc.isEmpty()) {
         for (int i = 1; i <= workspaceCount; i++) {
             QString key = QString("%1&&%2").arg(primaryMonitor).arg(i);
@@ -1006,6 +1008,7 @@ void AppearanceManager::loadWSConfig()
 
 QDateTime AppearanceManager::getThemeAutoChangeTime(QDateTime date, double latitude, double longitude)
 {
+    Q_UNUSED(date);
     QDateTime curr = QDateTime::currentDateTime();
 
     double utcOffset = curr.offsetFromUtc() / 3600.0;
