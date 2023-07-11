@@ -109,7 +109,7 @@ public:
     inline QString getGreetBg() {return greeterBg; }
     inline QMap<QString,QString>& getMonitor() {return monitorMap; }
     inline QSharedPointer<AppearanceDBusProxy> getDBusProxy() const { return dbusProxy; }
-    inline int getWorkspaceCount() const { return workspaceCount; }
+    int getWorkspaceCount();
     void timerEvent(QTimerEvent *event) override;
 
 public Q_SLOTS:
@@ -204,7 +204,6 @@ private:
     CustomTheme                     *customTheme;
     bool                            globalThemeUpdating;
     QString                         currentGlobalTheme; // 当前主题，globalTheme+.light/.dark
-    int                             workspaceCount;
 };
 
 #endif // APPEARANCEMANAGER_H
