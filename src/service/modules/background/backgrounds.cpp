@@ -225,5 +225,5 @@ QString Backgrounds::prepare(QString file)
         return tempFile;
     }
 
-    return onPrepare(file);
+    return onPrepare(tempFile);
 }
