@@ -4,7 +4,7 @@ dde-appearance (1.1.3) unstable; urgency=medium
   * fix: wayland can't set wallpaper
   * fix: fix: background should refresh after set background
 
- -- dengbo <dengbo@deepin.org>  Wed, 05 July 2023 11:08:40 +0800
+ -- dengbo <dengbo@deepin.org>  Wed, 05 Jul 2023 11:08:40 +0800
 
 dde-appearance (1.1.2) unstable; urgency=medium
 
