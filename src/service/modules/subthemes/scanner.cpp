@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "scanner.h"
+
 #include "../api/utils.h"
 #include "../common/commondefine.h"
 
@@ -41,8 +42,7 @@ QString Scanner::query(QString uri)
 {
     QString path = utils::deCodeURI(uri);
     QString mime = queryThemeMime(path);
-    if(!mime.isEmpty())
-    {
+    if (!mime.isEmpty()) {
         return mime;
     }
 
@@ -75,13 +75,11 @@ QString Scanner::doQueryFile(QString file)
 
     GFileInfo *fileinfo = g_file_query_info(g_file, attributes.toLatin1().data(), GFileQueryInfoFlags(G_FILE_QUERY_INFO_NONE), nullptr ,err);
     if(err != nullptr){
-        qInfo() << "g_file_query_info failed" << __FUNCTION__ << __LINE__;
         return "";
     }
 
     const char *attribute = g_file_info_get_attribute_string(fileinfo, attributes.toLatin1().data());
     QString attributeString(attribute);
-    qInfo() << "attributeString" << attributeString << __FUNCTION__ << __LINE__;
 
     return attributeString;
 }
@@ -94,8 +92,7 @@ bool Scanner::globalTheme(QString file)
         return false;
     }
 
-
-    if(keyfile.getStr("Deepin Theme","DefaultTheme").isEmpty()) {
+    if(keyfile.getStr("Deepin Theme", "DefaultTheme").isEmpty()) {
         return false;
     }
 
@@ -114,7 +111,6 @@ bool Scanner::iconTheme(QString file)
     if(!keyfile.loadFile(file)) {
         return false;
     }
-
 
     if(keyfile.getStr("Icon Theme","Directories").isEmpty()) {
         return false;
@@ -188,15 +184,8 @@ QVector<QString> Scanner::listSubDir(QString path)
     QFileInfoList filenames = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files);
 
     for(auto filename : filenames) {
-        qInfo() << "filename = " << filename.filePath() << __FUNCTION__ << __LINE__;
         subDirs.push_back(filename.fileName());
     }
-
-    for(auto sub : subDirs) {
-        qInfo() << "sub = " << sub << __FUNCTION__ << __LINE__;
-    }
-
-    qInfo() << "sub.size = " << subDirs.size() << __FUNCTION__ << __LINE__;
 
     return subDirs;
 }
@@ -205,10 +194,9 @@ QVector<QString> Scanner::doListTheme(QString uri, QString ty, Fn fn)
 {
     QString path = utils::deCodeURI(uri);
 
-    qInfo() << "path = " << path << __FUNCTION__ << __LINE__;
     QVector<QString> subDirs = listSubDir(path);
     if(!subDirs.size()) {
-        qInfo() << "subDirs is empty";
+        qInfo() << "Path:" << path << "subDirs is empty";
     }
 
     QVector<QString> themes;
@@ -219,17 +207,15 @@ QVector<QString> Scanner::doListTheme(QString uri, QString ty, Fn fn)
         } else {
             tmp = path + "/" + subDir + "/index.theme";
         }
-        qInfo() << "subDir = " << subDir << __FUNCTION__ << __LINE__;
 
         if(!fn(tmp) || isHidden(tmp, ty))
             continue;
-        qInfo() << "subDir = " << subDir << __FUNCTION__ << __LINE__;
+
         themes.push_back(tmp);
     }
 
     return themes;
 }
-
 
 QVector<QString> Scanner::listGlobalTheme(QString uri)
 {

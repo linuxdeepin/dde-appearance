@@ -138,8 +138,6 @@ QVector<QString> ThemesApi::doListTheme(QVector<QString> local, QVector<QString>
     QVector<QString> lists = scanThemeDirs(local, type);
     QVector<QString> syslists = scanThemeDirs(sys, type);
 
-    qInfo() << "doListTheme" << lists.size() << syslists.size() << __FUNCTION__ << __LINE__;
-
     return mergeThemeList(lists, syslists);
 }
 
@@ -172,7 +170,6 @@ QVector<QString> ThemesApi::scanThemeDirs(QVector<QString> dirs, QString type)
 
 QVector<QString> ThemesApi::mergeThemeList(QVector<QString> src, QVector<QString> target)
 {
-    qInfo() << "mergeThemeList";
     if (target.size() == 0) {
         return src;
     }
