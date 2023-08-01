@@ -14,6 +14,9 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gtk/gtk.h>
 
+#include <DGuiApplicationHelper>
+using Dtk::Gui::DGuiApplicationHelper;
+
 const int width = 320;
 const int height = 70;
 const int baseCursorSize = 24;
@@ -366,7 +369,8 @@ QString getGlobal(QString id, QString descFile)
     keyFile.loadFile(descFile);
     QStringList example = keyFile.getStrList("Deepin Theme", "Example");
     if (!example.isEmpty()) {
-        QString path = example.first();
+        bool isdark = DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::ColorType::DarkType;
+        QString path = isdark ? example.last() : example.first();
         QFileInfo file(path);
         if (file.isRelative()) {
             QFileInfo themefile(descFile);
