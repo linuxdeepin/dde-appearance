@@ -1,3 +1,13 @@
+dde-appearance (1.1.5) unstable; urgency=medium
+
+  * adjust the registing orders of services, put wm service front
+  * fix: systemd start after dde-session
+  * chore: remove useless log
+  * fix persionlization cannot get dart front png
+  * use full path to set background picture
+
+ -- chenhongtao <chenhongtao@deepin.org>  Mon, 14 Aug 2023 13:14:20 +0800
+
 dde-appearance (1.1.4) unstable; urgency=medium
 
   * fix: get workSapce count when set wallpapers
