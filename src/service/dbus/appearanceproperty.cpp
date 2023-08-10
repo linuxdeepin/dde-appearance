@@ -14,11 +14,11 @@ void AppearancePropertiesChanged(const QString &property, const QVariant &value)
     properties.insert(property, value);
 
     QList<QVariant> arguments;
-    arguments.push_back(AppearanceInterface);
+    arguments.push_back(APPEARANCE_INTERFACE);
     arguments.push_back(properties);
     arguments.push_back(QStringList());
 
-    QDBusMessage msg = QDBusMessage::createSignal(AppearancePath, "org.freedesktop.DBus.Properties", "PropertiesChanged");
+    QDBusMessage msg = QDBusMessage::createSignal(APPEARANCE_PATH, "org.freedesktop.DBus.Properties", "PropertiesChanged");
     msg.setArguments(arguments);
     APPEARANCEDBUS.send(msg);
 }

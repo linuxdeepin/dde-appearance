@@ -42,8 +42,8 @@ int main(int argc, char *argv[])
 
     new Appearance1Adaptor(appearance);
 
-    bool appearanceRegister = APPEARANCEDBUS.registerService(AppearanceService);
-    bool appearanceObjectRegister = APPEARANCEDBUS.registerObject(AppearancePath, AppearanceInterface, appearance);
+    bool appearanceRegister = APPEARANCEDBUS.registerService(APPEARANCE_SERVICE);
+    bool appearanceObjectRegister = APPEARANCEDBUS.registerObject(APPEARANCE_PATH, APPEARANCE_INTERFACE, appearance);
 
     if (!appearanceRegister || ! appearanceObjectRegister) {
         qWarning() << "appearance dbus service already registed";
