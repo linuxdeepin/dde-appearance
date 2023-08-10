@@ -8,9 +8,9 @@
 
 #define APPEARANCEDBUS QDBusConnection::sessionBus()
 
-const QString AppearanceService = "org.deepin.dde.Appearance1";
-const QString AppearancePath = "/org/deepin/dde/Appearance1";
-const QString AppearanceInterface = "org.deepin.dde.Appearance1";
+const QString APPEARANCE_SERVICE = "org.deepin.dde.Appearance1";
+const QString APPEARANCE_PATH = "/org/deepin/dde/Appearance1";
+const QString APPEARANCE_INTERFACE = "org.deepin.dde.Appearance1";
 
 #define APPEARANCESCHEMA    "org.deepin.dde.appearance"
 #define XSETTINGSSCHEMA     "com.deepin.xsettings"
