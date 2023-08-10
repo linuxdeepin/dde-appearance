@@ -30,6 +30,16 @@ int main(int argc, char *argv[])
     DLogManager::registerConsoleAppender();
  
     Appearance1 *appearance = new Appearance1();
+ 
+    DeepinWMFaker faker(appearance);
+    WmAdaptor wmAdaptor(&faker);
+    bool registerWmServiceSuccessed = QDBusConnection::sessionBus().registerService("com.deepin.wm");
+    bool registerWmObjectSuccessed = QDBusConnection::sessionBus().registerObject("/com/deepin/wm", "com.deepin.wm", &faker);
+    if (!registerWmServiceSuccessed || !registerWmObjectSuccessed) {
+        qWarning() << "wm dbus service already registed";
+        return -1;
+    }
+
     new Appearance1Adaptor(appearance);
 
     bool appearanceRegister = APPEARANCEDBUS.registerService(AppearanceService);
@@ -37,15 +47,6 @@ int main(int argc, char *argv[])
 
     if (!appearanceRegister || ! appearanceObjectRegister) {
         qWarning() << "appearance dbus service already registed";
-        return -1;
-    }
-
-    DeepinWMFaker faker(appearance);
-    WmAdaptor wmAdaptor(&faker);
-    bool registerWmServiceSuccessed = QDBusConnection::sessionBus().registerService("com.deepin.wm");
-    bool registerWmObjectSuccessed = QDBusConnection::sessionBus().registerObject("/com/deepin/wm", "com.deepin.wm", &faker);
-    if (!registerWmServiceSuccessed || !registerWmObjectSuccessed) {
-        qWarning() << "wm dbus service already registed";
         return -1;
     }
 
