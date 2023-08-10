@@ -10,6 +10,7 @@
 #include <QMutexLocker>
 
 #include <DConfig>
+#include <QThread>
 
 // AppearanceManager是实际功能实现
 // Appearance1Thread在线程中处理，并处理DBus返回及属性设置

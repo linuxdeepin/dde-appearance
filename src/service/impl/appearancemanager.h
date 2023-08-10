@@ -9,7 +9,6 @@
 #include "modules/subthemes/subthemes.h"
 #include "modules/fonts/fontsmanager.h"
 #include "dbus/scaleFactors.h"
-#include "cursorchangehandler.h"
 #include "wallpaperscheduler.h"
 
 #include <QObject>
@@ -192,7 +191,7 @@ private:
     int                             ntpTimeId;
     bool                            locationValid;
     QString                         curMonitorSpace;
-    QSharedPointer<CursorChangeHandler> cursorChangeHandler;
+    //QSharedPointer<CursorChangeHandler> cursorChangeHandler;
     QSharedPointer<Fsnotify>        fsnotify;
     QString                         m_gsQtActiveColor;
     QTimer                          detectSysClockTimer;

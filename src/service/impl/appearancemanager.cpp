@@ -51,7 +51,6 @@ AppearanceManager::AppearanceManager(AppearanceProperty *prop, QObject *parent)
     , timeUpdateTimeId(0)
     , ntpTimeId(0)
     , locationValid(false) // 非法经纬度，未初始化状态
-    , cursorChangeHandler(new CursorChangeHandler(this))
     , fsnotify(new Fsnotify())
     , detectSysClockTimer(this)
     , themeAutoTimer(this)
@@ -148,8 +147,6 @@ bool AppearanceManager::init()
         setCursorTheme(DEFAULTCURSORTHEME);
         doSetCursorTheme(DEFAULTCURSORTHEME);
     }
-
-    cursorChangeHandler->start();
 
     connect(fsnotify.data(), SIGNAL(themeFileChange(QString)), this, SLOT(handlethemeFileChange(QString)), Qt::QueuedConnection);
 
