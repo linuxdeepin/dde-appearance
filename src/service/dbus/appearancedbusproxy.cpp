@@ -12,11 +12,11 @@ const QString DaemonInterface = QStringLiteral("org.deepin.dde.Daemon1");
 
 AppearanceDBusProxy::AppearanceDBusProxy(QObject *parent)
     : QObject(parent)
-    , m_wmInterface(new DCCDBusInterface("com.deepin.wm", "/com/deepin/wm", "com.deepin.wm", QDBusConnection::sessionBus(), this))
-    , m_displayInterface(new DCCDBusInterface("org.deepin.dde.Display1", "/org/deepin/dde/Display1", "org.deepin.dde.Display1", QDBusConnection::sessionBus(), this))
-    , m_xSettingsInterface(new DCCDBusInterface("org.deepin.dde.XSettings1", "/org/deepin/dde/XSettings1", "org.deepin.dde.XSettings1", QDBusConnection::sessionBus(), this))
-    , m_timeDateInterface(new DCCDBusInterface("org.freedesktop.timedate1", "/org/freedesktop/timedate1", "org.freedesktop.timedate1", QDBusConnection::systemBus(), this))
-    , m_sessionTimeDateInterface(new DCCDBusInterface("org.deepin.dde.Timedate1", "/org/deepin/dde/Timedate1", "org.deepin.dde.Timedate1", QDBusConnection::sessionBus(), this))
+    , m_wmInterface(new DDBusInterface("com.deepin.wm", "/com/deepin/wm", "com.deepin.wm", QDBusConnection::sessionBus(), this))
+    , m_displayInterface(new DDBusInterface("org.deepin.dde.Display1", "/org/deepin/dde/Display1", "org.deepin.dde.Display1", QDBusConnection::sessionBus(), this))
+    , m_xSettingsInterface(new DDBusInterface("org.deepin.dde.XSettings1", "/org/deepin/dde/XSettings1", "org.deepin.dde.XSettings1", QDBusConnection::sessionBus(), this))
+    , m_timeDateInterface(new DDBusInterface("org.freedesktop.timedate1", "/org/freedesktop/timedate1", "org.freedesktop.timedate1", QDBusConnection::systemBus(), this))
+    , m_sessionTimeDateInterface(new DDBusInterface("org.deepin.dde.Timedate1", "/org/deepin/dde/Timedate1", "org.deepin.dde.Timedate1", QDBusConnection::sessionBus(), this))
     , m_nid(0)
 {
     registerScaleFactorsMetaType();
@@ -26,7 +26,7 @@ AppearanceDBusProxy::AppearanceDBusProxy(QObject *parent)
 
 void AppearanceDBusProxy::setUserInterface(const QString &userPath)
 {
-    m_userInterface = QSharedPointer<DCCDBusInterface>(new DCCDBusInterface("org.deepin.dde.Accounts1",
+    m_userInterface = QSharedPointer<DDBusInterface>(new DDBusInterface("org.deepin.dde.Accounts1",
                                                                             userPath,
                                                                             "org.deepin.dde.Accounts1.User",
                                                                             QDBusConnection::systemBus(), this));

@@ -5,10 +5,12 @@
 #ifndef APPEARANCEDBUSPROXY_H
 #define APPEARANCEDBUSPROXY_H
 
-#include "dccdbusinterface.h"
 #include "scaleFactors.h"
 
+#include <DDBusInterface>
 #include <QSharedPointer>
+
+using Dtk::Core::DDBusInterface;
 
 class AppearanceDBusProxy : public QObject
 {
@@ -126,12 +128,12 @@ Q_SIGNALS:
     void HandleForSleep(bool sleep);
 
 private:
-    DCCDBusInterface *m_wmInterface;
-    DCCDBusInterface *m_displayInterface;
-    DCCDBusInterface *m_xSettingsInterface;
-    DCCDBusInterface *m_timeDateInterface;
-    DCCDBusInterface *m_sessionTimeDateInterface;
-    QSharedPointer<DCCDBusInterface> m_userInterface;
+    DDBusInterface *m_wmInterface;
+    DDBusInterface *m_displayInterface;
+    DDBusInterface *m_xSettingsInterface;
+    DDBusInterface *m_timeDateInterface;
+    DDBusInterface *m_sessionTimeDateInterface;
+    QSharedPointer<DDBusInterface> m_userInterface;
     uint m_nid;
 };
 

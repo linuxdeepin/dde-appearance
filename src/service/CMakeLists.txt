@@ -35,8 +35,6 @@ set(SRCS
     ./main.cpp
     ./dbus/scaleFactors.h
     ./dbus/scaleFactors.cpp
-    ./dbus/dccdbusinterface.h
-    ./dbus/dccdbusinterface.cpp
     ./dbus/appearancedbusproxy.h
     ./dbus/appearancedbusproxy.cpp
     ./dbus/appearance1adaptor.h
