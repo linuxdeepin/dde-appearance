@@ -2,12 +2,16 @@
 <context>
     <name>AppearanceManager</name>
     <message>
-        <source>Setting display scaling</source>
-        <translation>Ustawienie skalowania ekranu</translation>
-    </message>
-    <message>
         <source>Display scaling</source>
         <translation>Skalowanie ekranu</translation>
+    </message>
+    <message>
+        <source>Log out for display scaling settings to take effect</source>
+        <translation>Wyloguj się, aby zastosować ustawienia wyświetlania</translation>
+    </message>
+    <message>
+        <source>Set successfully</source>
+        <translation>Ustawiono pomyślnie</translation>
     </message>
     <message>
         <source>Log Out Now</source>
@@ -18,12 +22,8 @@
         <translation>Później</translation>
     </message>
     <message>
-        <source>Log out for display scaling settings to take effect</source>
-        <translation>Wyloguj się, aby zastosować ustawienia wyświetlania</translation>
-    </message>
-    <message>
-        <source>Set successfully</source>
-        <translation>Ustawiono pomyślnie</translation>
+        <source>Start setting display scaling, please wait patience</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>

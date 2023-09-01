@@ -2,27 +2,27 @@
 <context>
     <name>AppearanceManager</name>
     <message>
-        <source>Setting display scaling</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
         <source>Display scaling</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Log Out Now</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Later</source>
-        <translation type="unfinished"/>
+        <translation>Scala di visualizzazione</translation>
     </message>
     <message>
         <source>Log out for display scaling settings to take effect</source>
-        <translation type="unfinished"/>
+        <translation>Disconnetti l&apos;utente per rendere effettivo lo scaling del display</translation>
     </message>
     <message>
         <source>Set successfully</source>
+        <translation>Modifica effettuata</translation>
+    </message>
+    <message>
+        <source>Log Out Now</source>
+        <translation>Disconnetti ora</translation>
+    </message>
+    <message>
+        <source>Later</source>
+        <translation>Dopo</translation>
+    </message>
+    <message>
+        <source>Start setting display scaling, please wait patience</source>
         <translation type="unfinished"/>
     </message>
 </context>

@@ -2,12 +2,16 @@
 <context>
     <name>AppearanceManager</name>
     <message>
-        <source>Setting display scaling</source>
-        <translation>Képernyő méretezésének beállítása</translation>
-    </message>
-    <message>
         <source>Display scaling</source>
         <translation>Képernyő méretezése</translation>
+    </message>
+    <message>
+        <source>Log out for display scaling settings to take effect</source>
+        <translation>Jelentkezzen ki, hogy a képernyő méretezési beállításai érvénybe lépjenek</translation>
+    </message>
+    <message>
+        <source>Set successfully</source>
+        <translation>Sikeresen beállítva</translation>
     </message>
     <message>
         <source>Log Out Now</source>
@@ -18,12 +22,8 @@
         <translation>Később</translation>
     </message>
     <message>
-        <source>Log out for display scaling settings to take effect</source>
-        <translation>Jelentkezzen ki, hogy a képernyő méretezési beállításai érvénybe lépjenek</translation>
-    </message>
-    <message>
-        <source>Set successfully</source>
-        <translation>Sikeresen beállítva</translation>
+        <source>Start setting display scaling, please wait patience</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>

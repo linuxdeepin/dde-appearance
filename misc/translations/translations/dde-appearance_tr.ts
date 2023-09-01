@@ -2,27 +2,27 @@
 <context>
     <name>AppearanceManager</name>
     <message>
-        <source>Setting display scaling</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
         <source>Display scaling</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Log Out Now</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Later</source>
-        <translation type="unfinished"/>
+        <translation>Görüntü ölçeği</translation>
     </message>
     <message>
         <source>Log out for display scaling settings to take effect</source>
-        <translation type="unfinished"/>
+        <translation>Ekran ölçekleme ayarlarının etkili olması için oturumu kapatın</translation>
     </message>
     <message>
         <source>Set successfully</source>
+        <translation>Ayarlandı</translation>
+    </message>
+    <message>
+        <source>Log Out Now</source>
+        <translation>Şimdi Oturumu Kapat</translation>
+    </message>
+    <message>
+        <source>Later</source>
+        <translation>Sonra</translation>
+    </message>
+    <message>
+        <source>Start setting display scaling, please wait patience</source>
         <translation type="unfinished"/>
     </message>
 </context>

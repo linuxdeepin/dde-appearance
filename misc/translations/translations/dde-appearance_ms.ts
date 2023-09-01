@@ -2,27 +2,27 @@
 <context>
     <name>AppearanceManager</name>
     <message>
-        <source>Setting display scaling</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
         <source>Display scaling</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Log Out Now</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Later</source>
-        <translation type="unfinished"/>
+        <translation>Penskalaan paparan</translation>
     </message>
     <message>
         <source>Log out for display scaling settings to take effect</source>
-        <translation type="unfinished"/>
+        <translation>Daftar keluar supaya tetapan penskalaan paparan berkesan</translation>
     </message>
     <message>
         <source>Set successfully</source>
+        <translation>Berjaya ditetapkan</translation>
+    </message>
+    <message>
+        <source>Log Out Now</source>
+        <translation>Daftar Keluar Sekarang</translation>
+    </message>
+    <message>
+        <source>Later</source>
+        <translation>Kemudian</translation>
+    </message>
+    <message>
+        <source>Start setting display scaling, please wait patience</source>
         <translation type="unfinished"/>
     </message>
 </context>

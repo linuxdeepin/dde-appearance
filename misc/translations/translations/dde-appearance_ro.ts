@@ -2,27 +2,27 @@
 <context>
     <name>AppearanceManager</name>
     <message>
-        <source>Setting display scaling</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
         <source>Display scaling</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Log Out Now</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Later</source>
-        <translation type="unfinished"/>
+        <translation>Redimensionați afișajul</translation>
     </message>
     <message>
         <source>Log out for display scaling settings to take effect</source>
-        <translation type="unfinished"/>
+        <translation>Deloghează-te pentru ca setările de scalare să intre în vigoare</translation>
     </message>
     <message>
         <source>Set successfully</source>
+        <translation>Setat cu succes</translation>
+    </message>
+    <message>
+        <source>Log Out Now</source>
+        <translation>Delogare Acum</translation>
+    </message>
+    <message>
+        <source>Later</source>
+        <translation>Mai târziu</translation>
+    </message>
+    <message>
+        <source>Start setting display scaling, please wait patience</source>
         <translation type="unfinished"/>
     </message>
 </context>
