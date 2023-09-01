@@ -11,5 +11,5 @@ echo 工程目录：${PROJECT_DIR}
 lupdate ${PROJECT_DIR}/src -no-obsolete -no-ui-lines -locations none -ts ${PROJECT_DIR}/misc/translations/translations/dde-appearance_en.ts
 
 # 推送翻译
-tx push -s -b m23
+tx push -s --branch m23
 cd ${CURRENT_DIR}

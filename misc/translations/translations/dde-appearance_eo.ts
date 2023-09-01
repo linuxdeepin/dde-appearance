@@ -2,11 +2,15 @@
 <context>
     <name>AppearanceManager</name>
     <message>
-        <source>Setting display scaling</source>
+        <source>Display scaling</source>
+        <translation>Ekran-skalado</translation>
+    </message>
+    <message>
+        <source>Log out for display scaling settings to take effect</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <source>Display scaling</source>
+        <source>Set successfully</source>
         <translation type="unfinished"/>
     </message>
     <message>
@@ -18,11 +22,7 @@
         <translation type="unfinished"/>
     </message>
     <message>
-        <source>Log out for display scaling settings to take effect</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Set successfully</source>
+        <source>Start setting display scaling, please wait patience</source>
         <translation type="unfinished"/>
     </message>
 </context>

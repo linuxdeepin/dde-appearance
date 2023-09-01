@@ -2,19 +2,7 @@
 <context>
     <name>AppearanceManager</name>
     <message>
-        <source>Setting display scaling</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
         <source>Display scaling</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Log Out Now</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Later</source>
         <translation type="unfinished"/>
     </message>
     <message>
@@ -23,6 +11,18 @@
     </message>
     <message>
         <source>Set successfully</source>
+        <translation>Uspješno postavljeno</translation>
+    </message>
+    <message>
+        <source>Log Out Now</source>
+        <translation>Odjavite se sada</translation>
+    </message>
+    <message>
+        <source>Later</source>
+        <translation>Kasnije</translation>
+    </message>
+    <message>
+        <source>Start setting display scaling, please wait patience</source>
         <translation type="unfinished"/>
     </message>
 </context>

@@ -2,27 +2,27 @@
 <context>
     <name>AppearanceManager</name>
     <message>
-        <source>Setting display scaling</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
         <source>Display scaling</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Log Out Now</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Later</source>
-        <translation type="unfinished"/>
+        <translation>Κλίμακα οθόνης</translation>
     </message>
     <message>
         <source>Log out for display scaling settings to take effect</source>
-        <translation type="unfinished"/>
+        <translation>Βγείτε από τις ρυθμίσεις κλίμακας οθόνης για να τεθούν σε ισχύ οι αλλάγες</translation>
     </message>
     <message>
         <source>Set successfully</source>
+        <translation>Ορισμός επιτυχής</translation>
+    </message>
+    <message>
+        <source>Log Out Now</source>
+        <translation>Αποσύνδεση Τώρα</translation>
+    </message>
+    <message>
+        <source>Later</source>
+        <translation>Αργότερα</translation>
+    </message>
+    <message>
+        <source>Start setting display scaling, please wait patience</source>
         <translation type="unfinished"/>
     </message>
 </context>
