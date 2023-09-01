@@ -4,10 +4,6 @@
 <context>
     <name>AppearanceManager</name>
     <message>
-        <source>Setting display scaling</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Display scaling</source>
         <translation type="unfinished"></translation>
     </message>
@@ -25,6 +21,10 @@
     </message>
     <message>
         <source>Later</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Start setting display scaling, please wait patience</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
