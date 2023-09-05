@@ -214,7 +214,7 @@ void AppearanceManager::handleWmWorkspaceSwithched(int from, int to)
 
 void AppearanceManager::handleSetScaleFactorStarted()
 {
-    QString body = tr("Start setting display scaling, please wait patience");
+    QString body = tr("Start setting display scaling, please wait patiently");
     QString summary = tr("Display scaling");
     dbusProxy->Notify("dde-control-center", "dialog-window-scale", summary, body, {}, {}, 0);
 }
