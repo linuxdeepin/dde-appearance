@@ -22,7 +22,7 @@
         <translation>稍后注销</translation>
     </message>
     <message>
-        <source>Start setting display scaling, please wait patience</source>
+        <source>Start setting display scaling, please wait patiently</source>
         <translation>开始设置屏幕缩放，请耐心等待</translation>
     </message>
 </context>
