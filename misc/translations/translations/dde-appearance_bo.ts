@@ -22,7 +22,7 @@
         <translation>ཏོག་ཙམ་ནས་ཐོ་འདོར་བ།</translation>
     </message>
     <message>
-        <source>Start setting display scaling, please wait patience</source>
+        <source>Start setting display scaling, please wait patiently</source>
         <translation type="unfinished"/>
     </message>
 </context>
