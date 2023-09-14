@@ -12,6 +12,3 @@ Before=dde-session-initialized.target
 Type=dbus
 BusName=org.deepin.dde.Appearance1
 ExecStart=@CMAKE_INSTALL_FULL_BINDIR@/dde-appearance
-
-[Install]
-WantedBy=graphical-session.target

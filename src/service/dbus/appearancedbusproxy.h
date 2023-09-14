@@ -99,14 +99,9 @@ Q_SIGNALS:
     void TimezoneChanged(QString timezone);
     void NTPChanged(bool NTP);
 
-    // sessionTimeDateInterface
 public:
-    Q_PROPERTY(bool NTPSession READ nTPSession NOTIFY NTPSessionChanged)
-    bool nTPSession();
-
 Q_SIGNALS:
     void TimeUpdate();
-    void NTPSessionChanged();
 
     // imageBlurInterface
 public:
@@ -132,7 +127,6 @@ private:
     DDBusInterface *m_displayInterface;
     DDBusInterface *m_xSettingsInterface;
     DDBusInterface *m_timeDateInterface;
-    DDBusInterface *m_sessionTimeDateInterface;
     QSharedPointer<DDBusInterface> m_userInterface;
     uint m_nid;
 };
