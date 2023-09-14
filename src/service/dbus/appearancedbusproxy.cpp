@@ -16,12 +16,11 @@ AppearanceDBusProxy::AppearanceDBusProxy(QObject *parent)
     , m_displayInterface(new DDBusInterface("org.deepin.dde.Display1", "/org/deepin/dde/Display1", "org.deepin.dde.Display1", QDBusConnection::sessionBus(), this))
     , m_xSettingsInterface(new DDBusInterface("org.deepin.dde.XSettings1", "/org/deepin/dde/XSettings1", "org.deepin.dde.XSettings1", QDBusConnection::sessionBus(), this))
     , m_timeDateInterface(new DDBusInterface("org.freedesktop.timedate1", "/org/freedesktop/timedate1", "org.freedesktop.timedate1", QDBusConnection::systemBus(), this))
-    , m_sessionTimeDateInterface(new DDBusInterface("org.deepin.dde.Timedate1", "/org/deepin/dde/Timedate1", "org.deepin.dde.Timedate1", QDBusConnection::sessionBus(), this))
     , m_nid(0)
 {
     registerScaleFactorsMetaType();
-    m_sessionTimeDateInterface->setSuffix("Session");
     QDBusConnection::systemBus().connect(DaemonService, DaemonPath, DaemonInterface, "HandleForSleep", this, SIGNAL(HandleForSleep(bool)));
+    QDBusConnection::sessionBus().connect(QStringLiteral("org.deepin.dde.Timedate1"), QStringLiteral("/org/deepin/dde/Timedate1"), QStringLiteral("org.deepin.dde.Timedate1"), "TimeUpdate", this, SIGNAL(TimeUpdate()));
 }
 
 void AppearanceDBusProxy::setUserInterface(const QString &userPath)
@@ -172,12 +171,7 @@ bool AppearanceDBusProxy::nTP()
 {
     return qvariant_cast<bool>(m_timeDateInterface->property("NTP"));
 }
-// sessionTimeDateInterface
-bool AppearanceDBusProxy::nTPSession()
-{
 
-    return qvariant_cast<bool>(m_sessionTimeDateInterface->property("NTPSession"));
-}
 // imageBlurInterface
 void AppearanceDBusProxy::Delete(const QString &file)
 {
