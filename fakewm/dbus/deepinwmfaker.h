@@ -27,7 +27,7 @@ class DeepinWMFaker : public QObject, protected QDBusContext
     Q_PROPERTY(int cursorSize READ cursorSize WRITE setCursorSize)
 
 public:
-    explicit DeepinWMFaker(Appearance1 *appearance);
+    explicit DeepinWMFaker(QObject *parent = nullptr);
     ~DeepinWMFaker();
 
     enum Action {
@@ -65,6 +65,9 @@ public:
 
     QString cursorTheme() const;
     int cursorSize() const;
+
+private Q_SLOTS:
+    void handleThemeChanged(const QString &key, const QString& value);
 
 public Q_SLOTS:
     QString GetWorkspaceBackground(const int index) const;

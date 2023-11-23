@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "deepinwmfaker.h"
-#include "appearance1.h"
 
 #include <QDBusConnection>
 #include <QDBusMessage>
@@ -300,7 +299,7 @@ static const QMap<QString, QString> SpecialRequireShiftKeyMap = {
     {"asciitilde", "~"}
 };
 
-DeepinWMFaker::DeepinWMFaker(Appearance1* appearance)
+DeepinWMFaker::DeepinWMFaker(QObject* appearance)
     : QObject(appearance)
     , m_windowSystem(KWindowSystem::self())
     , m_deepinWMConfig(new KConfig(DeepinWMConfigName, KConfig::CascadeConfig))
@@ -364,14 +363,19 @@ DeepinWMFaker::DeepinWMFaker(Appearance1* appearance)
         }
     }
 
-    connect(appearance,
-            &Appearance1::Changed,
-            this,
-            [=](const QString& key, const QString& value) {
-                if (key == "gtk") {
-                    SetDecorationDeepinTheme(value.contains("dark") ? "dark" : "light");
-                }
-            });
+    QDBusConnection::sessionBus().connect(QStringLiteral("org.deepin.dde.Appearance1"),
+                                          QStringLiteral("/org/deepin/dde/Appearance1"),
+                                          QStringLiteral("org.deepin.dde.Appearance1"),
+                                          QStringLiteral("Changed"),
+                                          this,
+                                          SLOT(handleThemeChanged(QString, QString)));
+}
+
+void DeepinWMFaker::handleThemeChanged(const QString& key, const QString &value)
+{
+    if (key == "gtk") {
+        SetDecorationDeepinTheme(value.contains("dark") ? "dark" : "light");
+    }
 }
 
 DeepinWMFaker::~DeepinWMFaker()

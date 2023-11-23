@@ -1,4 +1,0 @@
-[D-BUS Service]
-Name=com.deepin.wm
-Exec=/usr/bin/dde-appearance
-SystemdService=dde-appearance.service

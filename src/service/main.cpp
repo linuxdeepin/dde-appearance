@@ -4,8 +4,6 @@
 
 #include "dbus/appearance1adaptor.h"
 #include "dbus/appearance1.h"
-#include "wmadaptor.h"
-#include "dbus/deepinwmfaker.h"
 #include "modules/common/commondefine.h"
 
 #include <DLog>
@@ -28,17 +26,8 @@ int main(int argc, char *argv[])
 
     DLogManager::registerJournalAppender();
     DLogManager::registerConsoleAppender();
- 
+
     Appearance1 *appearance = new Appearance1();
- 
-    DeepinWMFaker faker(appearance);
-    WmAdaptor wmAdaptor(&faker);
-    bool registerWmServiceSuccessed = QDBusConnection::sessionBus().registerService("com.deepin.wm");
-    bool registerWmObjectSuccessed = QDBusConnection::sessionBus().registerObject("/com/deepin/wm", "com.deepin.wm", &faker);
-    if (!registerWmServiceSuccessed || !registerWmObjectSuccessed) {
-        qWarning() << "wm dbus service already registered";
-        return -1;
-    }
 
     new Appearance1Adaptor(appearance);
 
