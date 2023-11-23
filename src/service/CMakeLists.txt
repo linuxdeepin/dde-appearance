@@ -45,8 +45,6 @@ set(SRCS
     ./dbus/appearance1thread.cpp
     ./dbus/appearance1.h
     ./dbus/appearance1.cpp
-    ./dbus/deepinwmfaker.h
-    ./dbus/deepinwmfaker.cpp
     ./impl/appearancemanager.h
     ./impl/appearancemanager.cpp
     ./impl/fsnotify.h
@@ -96,16 +94,8 @@ set(SRCS
     ./modules/dconfig/phasewallpaper.cpp
 )
 
-qt5_add_dbus_adaptor(
-    wm_SRCS
-    ../../dbus/com.deepin.wm.xml
-    ./dbus/deepinwmfaker.h
-    DeepinWMFaker
-)
-
 add_executable(dde-appearance
     ${SRCS}
-    ${wm_SRCS}
 )
 
 target_link_libraries(dde-appearance
@@ -122,9 +112,6 @@ target_link_libraries(dde-appearance
     PkgConfig::FONTCONFIG
     ${DtkCore_LIBRARIES}
     ${DtkGui_LIBRARIES}
-    KF5::ConfigCore
-    KF5::WindowSystem
-    KF5::GlobalAccel
 )
 
 install(TARGETS dde-appearance DESTINATION ${CMAKE_INSTALL_BINDIR})
