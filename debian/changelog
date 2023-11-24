@@ -1,3 +1,11 @@
+dde-appearance (1.1.7) unstable; urgency=medium
+
+ * chore: auto set theme feature is missing
+ * fix: remove unused dtkwidget devel builddep from debian/control
+ * chore: split deepinwmfaker
+
+ -- dengbo <dengbo@deepin.org>  Fri, 24 Nov 2023 13:58:50 +0800
+
 dde-appearance (1.1.6) unstable; urgency=medium
 
  * chore: bring back first notification
