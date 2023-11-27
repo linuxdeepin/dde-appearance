@@ -20,7 +20,7 @@ int main (int argc, char *argv[])
     bool registerWmServiceSuccessed = QDBusConnection::sessionBus().registerService("com.deepin.wm");
     bool registerWmObjectSuccessed = QDBusConnection::sessionBus().registerObject("/com/deepin/wm", "com.deepin.wm", &faker);
     if (!registerWmServiceSuccessed || !registerWmObjectSuccessed) {
-        qWarning() << "wm dbus service already registed";
+        qWarning() << "wm dbus service already registered";
         return -1;
     }
     return app.exec();
