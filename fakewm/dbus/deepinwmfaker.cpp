@@ -16,6 +16,7 @@
 #include <QFileInfo>
 #include <QDBusReply>
 #include <QMetaEnum>
+#include <mutex>
 
 #include <KF5/KConfigCore/KConfig>
 #include <KF5/KConfigCore/KConfigGroup>
@@ -299,6 +300,8 @@ static const QMap<QString, QString> SpecialRequireShiftKeyMap = {
     {"asciitilde", "~"}
 };
 
+std::mutex WORKSPACE_COUNT_GUARD;
+
 DeepinWMFaker::DeepinWMFaker(QObject* appearance)
     : QObject(appearance)
     , m_windowSystem(KWindowSystem::self())
@@ -311,6 +314,7 @@ DeepinWMFaker::DeepinWMFaker(QObject* appearance)
     , m_globalAccel(KGlobalAccel::self())
     , m_previewWinMiniPair(QPair<uint, bool>(-1, false))
 {
+    m_workspaceount =  QDBusInterface(KWinDBusService, "/VirtualDesktopManager", "org.kde.KWin.VirtualDesktopManager").property("count").value<int>();
     m_isPlatformX11 = isX11Platform();
 #ifndef DISABLE_DEEPIN_WM
     m_currentDesktop = m_kwinConfig->group("Workspace").readEntry<int>("CurrentDesktop", 1);
@@ -369,6 +373,19 @@ DeepinWMFaker::DeepinWMFaker(QObject* appearance)
                                           QStringLiteral("Changed"),
                                           this,
                                           SLOT(handleThemeChanged(QString, QString)));
+
+    QDBusConnection::sessionBus().connect(QStringLiteral(KWinDBusService),
+                                          QStringLiteral("/VirtualDesktopManager"),
+                                          QStringLiteral("org.kde.KWin.VirtualDesktopManager"),
+                                          QStringLiteral("countChanged"),
+                                          this,
+                                          SLOT(handleWorkspaceCountChanged(quint32)));
+}
+
+void DeepinWMFaker::handleWorkspaceCountChanged(quint32 count)
+{
+    std::lock_guard<std::mutex> guard(WORKSPACE_COUNT_GUARD);
+    m_workspaceount = count;
 }
 
 void DeepinWMFaker::handleThemeChanged(const QString& key, const QString &value)
@@ -465,7 +482,7 @@ static void setWorkspaceBackgroundForDeepinWM(const int index, const QString &ur
 
 QString DeepinWMFaker::GetWorkspaceBackground(const int index) const
 {
-    if (!m_transientBackgroundUri.isEmpty() && index == GetCurrentWorkspace()) {
+    if (!m_transientBackgroundUri.isEmpty() && index == GetCurrentWorkspaceInner()) {
         return m_transientBackgroundUri;
     }
 
@@ -493,19 +510,35 @@ void DeepinWMFaker::SetWorkspaceBackground(const int index, const QString &uri)
 
 QString DeepinWMFaker::GetCurrentWorkspaceBackground() const
 {
-    return GetWorkspaceBackground(GetCurrentWorkspace());
+    return GetWorkspaceBackground(GetCurrentWorkspaceInner());
 }
 
 void DeepinWMFaker::SetCurrentWorkspaceBackground(const QString &uri)
 {
-    SetWorkspaceBackground(GetCurrentWorkspace(), uri);
+    SetWorkspaceBackground(GetCurrentWorkspaceInner(), uri);
 }
 
 QString DeepinWMFaker::GetWorkspaceBackgroundForMonitor(const int index,const QString &strMonitorName) const
 {
+    auto message = this->message();
+    setDelayedReply(true);
+    message.setDelayedReply(true);
+
     QDBusInterface interface("org.deepin.dde.Appearance1", "/org/deepin/dde/Appearance1", "org.deepin.dde.Appearance1");
-    const QDBusReply<QString> reply = interface.call("GetWorkspaceBackgroundForMonitor", index, strMonitorName);
-    return reply.value();
+
+    QDBusPendingCall reply = interface.asyncCallWithArgumentList("GetWorkspaceBackgroundForMonitor", {index, strMonitorName});
+
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(reply);
+
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, message, reply, watcher]{
+        if (reply.isError()) {
+           QDBusConnection::sessionBus().send(message.createErrorReply(reply.error()));
+        }
+        QDBusReply<QString> result = reply;
+        QDBusConnection::sessionBus().send(message.createReply(result.value()));
+        watcher->deleteLater();
+    });
+    return QString();
 }
 
 void DeepinWMFaker::SetWorkspaceBackgroundForMonitor(const int index, const QString &strMonitorName, const QString &uri)
@@ -516,16 +549,17 @@ void DeepinWMFaker::SetWorkspaceBackgroundForMonitor(const int index, const QStr
 
 QString DeepinWMFaker::GetCurrentWorkspaceBackgroundForMonitor(const QString &strMonitorName)
 {
+    setDelayedReply(true);
     return GetWorkspaceBackgroundForMonitor(m_currentDesktop, strMonitorName);
 }
 void DeepinWMFaker::SetCurrentWorkspaceBackgroundForMonitor(const QString &uri, const QString &strMonitorName)
 {
-    SetWorkspaceBackgroundForMonitor(GetCurrentWorkspace(), strMonitorName, uri );
+    SetWorkspaceBackgroundForMonitor(GetCurrentWorkspaceInner(), strMonitorName, uri );
 }
 
 void DeepinWMFaker::SetTransientBackground(const QString &uri)
 {
-    int current = GetCurrentWorkspace();
+    int current = GetCurrentWorkspaceInner();
 
     m_transientBackgroundUri = uri;
 #ifndef DISABLE_DEEPIN_WM
@@ -555,15 +589,33 @@ void DeepinWMFaker::ChangeCurrentWorkspaceBackground(const QString &uri)
 }
 #endif // DISABLE_DEEPIN_WM
 
-int DeepinWMFaker::GetCurrentWorkspace() const
+int DeepinWMFaker::GetCurrentWorkspaceInner() const
 {
     QDBusReply<int> reply = QDBusInterface(KWinDBusService, KWinDBusPath, KWinDBusInterface).call("currentDesktop");
     return reply.value();
 }
 
+int DeepinWMFaker::GetCurrentWorkspace() const
+{
+    auto message = this->message();
+    setDelayedReply(true);
+    QDBusPendingCall reply = QDBusInterface(KWinDBusService, KWinDBusPath, KWinDBusInterface).asyncCall("currentDesktop");
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(reply);
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, message, reply, watcher]{
+       if (reply.isError()) {
+          QDBusConnection::sessionBus().send(message.createErrorReply(reply.error()));
+       }
+       QDBusReply<int> result = reply;
+       QDBusConnection::sessionBus().send(message.createReply(result.value()));
+       watcher->deleteLater();
+    });
+    return 1;
+}
+
 int DeepinWMFaker::WorkspaceCount() const
 {
-    return QDBusInterface(KWinDBusService, "/VirtualDesktopManager", "org.kde.KWin.VirtualDesktopManager").property("count").value<int>();
+    std::lock_guard<std::mutex> guard(WORKSPACE_COUNT_GUARD);
+    return m_workspaceount;
 }
 
 void DeepinWMFaker::SetCurrentWorkspace(const int index)
@@ -580,7 +632,7 @@ void DeepinWMFaker::NextWorkspace()
 //    ++current < m_windowSystem->numberOfDesktops() ? current : loopback ? 0 : --current;
 //    SetCurrentWorkspace(current);
 
-   SetCurrentWorkspace(GetCurrentWorkspace() + 1);
+   SetCurrentWorkspace(GetCurrentWorkspaceInner() + 1);
 }
 
 void DeepinWMFaker::PreviousWorkspace()
@@ -590,7 +642,7 @@ void DeepinWMFaker::PreviousWorkspace()
 //    --current >= 0 ? current : loopback ? --(m_windowSystem->numberOfDesktops()) : 0;
 //    SetCurrentWorkspace(current);
 
-    SetCurrentWorkspace(GetCurrentWorkspace() - 1);
+    SetCurrentWorkspace(GetCurrentWorkspaceInner() - 1);
 }
 
 /*!
@@ -1245,7 +1297,7 @@ void DeepinWMFaker::quitTransientBackground()
     if (!m_transientBackgroundUri.isEmpty()) {
         m_transientBackgroundUri.clear();
 
-        Q_EMIT WorkspaceBackgroundChanged(GetCurrentWorkspace(), GetCurrentWorkspaceBackground());
+        Q_EMIT WorkspaceBackgroundChanged(GetCurrentWorkspaceInner(), GetCurrentWorkspaceBackground());
     }
 
 #ifndef DISABLE_DEEPIN_WM
@@ -1253,7 +1305,7 @@ void DeepinWMFaker::quitTransientBackground()
         // 在退出预览时不同步deepin-wm的设置
         QSignalBlocker blocker(_gsettings_dde_appearance);
         Q_UNUSED(blocker)
-        setWorkspaceBackgroundForDeepinWM(GetCurrentWorkspace(), m_deepinWMBackgroundUri);
+        setWorkspaceBackgroundForDeepinWM(GetCurrentWorkspaceInner(), m_deepinWMBackgroundUri);
         m_deepinWMBackgroundUri.clear();
     }
 #endif // DISABLE_DEEPIN_WM
@@ -1276,7 +1328,7 @@ void DeepinWMFaker::onGsettingsDDEAppearanceChanged(const QString &key)
 
         // 更新值
         if (!m_deepinWMBackgroundUri.isEmpty()) {
-            m_deepinWMBackgroundUri = uris.value(GetCurrentWorkspace());
+            m_deepinWMBackgroundUri = uris.value(GetCurrentWorkspaceInner());
         }
     }
 }

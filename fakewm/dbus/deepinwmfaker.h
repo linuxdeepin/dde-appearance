@@ -8,6 +8,7 @@
 #include <QAction>
 #include <QObject>
 #include <QDBusContext>
+#include <QDBusMessage>
 
 class KWindowSystem;
 class KConfig;
@@ -68,6 +69,7 @@ public:
 
 private Q_SLOTS:
     void handleThemeChanged(const QString &key, const QString& value);
+    void handleWorkspaceCountChanged(quint32 count);
 
 public Q_SLOTS:
     QString GetWorkspaceBackground(const int index) const;
@@ -90,6 +92,7 @@ public Q_SLOTS:
     void ChangeCurrentWorkspaceBackground(const QString &uri);
 #endif
 
+    int GetCurrentWorkspaceInner() const;
     int GetCurrentWorkspace() const;
     int WorkspaceCount() const;
     void SetCurrentWorkspace(const int index);
@@ -210,6 +213,7 @@ private:
     bool m_isMultitaskingActived = false;
     bool m_isPlatformX11 = true;
     bool m_isShowDesktop = false;
+    int m_workspaceount = 0;
 };
 
 #endif // DEEPINWMFAKER_H
