@@ -1,16 +1,23 @@
+dde-appearance (1.1.8) unstable; urgency=medium
+
+  * fix: fakewm block with kwin when be invoked
+  * chore: fix a typo in fakewm/main.cpp
+
+ -- chenhongtao <chenhongtao@deepin.org>  Tue, 12 Dec 2023 13:16:25 +0800
+
 dde-appearance (1.1.7) unstable; urgency=medium
 
- * chore: auto set theme feature is missing
- * fix: remove unused dtkwidget devel builddep from debian/control
- * chore: split deepinwmfaker
+  * chore: auto set theme feature is missing
+  * fix: remove unused dtkwidget devel builddep from debian/control
+  * chore: split deepinwmfaker
 
  -- dengbo <dengbo@deepin.org>  Fri, 24 Nov 2023 13:58:50 +0800
 
 dde-appearance (1.1.6) unstable; urgency=medium
 
- * chore: bring back first notification
- * chore: commit gtk cursor module
- * chore: update translations
+  * chore: bring back first notification
+  * chore: commit gtk cursor module
+  * chore: update translations
 
  -- dengbo <dengbo@deepin.org>  Wed, 06 Sep 2023 15:19:15 +0800
 
