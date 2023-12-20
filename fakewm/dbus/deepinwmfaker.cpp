@@ -95,6 +95,8 @@ static QMap<QString, QString> AllDeepinWMKWinAccelsMap {
     { "close", "Window Close" },
     { "begin-move", "Window Move" },
     { "begin-resize", "Window Resize" },
+    { "toggle-to-left", "Window Quick Tile Left" },
+    { "toggle-to-right", "Window Quick Tile Right" },
     { "move-to-workspace-1", "Window to Desktop 1" },
     { "move-to-workspace-2", "Window to Desktop 2" },
     { "move-to-workspace-3", "Window to Desktop 3" },
