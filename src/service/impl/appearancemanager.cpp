@@ -1590,6 +1590,8 @@ void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeNam
         return setGlobalItem("AppTheme", TYPEGTK);
     }
 
+    QMutexLocker locker(&m_mutex);
+
     setGlobalFile("Wallpaper", TYPEWALLPAPER);
     setGlobalFile("LockBackground", TYPEGREETERBACKGROUND);
     setGlobalItem("IconTheme", TYPEICON);
@@ -1738,6 +1740,7 @@ void AppearanceManager::doSetCurrentWorkspaceBackground(const QString &uri)
 
 QString AppearanceManager::doGetCurrentWorkspaceBackground()
 {
+    QMutexLocker locker(&m_mutex);
     QString strIndex = QString::number(getCurrentDesktopIndex());
     if (strIndex == "") {
         qWarning() << "error getting current desktop index through wm.";

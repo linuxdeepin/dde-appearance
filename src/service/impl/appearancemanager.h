@@ -19,6 +19,7 @@
 #include <QTimerEvent>
 #include <QTimer>
 #include <QGSettings>
+#include <QMutex>
 
 #include <dbus/appearanceproperty.h>
 
@@ -173,6 +174,9 @@ private: // PROPERTIES
     AppearanceProperty *property;
 
 private:
+
+    QMutex m_mutex;
+
     DTK_CORE_NAMESPACE::DConfig                         settingDconfig;
     QSharedPointer<QGSettings>      xSetting;
     QSharedPointer<QGSettings>      wrapBgSetting;
