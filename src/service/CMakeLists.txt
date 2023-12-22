@@ -24,12 +24,13 @@ pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb-render xcb xcb-randr xcb-curs
 pkg_check_modules(FONTCONFIG REQUIRED IMPORTED_TARGET fontconfig)
 pkg_check_modules(OPENSSL REQUIRED IMPORTED_TARGET openssl)
 
-
-#qt5_add_dbus_adaptor(ADAPTER_SOURCES
-#                     ../../dbus/org.deepin.dde.Appearance1.xml
-#                     impl/appearance1.h
-#                     Appearance1)
 add_definitions(-DUSE_QT)
+
+qt5_add_dbus_adaptor(ADAPTER_SOURCES
+                     ../../dbus/org.deepin.dde.Appearance1.xml
+                     ./dbus/appearance1.h
+                     Appearance1)
+
 
 set(SRCS
     ./main.cpp
@@ -37,8 +38,6 @@ set(SRCS
     ./dbus/scaleFactors.cpp
     ./dbus/appearancedbusproxy.h
     ./dbus/appearancedbusproxy.cpp
-    ./dbus/appearance1adaptor.h
-    ./dbus/appearance1adaptor.cpp
     ./dbus/appearanceproperty.h
     ./dbus/appearanceproperty.cpp
     ./dbus/appearance1thread.h
@@ -92,6 +91,7 @@ set(SRCS
     ./modules/dconfig/dconfigsettings.cpp
     ./modules/dconfig/phasewallpaper.h
     ./modules/dconfig/phasewallpaper.cpp
+    ${ADAPTER_SOURCES}
 )
 
 add_executable(dde-appearance

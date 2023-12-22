@@ -117,124 +117,161 @@ void Appearance1::setWindowRadius(int value)
     QMetaObject::invokeMethod(appearance1Thread.get(), "setWindowRadius", Qt::QueuedConnection, Q_ARG(int, value));
 }
 
-void Appearance1::Delete(const QString &ty, const QString &name, const QDBusMessage &message)
+void Appearance1::Delete(const QString &ty, const QString &name)
 {
+    auto message = this->message();
+    setDelayedReply(true);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "Delete", Qt::QueuedConnection, Q_ARG(QString, ty), Q_ARG(QString, name), Q_ARG(QDBusMessage, message));
 }
 
-QString Appearance1::GetCurrentWorkspaceBackground(const QDBusMessage &message)
-{
-    message.setDelayedReply(true);
+QString Appearance1::GetCurrentWorkspaceBackground()
+{ 
+    auto message = this->message();
+    setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "GetCurrentWorkspaceBackground", Qt::QueuedConnection, Q_ARG(QDBusMessage, message));
     return QString();
 }
 
-QString Appearance1::GetCurrentWorkspaceBackgroundForMonitor(const QString &strMonitorName, const QDBusMessage &message)
+QString Appearance1::GetCurrentWorkspaceBackgroundForMonitor(const QString &strMonitorName)
 {
+    auto message = this->message();
+    setDelayedReply(true);
     message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "GetCurrentWorkspaceBackgroundForMonitor", Qt::QueuedConnection, Q_ARG(QString, strMonitorName), Q_ARG(QDBusMessage, message));
     return QString();
 }
 
-double Appearance1::GetScaleFactor(const QDBusMessage &message)
+double Appearance1::GetScaleFactor()
 {
+    auto message = this->message();
+    setDelayedReply(true);
     message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "GetScaleFactor", Qt::QueuedConnection, Q_ARG(QDBusMessage, message));
     return 0.0;
 }
 
-ScaleFactors Appearance1::GetScreenScaleFactors(const QDBusMessage &message)
+ScaleFactors Appearance1::GetScreenScaleFactors()
 {
+    auto message = this->message();
+    setDelayedReply(true);
     message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "GetScreenScaleFactors", Qt::QueuedConnection, Q_ARG(QDBusMessage, message));
     return ScaleFactors();
 }
 
-QString Appearance1::GetWallpaperSlideShow(const QString &monitorName, const QDBusMessage &message)
+QString Appearance1::GetWallpaperSlideShow(const QString &monitorName)
 {
+    auto message = this->message();
+    setDelayedReply(true);
     message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "GetWallpaperSlideShow", Qt::QueuedConnection, Q_ARG(QString, monitorName), Q_ARG(QDBusMessage, message));
     return QString();
 }
 
-QString Appearance1::GetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QDBusMessage &message)
+QString Appearance1::GetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName)
 {
+    auto message = this->message();
+    setDelayedReply(true);
     message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "GetWorkspaceBackgroundForMonitor", Qt::QueuedConnection, Q_ARG(int, index), Q_ARG(QString, strMonitorName), Q_ARG(QDBusMessage, message));
     return QString();
 }
 
-QString Appearance1::List(const QString &ty, const QDBusMessage &message)
+QString Appearance1::List(const QString &ty)
 {
+    auto message = this->message();
+    setDelayedReply(true);
     message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "List", Qt::QueuedConnection, Q_ARG(QString, ty), Q_ARG(QDBusMessage, message));
     return QString();
 }
 
-void Appearance1::Reset(const QDBusMessage &message)
+void Appearance1::Reset()
 {
+    auto message = this->message();
+    setDelayedReply(true);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "Reset", Qt::QueuedConnection, Q_ARG(QDBusMessage, message));
 }
 
-void Appearance1::Set(const QString &ty, const QString &value, const QDBusMessage &message)
+void Appearance1::Set(const QString &ty, const QString &value)
 {
+    auto message = this->message();
+    setDelayedReply(true);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "Set", Qt::QueuedConnection, Q_ARG(QString, ty), Q_ARG(QString, value), Q_ARG(QDBusMessage, message));
 }
 
-void Appearance1::SetCurrentWorkspaceBackground(const QString &uri, const QDBusMessage &message)
+void Appearance1::SetCurrentWorkspaceBackground(const QString &uri)
 {
+    auto message = this->message();
+    setDelayedReply(true);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "SetCurrentWorkspaceBackground", Qt::QueuedConnection, Q_ARG(QString, uri), Q_ARG(QDBusMessage, message));
 }
 
-void Appearance1::SetCurrentWorkspaceBackgroundForMonitor(const QString &uri, const QString &strMonitorName, const QDBusMessage &message)
+void Appearance1::SetCurrentWorkspaceBackgroundForMonitor(const QString &uri, const QString &strMonitorName)
 {
+    auto message = this->message();
+    setDelayedReply(true);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "SetCurrentWorkspaceBackgroundForMonitor", Qt::QueuedConnection, Q_ARG(QString, uri), Q_ARG(QString, strMonitorName), Q_ARG(QDBusMessage, message));
 }
 
-void Appearance1::SetMonitorBackground(const QString &monitorName, const QString &imageGile, const QDBusMessage &message)
+void Appearance1::SetMonitorBackground(const QString &monitorName, const QString &imageGile)
 {
+    auto message = this->message();
+    setDelayedReply(true);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "SetMonitorBackground", Qt::QueuedConnection, Q_ARG(QString, monitorName), Q_ARG(QString, imageGile), Q_ARG(QDBusMessage, message));
 }
 
-void Appearance1::SetScaleFactor(double scale, const QDBusMessage &message)
+void Appearance1::SetScaleFactor(double scale)
 {
+    auto message = this->message();
+    setDelayedReply(true);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "SetScaleFactor", Qt::QueuedConnection, Q_ARG(double, scale), Q_ARG(QDBusMessage, message));
 }
 
-void Appearance1::SetScreenScaleFactors(ScaleFactors scaleFactors, const QDBusMessage &message)
+void Appearance1::SetScreenScaleFactors(ScaleFactors scaleFactors)
 {
+    auto message = this->message();
+    setDelayedReply(true);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "SetScreenScaleFactors", Qt::QueuedConnection, Q_ARG(ScaleFactors, scaleFactors), Q_ARG(QDBusMessage, message));
 }
 
-void Appearance1::SetWallpaperSlideShow(const QString &monitorName, const QString &slideShow, const QDBusMessage &message)
+void Appearance1::SetWallpaperSlideShow(const QString &monitorName, const QString &slideShow)
 {
+    auto message = this->message();
+    setDelayedReply(true);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "SetWallpaperSlideShow", Qt::QueuedConnection, Q_ARG(QString, monitorName), Q_ARG(QString, slideShow), Q_ARG(QDBusMessage, message));
 }
 
-void Appearance1::SetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QString &uri, const QDBusMessage &message)
+void Appearance1::SetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QString &uri)
 {
+    auto message = this->message();
+    setDelayedReply(true);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "SetWorkspaceBackgroundForMonitor", Qt::QueuedConnection, Q_ARG(int, index), Q_ARG(QString, strMonitorName), Q_ARG(QString, uri), Q_ARG(QDBusMessage, message));
 }
 
-QString Appearance1::Show(const QString &ty, const QStringList &names, const QDBusMessage &message)
+QString Appearance1::Show(const QString &ty, const QStringList &names)
 {
+    auto message = this->message();
+    setDelayedReply(true);
     message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "Show", Qt::QueuedConnection, Q_ARG(QString, ty), Q_ARG(QStringList, names), Q_ARG(QDBusMessage, message));
     return QString();
 }
 
-QString Appearance1::Thumbnail(const QString &ty, const QString &name, const QDBusMessage &message)
+QString Appearance1::Thumbnail(const QString &ty, const QString &name)
 {
+    auto message = this->message();
+    setDelayedReply(true);
     message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "Thumbnail", Qt::QueuedConnection, Q_ARG(QString, ty), Q_ARG(QString, name), Q_ARG(QDBusMessage, message));
     return QString();
