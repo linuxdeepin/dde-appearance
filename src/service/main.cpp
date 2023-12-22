@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "dbus/appearance1adaptor.h"
+#include "appearance1adaptor.h"
 #include "dbus/appearance1.h"
 #include "modules/common/commondefine.h"
 

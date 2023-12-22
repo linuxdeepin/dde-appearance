@@ -6,12 +6,13 @@
 #define APPEARANCE1_H
 
 #include "scaleFactors.h"
+#include <qdbuscontext.h>
 
 #include <QObject>
 
 class QDBusMessage;
 class Appearance1Thread;
-class Appearance1 : public QObject
+class Appearance1 : public QObject, protected QDBusContext
 {
     Q_OBJECT
 
@@ -65,25 +66,25 @@ public: // PROPERTIES
     void setWindowRadius(int value);
 
 public Q_SLOTS: // METHODS
-    void Delete(const QString &ty, const QString &name, const QDBusMessage &message);
-    QString GetCurrentWorkspaceBackground(const QDBusMessage &message);
-    QString GetCurrentWorkspaceBackgroundForMonitor(const QString &strMonitorName, const QDBusMessage &message);
-    double GetScaleFactor(const QDBusMessage &message);
-    ScaleFactors GetScreenScaleFactors(const QDBusMessage &message);
-    QString GetWallpaperSlideShow(const QString &monitorName, const QDBusMessage &message);
-    QString GetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QDBusMessage &message);
-    QString List(const QString &ty, const QDBusMessage &message);
-    void Reset(const QDBusMessage &message);
-    void Set(const QString &ty, const QString &value, const QDBusMessage &message);
-    void SetCurrentWorkspaceBackground(const QString &uri, const QDBusMessage &message);
-    void SetCurrentWorkspaceBackgroundForMonitor(const QString &uri, const QString &strMonitorName, const QDBusMessage &message);
-    void SetMonitorBackground(const QString &monitorName, const QString &imageGile, const QDBusMessage &message);
-    void SetScaleFactor(double scale, const QDBusMessage &message);
-    void SetScreenScaleFactors(ScaleFactors scaleFactors, const QDBusMessage &message);
-    void SetWallpaperSlideShow(const QString &monitorName, const QString &slideShow, const QDBusMessage &message);
-    void SetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QString &uri, const QDBusMessage &message);
-    QString Show(const QString &ty, const QStringList &names, const QDBusMessage &message);
-    QString Thumbnail(const QString &ty, const QString &name, const QDBusMessage &message);
+    void Delete(const QString &ty, const QString &name);
+    QString GetCurrentWorkspaceBackground();
+    QString GetCurrentWorkspaceBackgroundForMonitor(const QString &strMonitorName);
+    double GetScaleFactor();
+    ScaleFactors GetScreenScaleFactors();
+    QString GetWallpaperSlideShow(const QString &monitorName);
+    QString GetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName);
+    QString List(const QString &ty);
+    void Reset();
+    void Set(const QString &ty, const QString &value);
+    void SetCurrentWorkspaceBackground(const QString &uri);
+    void SetCurrentWorkspaceBackgroundForMonitor(const QString &uri, const QString &strMonitorName);
+    void SetMonitorBackground(const QString &monitorName, const QString &imageGile);
+    void SetScaleFactor(double scale);
+    void SetScreenScaleFactors(ScaleFactors scaleFactors);
+    void SetWallpaperSlideShow(const QString &monitorName, const QString &slideShow);
+    void SetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QString &uri);
+    QString Show(const QString &ty, const QStringList &names);
+    QString Thumbnail(const QString &ty, const QString &name);
 Q_SIGNALS: // SIGNALS
     void Changed(const QString &ty, const QString &value);
     void Refreshed(const QString &type);
