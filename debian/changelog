@@ -1,3 +1,9 @@
+dde-appearance (1.1.9) unstable; urgency=medium
+
+  feat: add window keybindings
+
+ -- chenhongtao <chenhongtao@deepin.org>  Mon, 25 Dec 2023 10:47:48 +0800
+
 dde-appearance (1.1.8) unstable; urgency=medium
 
   * fix: fakewm block with kwin when be invoked
