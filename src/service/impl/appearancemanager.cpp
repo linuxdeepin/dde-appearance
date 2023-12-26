@@ -34,8 +34,6 @@
 
 DCORE_USE_NAMESPACE
 
-const QString wallpaperJsonPath = QString("%1/dde-appearance/").arg(utils::GetUserConfigDir());
-
 AppearanceManager::AppearanceManager(AppearanceProperty *prop, QObject *parent)
     : QObject(parent)
     , m_property(prop)
@@ -53,6 +51,7 @@ AppearanceManager::AppearanceManager(AppearanceProperty *prop, QObject *parent)
     , m_themeAutoTimer(this)
     , m_customTheme(new CustomTheme())
     , m_globalThemeUpdating(false)
+    , m_wallpaperConfig({})
 {
     if (QGSettings::isSchemaInstalled(XSETTINGSSCHEMA)) {
         m_xSetting = QSharedPointer<QGSettings>(new QGSettings(XSETTINGSSCHEMA));
@@ -295,85 +294,106 @@ void AppearanceManager::handleXsettingDConfigChange(QString key)
     }
 }
 
+// NOTE: it here is value change, then do change value, and emit signal
+// else, just emit the signal
+// All the signal will be sended on dconfig changed
 void AppearanceManager::handleSettingDConfigChange(QString key)
 {
     QString type;
     QString value;
     bool bSuccess = true;
-    if (key == GSKEYGLOBALTHEME) {
-        type = TYPEGLOBALTHEME;
-        value = m_settingDconfig.value(key).toString();
-        bSuccess = doSetGlobalTheme(value);
-        if (bSuccess) {
-            setGlobalTheme(value);
-        }
-    } else if (key == GSKEYGTKTHEME) {
-        type = TYPEGTK;
-        value = m_settingDconfig.value(key).toString();
-        bSuccess = doSetGtkTheme(value);
-    } else if (key == GSKEYICONTHEM) {
-        type = TYPEICON;
-        value = m_settingDconfig.value(key).toString();
-        bSuccess = doSetIconTheme(value);
-    } else if (key == GSKEYCURSORTHEME) {
-        type = TYPECURSOR;
-        value = m_settingDconfig.value(key).toString();
-        bSuccess = doSetCursorTheme(value);
-    } else if (key == GSKEYFONTSTANDARD) {
-        type = TYPESTANDARDFONT;
-        value = m_settingDconfig.value(key).toString();
-        bSuccess = doSetStandardFont(value);
-    } else if (key == GSKEYFONTMONOSPACE) {
-        type = TYPEMONOSPACEFONT;
-        value = m_settingDconfig.value(key).toString();
-        bSuccess = doSetMonospaceFont(value);
-    } else if (key == GSKEYFONTSIZE) {
-        type = TYPEFONTSIZE;
-        double size = m_settingDconfig.value(key).toDouble();
-        bSuccess = doSetFonts(size);
-        value = QString::number(size);
-    } else if (key == GSKEYBACKGROUNDURIS) {
-        type = TYPEBACKGROUND;
-        m_desktopBgs = m_settingDconfig.value(key).toStringList();
-        m_dbusProxy->SetDesktopBackgrounds(m_desktopBgs);
-        value = m_desktopBgs.join(";");
-    } else if (key == GSKEYWALLPAPERSLIDESHOW) {
-        type = TYPEWALLPAPERSLIDESHOW;
-        value = m_settingDconfig.value(key).toString();
-        updateWSPolicy(value);
-    } else if (key == GSKEYOPACITY) {
-        type = TYPEWINDOWOPACITY;
-        bool ok = false;
-        double opacity = m_settingDconfig.value(key).toDouble(&ok);
-        if (ok) {
-            setOpacity(opacity);
-            value = QString::number(opacity);
-        }
-    } else if (key == DCKEYALLWALLPAPER) {
-        type = TYPEALLWALLPAPER;
-        QVariant wallpaper = m_settingDconfig.value(key);
-        value = QJsonDocument::fromVariant(wallpaper).toJson();
-        QDir dir;
-        if (!dir.exists(wallpaperJsonPath)) {
-            bool res = dir.mkpath(wallpaperJsonPath);
-            if (!res) {
-                qWarning() << QString("mkdir %1 failed.").arg(wallpaperJsonPath);
-                return;
-            }
-        }
 
-        QFile file(wallpaperJsonPath + "config.json");
-        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            QTextStream textStream(&file);
-            textStream << value;
-            textStream.flush();
-            file.close();
+    do {
+        if (key == GSKEYGLOBALTHEME) {
+            type = TYPEGLOBALTHEME;
+            value = m_settingDconfig.value(key).toString();
+            if (value == m_property->globalTheme) {
+                break;
+            }
+            bSuccess = doSetGlobalTheme(value);
+            if (bSuccess) {
+                setGlobalTheme(value);
+            }
+        } else if (key == GSKEYGTKTHEME) {
+            type = TYPEGTK;
+            value = m_settingDconfig.value(key).toString();
+            if (value == m_property->gtkTheme) {
+                break;
+            }
+            bSuccess = doSetGtkTheme(value);
+        } else if (key == GSKEYICONTHEM) {
+            type = TYPEICON;
+            value = m_settingDconfig.value(key).toString();
+            if (value == m_property->iconTheme) {
+                break;
+            }
+            bSuccess = doSetIconTheme(value);
+        } else if (key == GSKEYCURSORTHEME) {
+            type = TYPECURSOR;
+            value = m_settingDconfig.value(key).toString();
+            if (value == m_property->cursorTheme) {
+                break;
+            }
+            bSuccess = doSetCursorTheme(value);
+        } else if (key == GSKEYFONTSTANDARD) {
+            type = TYPESTANDARDFONT;
+            value = m_settingDconfig.value(key).toString();
+            if (value == m_property->standardFont) {
+                break;
+            }
+            bSuccess = doSetStandardFont(value);
+        } else if (key == GSKEYFONTMONOSPACE) {
+            type = TYPEMONOSPACEFONT;
+            value = m_settingDconfig.value(key).toString();
+            if (value == m_property->monospaceFont) {
+                break;
+            }
+            bSuccess = doSetMonospaceFont(value);
+        } else if (key == GSKEYFONTSIZE) {
+            type = TYPEFONTSIZE;
+            double size = m_settingDconfig.value(key).toDouble();
+            if (size == m_property->fontSize) {
+                break;
+            }
+            bSuccess = doSetFonts(size);
+            value = QString::number(size);
+        } else if (key == GSKEYBACKGROUNDURIS) {
+            type = TYPEBACKGROUND;
+            m_desktopBgs = m_settingDconfig.value(key).toStringList();
+            if (m_settingDconfig.value(key).toString() == this->m_property->background) {
+                break;
+            }
+            m_dbusProxy->SetDesktopBackgrounds(m_desktopBgs);
+            value = m_desktopBgs.join(";");
+        } else if (key == GSKEYWALLPAPERSLIDESHOW) {
+            type = TYPEWALLPAPERSLIDESHOW;
+            value = m_settingDconfig.value(key).toString();
+            if (value == m_property->wallpaperSlideShow) {
+                break;
+            }
+            updateWSPolicy(value);
+        } else if (key == GSKEYOPACITY) {
+            type = TYPEWINDOWOPACITY;
+            bool ok = false;
+            double opacity = m_settingDconfig.value(key).toDouble(&ok);
+            if (opacity == m_property->opacity) {
+                break;
+            }
+            if (ok) {
+                setOpacity(opacity);
+                value = QString::number(opacity);
+            }
+        } else if (key == DCKEYALLWALLPAPER) {
+            type = TYPEALLWALLPAPER;
+            QVariant wallpaper = m_settingDconfig.value(key);
+            if (wallpaper.toJsonArray() == m_wallpaperConfig) {
+                break;
+            }
+            utils::writeWallpaperConfig(wallpaper);
         } else {
-            qWarning() << QString("%1 error.").arg(wallpaperJsonPath);
+            return;
         }
-    } else {
-        return;
-    }
+    } while (false);
 
     if (!bSuccess) {
         qDebug() << "set " << key << "fail";
@@ -1690,7 +1710,9 @@ QString AppearanceManager::getWallpaperUri(const QString &index, const QString &
             wallpaper = "file:///usr/share/wallpapers/deepin/desktop.jpg";
         }
 
-        PhaseWallPaper::setWallpaperUri(index, monitorName, wallpaper);
+        if (auto value = PhaseWallPaper::setWallpaperUri(index, monitorName, wallpaper); value.has_value()) {
+            m_wallpaperConfig = value.value();
+        }
     }
     return wallpaper;
 }
@@ -1753,7 +1775,9 @@ void AppearanceManager::doSetCurrentWorkspaceBackgroundForMonitor(const QString 
         return;
     }
 
-    PhaseWallPaper::setWallpaperUri(strIndex, strMonitorName, uri);
+    if (auto value = PhaseWallPaper::setWallpaperUri(strIndex, strMonitorName, uri); value.has_value()) {
+        m_wallpaperConfig = value.value();
+    }
     doUpdateWallpaperURIs();
     return;
 }
@@ -1771,7 +1795,9 @@ QString AppearanceManager::doGetCurrentWorkspaceBackgroundForMonitor(const QStri
 
 void AppearanceManager::doSetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QString &uri)
 {
-    PhaseWallPaper::setWallpaperUri(QString::number(index), strMonitorName, uri);
+    if (auto value = PhaseWallPaper::setWallpaperUri(QString::number(index), strMonitorName, uri); value.has_value()) {
+        m_wallpaperConfig = value.value();
+    }
     doUpdateWallpaperURIs();
 }
 

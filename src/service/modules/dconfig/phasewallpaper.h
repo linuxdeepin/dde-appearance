@@ -5,11 +5,15 @@
 #ifndef PHASEWALLPAPERDCONFIG
 #define PHASEWALLPAPERDCONFIG
 
+#include "dconfigsettings.h"
+
 #include <DConfig>
+
+#include <QJsonArray>
 #include <QObject>
 #include <QString>
 
-#include "dconfigsettings.h"
+#include <optional>
 
 DCORE_USE_NAMESPACE
 
@@ -26,8 +30,8 @@ public:
     ~PhaseWallPaper();
 
 public:
-    static void setWallpaperUri(const QString &index, const QString &strMonitorName, const QString &uri);
-    static QString getWallpaperUri(const QString &index,const QString &strMonitorName);
+    static std::optional<QJsonArray> setWallpaperUri(const QString &index, const QString &strMonitorName, const QString &uri);
+    static QString getWallpaperUri(const QString &index, const QString &strMonitorName);
     static void resizeWorkspaceCount(int size);
 };
 

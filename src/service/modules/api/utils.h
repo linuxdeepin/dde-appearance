@@ -6,6 +6,7 @@
 #define UTILS_H
 #include <QString>
 #include <QVector>
+#include <QVariant>
 
 class utils
 {
@@ -23,6 +24,7 @@ public:
     static QString GetUserConfigDir();
     static QString GetUserCacheDir();
     static QString GetUserRuntimeDir();
+    static void writeWallpaperConfig(const QVariant &wallpaper);
 };
 
 #endif // UTILS_H

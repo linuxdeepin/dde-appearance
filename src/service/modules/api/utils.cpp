@@ -9,12 +9,39 @@
 #include <QDir>
 #include <QUrl>
 #include <QStandardPaths>
+#include <QDebug>
+#include <QJsonDocument>
 
 #include <pwd.h>
 #include <unistd.h>
 
+const static QString wallpaperJsonPath = QString("%1/dde-appearance/").arg(utils::GetUserConfigDir());
+
 utils::utils()
 {
+}
+
+void utils::writeWallpaperConfig(const QVariant &wallpaper)
+{
+    QString value = QJsonDocument::fromVariant(wallpaper).toJson();
+    QDir dir;
+    if (!dir.exists(wallpaperJsonPath)) {
+        bool res = dir.mkpath(wallpaperJsonPath);
+        if (!res) {
+            qWarning() << QString("mkdir %1 failed.").arg(wallpaperJsonPath);
+            return;
+        }
+    }
+
+    QFile file(wallpaperJsonPath + "config.json");
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream textStream(&file);
+        textStream << value;
+        textStream.flush();
+        file.close();
+    } else {
+        qWarning() << QString("%1 error.").arg(wallpaperJsonPath);
+    }
 }
 
 bool utils::WriteStringToFile(QString filename, QString content)

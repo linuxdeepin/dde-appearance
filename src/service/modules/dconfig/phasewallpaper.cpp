@@ -3,24 +3,23 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "phasewallpaper.h"
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QDebug>
-#include <QFile>
 
 #include <modules/api/utils.h>
+
+#include <QDebug>
+#include <QDir>
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 const QString appearanceProcessId = "org.deepin.dde.appearance";
 const QString appearanceDconfJson = "org.deepin.dde.appearance";
 const QString allWallpaperUrisKey = "All_Wallpaper_Uris";
 
-PhaseWallPaper::PhaseWallPaper()
-{
-}
+PhaseWallPaper::PhaseWallPaper() { }
 
-PhaseWallPaper::~PhaseWallPaper()
-{
-}
+PhaseWallPaper::~PhaseWallPaper() { }
 
 QString phaseWPType(const QString &index, const QString &strMonitorName)
 {
@@ -36,18 +35,18 @@ QString phaseWPType(const QString &index, const QString &strMonitorName)
     return shouldGetWPType;
 }
 
-void PhaseWallPaper::setWallpaperUri(const QString &index, const QString &strMonitorName, const QString &uri)
+std::optional<QJsonArray> PhaseWallPaper::setWallpaperUri(const QString &index, const QString &strMonitorName, const QString &uri)
 {
     QString wpIndexKey = generateWpIndexKey(index, strMonitorName);
     QString shouldGetWPType = phaseWPType(index, strMonitorName);
     if (shouldGetWPType == "") {
         qWarning() << QString("set wall paper type error, index [%1] strMonitorName [%2]").arg(index, strMonitorName);
-        return;
+        return std::nullopt;
     }
 
     QVariant v = DconfigSettings::ConfigValue(appearanceProcessId, appearanceDconfJson, allWallpaperUrisKey, "");
     if (!v.isValid()) {
-        return;
+        return std::nullopt;
     }
 
     QString url;
@@ -102,11 +101,7 @@ void PhaseWallPaper::setWallpaperUri(const QString &index, const QString &strMon
 
         wpTypeObj["wallpaperInfo"] = wpInfoArray;
         if (shouldAddWPInfo) {
-            QJsonObject obj = {
-                {"uri", url,},
-                {"wpIndex", wpIndexKey}
-            };
-
+            QJsonObject obj = { { "uri", url }, { "wpIndex", wpIndexKey } };
             QJsonArray array = wpTypeObj["wallpaperInfo"].toArray();
             array.append(obj);
             wpTypeObj["wallpaperInfo"] = array;
@@ -115,21 +110,16 @@ void PhaseWallPaper::setWallpaperUri(const QString &index, const QString &strMon
     }
 
     if (shouldAddWPTypeInfo) {
-        QJsonObject obj1 = {
-            {"uri", url,},
-            {"wpIndex", wpIndexKey}
-        };
+        QJsonObject obj1 = { { "uri", url }, { "wpIndex", wpIndexKey } };
         QJsonArray array = { obj1 };
-        QJsonObject obj2 = {
-            {"type", shouldGetWPType},
-            {"wallpaperInfo", array}
-        };
+        QJsonObject obj2 = { { "type", shouldGetWPType }, { "wallpaperInfo", array } };
 
         allWallpaperUri.append(obj2);
     }
 
+    utils::writeWallpaperConfig(allWallpaperUri.toVariantList());
     DconfigSettings::ConfigSaveValue(appearanceProcessId, appearanceDconfJson, allWallpaperUrisKey, allWallpaperUri.toVariantList());
-    return;
+    return allWallpaperUri;
 }
 
 QString PhaseWallPaper::getWallpaperUri(const QString &index, const QString &strMonitorName)
@@ -180,6 +170,7 @@ QString PhaseWallPaper::getWallpaperUri(const QString &index, const QString &str
 
     return QString();
 }
+
 // 删除多余工作区的配置，保证新建的工作区壁纸随机
 void PhaseWallPaper::resizeWorkspaceCount(int size)
 {
