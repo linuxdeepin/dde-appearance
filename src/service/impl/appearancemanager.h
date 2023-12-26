@@ -19,6 +19,7 @@
 #include <QTimerEvent>
 #include <QTimer>
 #include <QGSettings>
+#include <QJsonArray>
 
 #include <dbus/appearanceproperty.h>
 
@@ -205,6 +206,7 @@ private:
     CustomTheme                                      *m_customTheme;
     bool                                             m_globalThemeUpdating;
     QString                                          m_currentGlobalTheme; // 当前主题，globalTheme+.light/.dark
+    QJsonArray                                       m_wallpaperConfig; // store the config
 };
 
 #endif // APPEARANCEMANAGER_H
