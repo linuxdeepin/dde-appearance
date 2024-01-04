@@ -190,7 +190,7 @@ QString Appearance1::List(const QString &ty)
 void Appearance1::Reset()
 {
     auto message = this->message();
-    setDelayedReply(true);
+    setDelayedReply(false);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "Reset", Qt::QueuedConnection, Q_ARG(QDBusMessage, message));
 }
@@ -198,7 +198,7 @@ void Appearance1::Reset()
 void Appearance1::Set(const QString &ty, const QString &value)
 {
     auto message = this->message();
-    setDelayedReply(true);
+    setDelayedReply(false);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "Set", Qt::QueuedConnection, Q_ARG(QString, ty), Q_ARG(QString, value), Q_ARG(QDBusMessage, message));
 }
@@ -206,7 +206,7 @@ void Appearance1::Set(const QString &ty, const QString &value)
 void Appearance1::SetCurrentWorkspaceBackground(const QString &uri)
 {
     auto message = this->message();
-    setDelayedReply(true);
+    setDelayedReply(false);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "SetCurrentWorkspaceBackground", Qt::QueuedConnection, Q_ARG(QString, uri), Q_ARG(QDBusMessage, message));
 }
@@ -214,7 +214,7 @@ void Appearance1::SetCurrentWorkspaceBackground(const QString &uri)
 void Appearance1::SetCurrentWorkspaceBackgroundForMonitor(const QString &uri, const QString &strMonitorName)
 {
     auto message = this->message();
-    setDelayedReply(true);
+    setDelayedReply(false);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "SetCurrentWorkspaceBackgroundForMonitor", Qt::QueuedConnection, Q_ARG(QString, uri), Q_ARG(QString, strMonitorName), Q_ARG(QDBusMessage, message));
 }
@@ -222,7 +222,7 @@ void Appearance1::SetCurrentWorkspaceBackgroundForMonitor(const QString &uri, co
 void Appearance1::SetMonitorBackground(const QString &monitorName, const QString &imageGile)
 {
     auto message = this->message();
-    setDelayedReply(true);
+    setDelayedReply(false);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "SetMonitorBackground", Qt::QueuedConnection, Q_ARG(QString, monitorName), Q_ARG(QString, imageGile), Q_ARG(QDBusMessage, message));
 }
@@ -230,7 +230,7 @@ void Appearance1::SetMonitorBackground(const QString &monitorName, const QString
 void Appearance1::SetScaleFactor(double scale)
 {
     auto message = this->message();
-    setDelayedReply(true);
+    setDelayedReply(false);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "SetScaleFactor", Qt::QueuedConnection, Q_ARG(double, scale), Q_ARG(QDBusMessage, message));
 }
@@ -238,7 +238,7 @@ void Appearance1::SetScaleFactor(double scale)
 void Appearance1::SetScreenScaleFactors(ScaleFactors scaleFactors)
 {
     auto message = this->message();
-    setDelayedReply(true);
+    setDelayedReply(false);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "SetScreenScaleFactors", Qt::QueuedConnection, Q_ARG(ScaleFactors, scaleFactors), Q_ARG(QDBusMessage, message));
 }
@@ -246,7 +246,7 @@ void Appearance1::SetScreenScaleFactors(ScaleFactors scaleFactors)
 void Appearance1::SetWallpaperSlideShow(const QString &monitorName, const QString &slideShow)
 {
     auto message = this->message();
-    setDelayedReply(true);
+    setDelayedReply(false);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "SetWallpaperSlideShow", Qt::QueuedConnection, Q_ARG(QString, monitorName), Q_ARG(QString, slideShow), Q_ARG(QDBusMessage, message));
 }
@@ -254,7 +254,7 @@ void Appearance1::SetWallpaperSlideShow(const QString &monitorName, const QStrin
 void Appearance1::SetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QString &uri)
 {
     auto message = this->message();
-    setDelayedReply(true);
+    setDelayedReply(false);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "SetWorkspaceBackgroundForMonitor", Qt::QueuedConnection, Q_ARG(int, index), Q_ARG(QString, strMonitorName), Q_ARG(QString, uri), Q_ARG(QDBusMessage, message));
 }
