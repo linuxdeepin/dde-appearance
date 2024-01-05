@@ -26,6 +26,8 @@ class AppearanceDBusProxy;
 class Appearance1;
 class CustomTheme;
 
+using Dtk::Core::DConfig;
+
 class AppearanceManager : public QObject
 {
     Q_OBJECT
@@ -91,23 +93,23 @@ public:
     void doSetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QString &uri);
     QString doGetWorkspaceBackgroundForMonitor(const int &index,const QString &strMonitorName);
 
-    inline QString getBackground() {return property->background; }
-    inline double getFontSize() {return property->fontSize; }
-    inline QString getGLobalTheme() {return property->globalTheme; }
-    inline QString getGtkTheme() {return property->gtkTheme; }
-    inline QString getIconTheme() {return property->iconTheme; }
-    inline QString getCursorTheme() {return property->cursorTheme; }
-    inline QString getMonospaceFont() {return property->monospaceFont; }
-    inline double getOpacity() {return property->opacity; }
-    inline QString getQtActiveColor() {return property->qtActiveColor; }
-    inline QString getStandardFont() {return property->standardFont; }
-    inline QString getWallpaperSlideShow() {return property->wallpaperSlideShow; }
-    inline QString getWallpaperURls() {return property->wallpaperURls;}
-    inline int getWindowRadius() {return property->windowRadius; }
+    inline QString getBackground() {return m_property->background; }
+    inline double getFontSize() {return m_property->fontSize; }
+    inline QString getGLobalTheme() {return m_property->globalTheme; }
+    inline QString getGtkTheme() {return m_property->gtkTheme; }
+    inline QString getIconTheme() {return m_property->iconTheme; }
+    inline QString getCursorTheme() {return m_property->cursorTheme; }
+    inline QString getMonospaceFont() {return m_property->monospaceFont; }
+    inline double getOpacity() {return m_property->opacity; }
+    inline QString getQtActiveColor() {return m_property->qtActiveColor; }
+    inline QString getStandardFont() {return m_property->standardFont; }
+    inline QString getWallpaperSlideShow() {return m_property->wallpaperSlideShow; }
+    inline QString getWallpaperURls() {return m_property->wallpaperURls;}
+    inline int getWindowRadius() {return m_property->windowRadius; }
 
-    inline QString getGreetBg() {return greeterBg; }
-    inline QMap<QString,QString>& getMonitor() {return monitorMap; }
-    inline QSharedPointer<AppearanceDBusProxy> getDBusProxy() const { return dbusProxy; }
+    inline QString getGreetBg() {return m_greeterBg; }
+    inline QMap<QString,QString>& getMonitor() {return m_monitorMap; }
+    inline QSharedPointer<AppearanceDBusProxy> getDBusProxy() const { return m_dbusProxy; }
     int getWorkspaceCount();
     void timerEvent(QTimerEvent *event) override;
 
@@ -170,39 +172,39 @@ Q_SIGNALS:
     void Refreshed(const QString &type);
 
 private: // PROPERTIES
-    AppearanceProperty *property;
+    AppearanceProperty *m_property;
 
 private:
-    DTK_CORE_NAMESPACE::DConfig                         settingDconfig;
-    QSharedPointer<QGSettings>      xSetting;
-    QSharedPointer<QGSettings>      wrapBgSetting;
-    QSharedPointer<QGSettings>      gnomeBgSetting;
-    QSharedPointer<AppearanceDBusProxy> dbusProxy;
-    QSharedPointer<Subthemes>       subthemes;
-    QSharedPointer<Backgrounds>     backgrounds;
-    QSharedPointer<FontsManager>    fontsManager;
-    QMap<QString,QString>           monitorMap;
-    QMap<QString,coordinate>        coordinateMap;
-    double                          longitude;
-    double                          latitude;
-    QStringList                     desktopBgs;
-    QString                         greeterBg;
-    int                             timeUpdateTimeId;
-    int                             ntpTimeId;
-    bool                            locationValid;
-    QString                         curMonitorSpace;
+    DConfig                                          m_settingDconfig;
+    QSharedPointer<QGSettings>                       m_xSetting;
+    QSharedPointer<QGSettings>                       m_wrapBgSetting;
+    QSharedPointer<QGSettings>                       m_gnomeBgSetting;
+    QSharedPointer<AppearanceDBusProxy>              m_dbusProxy;
+    QSharedPointer<Subthemes>                        m_subthemes;
+    QSharedPointer<Backgrounds>                      m_backgrounds;
+    QSharedPointer<FontsManager>                     m_fontsManager;
+    QMap<QString,QString>                            m_monitorMap;
+    QMap<QString,coordinate>                         m_coordinateMap;
+    double                                           m_longitude;
+    double                                           m_latitude;
+    QStringList                                      m_desktopBgs;
+    QString                                          m_greeterBg;
+    int                                              m_timeUpdateTimeId;
+    int                                              m_ntpTimeId;
+    bool                                             m_locationValid;
+    QString                                          m_curMonitorSpace;
     //QSharedPointer<CursorChangeHandler> cursorChangeHandler;
-    QSharedPointer<Fsnotify>        fsnotify;
-    QString                         m_gsQtActiveColor;
-    QTimer                          detectSysClockTimer;
-    QTimer                          themeAutoTimer;     // 自动切换深浅主题定时器
-    qint64                          detectSysClockStartTime;
-    QString                         zone;
-    QMap<QString,QSharedPointer<WallpaperScheduler>> wsSchedulerMap;
-    QMap<QString,QSharedPointer<WallpaperLoop>>      wsLoopMap;
-    CustomTheme                     *customTheme;
-    bool                            globalThemeUpdating;
-    QString                         currentGlobalTheme; // 当前主题，globalTheme+.light/.dark
+    QSharedPointer<Fsnotify>                         m_fsnotify;
+    QString                                          m_gsQtActiveColor;
+    QTimer                                           m_detectSysClockTimer;
+    QTimer                                           m_themeAutoTimer;     // 自动切换深浅主题定时器
+    qint64                                           m_detectSysClockStartTime;
+    QString                                          m_zone;
+    QMap<QString,QSharedPointer<WallpaperScheduler>> m_wsSchedulerMap;
+    QMap<QString,QSharedPointer<WallpaperLoop>>      m_wsLoopMap;
+    CustomTheme                                      *m_customTheme;
+    bool                                             m_globalThemeUpdating;
+    QString                                          m_currentGlobalTheme; // 当前主题，globalTheme+.light/.dark
 };
 
 #endif // APPEARANCEMANAGER_H
