@@ -7,7 +7,6 @@
 #include "themethumb.h"
 #include "../api/dfile.h"
 #include "../api/utils.h"
-#include "../common/commondefine.h"
 #include "compatibleengine.h"
 #include "keyfile.h"
 
@@ -15,6 +14,15 @@
 #include <gtk/gtk.h>
 
 #include <DGuiApplicationHelper>
+
+#include <X11/Xcursor/Xcursor.h>
+
+#undef Bool
+#undef Status
+#undef Unsorted
+#undef True
+#undef False
+
 using Dtk::Gui::DGuiApplicationHelper;
 
 const int width = 320;
@@ -322,20 +330,7 @@ QImage CompositeImages(QVector<QImage*> images, int width, int height, int iconS
     return image;
 }
 
-QImage* loadXCursor(QString fileName, int size)
-{
-    XcursorImage* xcursorImage = XcursorFilenameLoadImage(fileName.toStdString().c_str(),size);
-    if(xcursorImage == nullptr)
-    {
-        return nullptr;
-    }
-    QImage* image =fromXCurorImageToQImage(xcursorImage);
-    delete xcursorImage;
-
-    return image;
-}
-
-QImage* fromXCurorImageToQImage(XcursorImage* image)
+static QImage* fromXCurorImageToQImage(XcursorImage* image)
 {
     // golang 原代码 pixels := (*[1 << 12]C.XcursorPixel)(unsafe.Pointer(img.pixels))[:n:n]
     XcursorPixel* tempPixel = &image->pixels[0];
@@ -357,6 +352,19 @@ QImage* fromXCurorImageToQImage(XcursorImage* image)
     }
 
     return qImage;
+}
+
+QImage* loadXCursor(QString fileName, int size)
+{
+    XcursorImage* xcursorImage = XcursorFilenameLoadImage(fileName.toStdString().c_str(),size);
+    if(xcursorImage == nullptr)
+    {
+        return nullptr;
+    }
+    QImage* image =fromXCurorImageToQImage(xcursorImage);
+    delete xcursorImage;
+
+    return image;
 }
 
 QString getGlobal(QString id, QString descFile)
