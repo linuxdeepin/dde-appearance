@@ -482,6 +482,9 @@ void AppearanceManager::timerEvent(QTimerEvent *event)
 // 设置gsetting
 void AppearanceManager::setFontSize(double value)
 {
+    if(!doUpdateFonts(value)) {
+        return;
+    }
     if (!m_fontsManager->isFontSizeValid(value)) {
         qWarning() << "set font size error:invalid size " << value;
         return;
@@ -1051,7 +1054,7 @@ QDateTime AppearanceManager::getThemeAutoChangeTime(QDateTime date, double latit
     return sunrise;
 }
 
-bool AppearanceManager::doSetFonts(double size)
+bool AppearanceManager::doUpdateFonts(double size)
 {
     if (!m_fontsManager->isFontSizeValid(size)) {
         qWarning() << "set font size error:invalid size " << size;
@@ -1067,6 +1070,14 @@ bool AppearanceManager::doSetFonts(double size)
     m_dbusProxy->SetString("Qt/FontPointSize", QString::number(size));
     if (!setDQtTheme({ QTKEYFONTSIZE }, { QString::number(size) })) {
         qWarning() << "set font size error:can not set qt theme ";
+        return false;
+    }
+    return true;
+}
+
+bool AppearanceManager::doSetFonts(double size)
+{
+    if (!doUpdateFonts(size)) {
         return false;
     }
     setFontSize(size);
