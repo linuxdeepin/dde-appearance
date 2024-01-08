@@ -1466,14 +1466,18 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
         if (m_property->standardFont == value) {
             return;
         }
-        setStandardFont(value);
-        updateValut = true;
+        if (doSetStandardFont(value)) {
+            setStandardFont(value);
+            updateValut = true;
+        }
     } else if (type == TYPEMONOSPACEFONT) {
         if (m_property->monospaceFont == value) {
             return;
         }
-        setMonospaceFont(value);
-        updateValut = true;
+        if(doSetMonospaceFont(value)) {
+            setMonospaceFont(value);
+            updateValut = true;
+        }
     } else if (type == TYPEFONTSIZE) {
         double size = value.toDouble();
         if (m_property->fontSize > size - 0.01 && m_property->fontSize < size + 0.01) {
