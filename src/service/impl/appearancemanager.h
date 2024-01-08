@@ -65,6 +65,7 @@ public:
     bool setWallpaperSlideShow(const QString &value);
     bool setWallpaperURls(const QString &value);
     bool doSetFonts(double size);
+    bool doUpdateFonts(double size);
     bool doSetGlobalTheme(QString value);
     bool doSetGtkTheme(QString value);
     bool doSetIconTheme(QString value);
