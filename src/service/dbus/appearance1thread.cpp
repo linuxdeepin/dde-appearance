@@ -41,11 +41,10 @@ Appearance1Thread::Appearance1Thread()
         QGSettings wrapBgSetting(WRAPBGSCHEMA);
         property->background.init(wrapBgSetting.get(GSKEYBACKGROUND).toString());
     }
+    init();
     // 线程
     moveToThread(thread);
     thread->start();
-    // 在线程中初始化
-    QMetaObject::invokeMethod(this, "init", Qt::AutoConnection);
 }
 
 Appearance1Thread::~Appearance1Thread()
