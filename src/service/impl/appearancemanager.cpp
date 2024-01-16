@@ -1121,16 +1121,16 @@ bool AppearanceManager::doSetGlobalTheme(QString value)
     QString darkTheme = theme.getStr("Deepin Theme", "DarkTheme");
     if (darkTheme.isEmpty())
         mode = Light;
+
+    m_currentGlobalTheme = value;
     switch (mode) {
     case Light:
         applyGlobalTheme(theme, defaultTheme, defaultTheme, themePath);
-        m_currentGlobalTheme = value;
         break;
     case Dark: {
         if (darkTheme.isEmpty())
             return false;
         applyGlobalTheme(theme, darkTheme, defaultTheme, themePath);
-        m_currentGlobalTheme = value;
     } break;
     case Auto: {
         updateThemeAuto(true);
