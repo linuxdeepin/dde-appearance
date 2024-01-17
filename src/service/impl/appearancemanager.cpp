@@ -886,7 +886,7 @@ void AppearanceManager::updateNewVersionData()
     QJsonObject wallpaperURIsObj;
     for (auto item : m_monitorMap.toStdMap()) {
         for (int i = 1; i <= workspaceCount; i++) {
-            QString wallpaperURI = m_dbusProxy->GetWorkspaceBackgroundForMonitor(i, item.first);
+            QString wallpaperURI = doGetWorkspaceBackgroundForMonitor(i, item.first);
             if (wallpaperURI.isEmpty())
                 continue;
             QString key = QString("%1&&%2").arg(item.second).arg(i);
