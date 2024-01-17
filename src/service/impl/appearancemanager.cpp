@@ -1133,6 +1133,7 @@ bool AppearanceManager::doSetGlobalTheme(QString value)
         applyGlobalTheme(theme, darkTheme, defaultTheme, themePath);
     } break;
     case Auto: {
+        setGlobalTheme(value);
         updateThemeAuto(true);
     } break;
     }
