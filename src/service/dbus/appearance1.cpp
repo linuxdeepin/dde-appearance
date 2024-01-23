@@ -4,6 +4,11 @@
 
 #include "appearance1.h"
 #include "appearance1thread.h"
+#include "modules/common/commondefine.h"
+
+#include <DGuiApplicationHelper>
+
+DGUI_USE_NAMESPACE
 
 #include <QDBusMessage>
 
@@ -16,6 +21,11 @@ Appearance1::Appearance1(QObject *parent)
     registerScaleFactorsMetaType();
     connect(appearance1Thread.data(), SIGNAL(Changed(QString, QString)), this, SIGNAL(Changed(const QString &, const QString &)));
     connect(appearance1Thread.data(), SIGNAL(Refreshed(QString)), this, SIGNAL(Refreshed(const QString)));
+
+    // NOTE: because I do not know when themetype will change, so when themetype has changed, notify again
+    connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, this, [this] {
+        Q_EMIT Changed(TYPEGLOBALTHEME, appearance1Thread.data()->globalTheme());
+    });
 }
 
 Appearance1::~Appearance1()
