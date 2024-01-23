@@ -1,3 +1,9 @@
+dde-appearance (1.1.24) unstable; urgency=medium
+
+  * fix: emit themechange again when themetype changed(https://github.com/linuxdeepin/developer-center/issues/7047)
+
+ -- chenhongtao <chenhongtao@deepin.org>  Tue, 23 Jan 2024 16:40:49 +0800
+
 dde-appearance (1.1.23) unstable; urgency=medium
 
   * fix: first start, init for too long time
