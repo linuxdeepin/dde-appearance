@@ -168,6 +168,7 @@ Q_SIGNALS:
     void ShowWorkspaceChanged();
     void ResumeCompositorChanged(int reason);
     void SuspendCompositorChanged(int reason);
+    void DecorationThemeChanged();
 
 private:
     QAction *accelAction(const QString accelKid) const;

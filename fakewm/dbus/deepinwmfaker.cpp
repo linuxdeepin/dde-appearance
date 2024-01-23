@@ -988,6 +988,8 @@ void DeepinWMFaker::SetDecorationTheme(const QString &type, const QString &name)
     m_kwinConfig->group("deepin-chameleon").writeEntry("theme", type + "/" + name);
 
     syncConfigForKWin();
+
+    Q_EMIT DecorationThemeChanged();
 }
 
 void DeepinWMFaker::SetDecorationDeepinTheme(const QString &name)
