@@ -116,6 +116,7 @@
         <arg type="s" name="themeType" direction="in"/>
         <arg type="s" name="themeName" direction="in"/>
     </method>
+    <signal name="DecorationThemeChanged"></signal>
     <method name="SetDecorationDeepinTheme">
         <arg type="s" name="deepinThemeName" direction="in"/>
     </method>
