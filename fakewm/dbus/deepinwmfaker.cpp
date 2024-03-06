@@ -442,7 +442,7 @@ bool DeepinWMFaker::zoneEnabled() const
 
 QString DeepinWMFaker::cursorTheme() const
 {
-    KConfigGroup mousecfg(KSharedConfig::openConfig("deepin-kcminputrc", KConfig::NoGlobals), "Mouse");
+    KConfigGroup mousecfg(KSharedConfig::openConfig("kcminputrc", KConfig::NoGlobals), "Mouse");
     const QString themeName = mousecfg.readEntry("cursorTheme", "default");
 
     return themeName;
@@ -450,11 +450,12 @@ QString DeepinWMFaker::cursorTheme() const
 
 int DeepinWMFaker::cursorSize() const
 {
-    KConfigGroup mousecfg(KSharedConfig::openConfig("deepin-kcminputrc", KConfig::NoGlobals), "Mouse");
+    KConfigGroup mousecfg(KSharedConfig::openConfig("kcminputrc", KConfig::NoGlobals), "Mouse");
     bool ok = false;
-    int themeSize = mousecfg.readEntry("cursorSize", QString("0")).toInt(&ok);
+    // The default Xcursor theme size of deepin-kwin is 24
+    int themeSize = mousecfg.readEntry("cursorSize", QString("24")).toInt(&ok);
 
-    return ok ? themeSize : -1;
+    return ok ? themeSize : 24;
 }
 
 #ifndef DISABLE_DEEPIN_WM
