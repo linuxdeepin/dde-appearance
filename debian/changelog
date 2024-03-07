@@ -1,3 +1,9 @@
+dde-appearance (1.1.26) unstable; urgency=medium
+
+  * fix: deepinwmfaker read error cursorSize
+
+ -- rewine <luhongxu@deepin.org>  Thu, 07 Mar 2024 10:42:56 +0800
+
 dde-appearance (1.1.25) unstable; urgency=medium
 
   * feat: add signal for deepin fakewm
