@@ -22,7 +22,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QTimeZone>
 #include <QTimer>
@@ -777,14 +777,15 @@ void AppearanceManager::handlePrepareForSleep(bool sleep)
 
 void AppearanceManager::iso6709Parsing(QString city, QString coordinates)
 {
-    QRegExp pattern("(\\+|-)\\d+\\.?\\d*");
+    QRegularExpression pattern("(\\+|-)\\d+\\.?\\d*");
 
     QVector<QString> resultVet;
 
-    int pos = 0;
-    while ((pos = pattern.indexIn(coordinates, pos)) != -1 && resultVet.size() <= 2) {
-        resultVet.push_back(coordinates.mid(pos, pattern.matchedLength()));
-        pos += pattern.matchedLength();
+    QRegularExpressionMatchIterator i = pattern.globalMatch(coordinates);
+
+    while (i.hasNext()) {
+        QRegularExpressionMatch match = i.next();
+        resultVet.push_back(match.captured(0));
     }
 
     if (resultVet.size() < 2) {
