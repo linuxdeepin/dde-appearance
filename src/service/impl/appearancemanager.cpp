@@ -901,8 +901,7 @@ void AppearanceManager::updateNewVersionData()
 
 void AppearanceManager::autoSetTheme(double latitude, double longitude)
 {
-    QDateTime curr = QDateTime::currentDateTimeUtc();
-    curr.setTimeZone(QTimeZone(m_zone.toLatin1()));
+    QDateTime curr = QDateTime::currentDateTime();
     double utcOffset = curr.offsetFromUtc() / 3600.0;
 
     QDateTime sunrise, sunset;
@@ -911,7 +910,6 @@ void AppearanceManager::autoSetTheme(double latitude, double longitude)
         return;
     }
     QString themeName;
-    curr = QDateTime::currentDateTimeUtc();
     if (sunrise.secsTo(curr) >= 0 && curr.secsTo(sunset) >= 0) {
         themeName = m_property->globalTheme + ".light";
     } else {
