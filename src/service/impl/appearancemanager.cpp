@@ -26,6 +26,8 @@
 #include <QSettings>
 #include <QTimeZone>
 #include <QTimer>
+#include <QMetaObject>
+#include <QCoreApplication>
 
 #include <pwd.h>
 
@@ -368,9 +370,6 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
         } else if (key == GSKEYWALLPAPERSLIDESHOW) {
             type = TYPEWALLPAPERSLIDESHOW;
             value = m_settingDconfig.value(key).toString();
-            if (value == m_property->wallpaperSlideShow) {
-                break;
-            }
             updateWSPolicy(value);
         } else if (key == GSKEYOPACITY) {
             type = TYPEWINDOWOPACITY;
@@ -594,7 +593,6 @@ bool AppearanceManager::setWallpaperSlideShow(const QString &value)
     qInfo() << "value: GSKEYWALLPAPERSLIDESHOW" << m_settingDconfig.value(GSKEYWALLPAPERSLIDESHOW);
     m_settingDconfig.setValue(GSKEYWALLPAPERSLIDESHOW, value);
     m_property->wallpaperSlideShow = value;
-    updateWSPolicy(value);
 
     return true;
 }
@@ -989,8 +987,12 @@ void AppearanceManager::updateWSPolicy(QString policy)
             int nSec = iter.second.toString().toInt(&bOk);
             if (bOk) {
                 QDateTime curr = QDateTime::currentDateTimeUtc();
-                m_wsSchedulerMap[iter.first]->setLastChangeTime(curr);
-                m_wsSchedulerMap[iter.first]->setInterval(iter.first, nSec);
+                QMetaObject::invokeMethod(qApp, [this, iter, curr](){ 
+                       m_wsSchedulerMap[iter.first]->setLastChangeTime(curr);
+                    }, Qt::QueuedConnection);
+                QMetaObject::invokeMethod(qApp, [this, iter, nSec](){ 
+                       m_wsSchedulerMap[iter.first]->setInterval(iter.first, nSec);
+                    }, Qt::QueuedConnection);
                 saveWSConfig(iter.first, curr);
             } else {
                 m_wsSchedulerMap[iter.first]->stop();
