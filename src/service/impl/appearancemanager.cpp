@@ -482,7 +482,7 @@ void AppearanceManager::timerEvent(QTimerEvent *event)
 // 设置gsetting
 void AppearanceManager::setFontSize(double value)
 {
-    if(!doUpdateFonts(value)) {
+    if (!doUpdateFonts(value)) {
         return;
     }
     if (!m_fontsManager->isFontSizeValid(value)) {
@@ -594,6 +594,7 @@ bool AppearanceManager::setWallpaperSlideShow(const QString &value)
     qInfo() << "value: GSKEYWALLPAPERSLIDESHOW" << m_settingDconfig.value(GSKEYWALLPAPERSLIDESHOW);
     m_settingDconfig.setValue(GSKEYWALLPAPERSLIDESHOW, value);
     m_property->wallpaperSlideShow = value;
+    updateWSPolicy(value);
 
     return true;
 }
@@ -1486,7 +1487,7 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
         if (m_property->monospaceFont == value) {
             return;
         }
-        if(doSetMonospaceFont(value)) {
+        if (doSetMonospaceFont(value)) {
             setMonospaceFont(value);
             updateValut = true;
         }
