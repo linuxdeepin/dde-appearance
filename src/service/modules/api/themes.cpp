@@ -304,7 +304,7 @@ QString ThemesApi::getThemePath(QString name, QString ty, QString key)
     QVector<QString> dirs;
     QString home = utils::GetUserHomeDir();
     dirs.push_back(home + "/.local/share/" + key);
-    dirs.push_back(home + "." + key);
+    dirs.push_back(home + "/." + key);
     for (const QString &basedir : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)) {
         const QString path = QDir(basedir).filePath(key);
         if (QFile::exists(path))
