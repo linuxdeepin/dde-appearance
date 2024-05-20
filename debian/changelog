@@ -1,3 +1,9 @@
+dde-appearance (1.1.28) unstable; urgency=medium
+
+  * release 1.1.28
+
+ -- Mike Chen <chenke@deepin.org>  Mon, 20 May 2024 13:15:56 +0800
+
 dde-appearance (1.1.27) unstable; urgency=medium
 
   * fix: it doesn't work immediately
