@@ -21,6 +21,7 @@ Appearance1Thread::Appearance1Thread()
     , thread(new QThread(this))
 {
     // 属性初始化
+    DTK_CORE_NAMESPACE::DConfig::setAppId(APPEARANCEAPPID);
     DTK_CORE_NAMESPACE::DConfig settingDconfig(APPEARANCESCHEMA);
     property->globalTheme.init(settingDconfig.value(GSKEYGLOBALTHEME).toString());
     property->gtkTheme.init(settingDconfig.value(GSKEYGTKTHEME).toString());

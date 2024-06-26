@@ -209,6 +209,13 @@ bool ThemesApi::setGlobalTheme(QString name)
     return true;
 }
 
+QString ThemesApi::getGtkTheme(){
+    if (!xSetting) {
+        return QString();
+    }
+    return xSetting->get(XSKEYTHEME).toString();
+}
+
 bool ThemesApi::setGtkTheme(QString name)
 {
     if (!scanner->isGtkTheme(getThemePath(name, TYPEGTK, "themes"))) {

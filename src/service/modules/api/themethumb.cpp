@@ -13,8 +13,6 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gtk/gtk.h>
 
-#include <DGuiApplicationHelper>
-
 #include <X11/Xcursor/Xcursor.h>
 
 #undef Bool
@@ -22,8 +20,6 @@
 #undef Unsorted
 #undef True
 #undef False
-
-using Dtk::Gui::DGuiApplicationHelper;
 
 const int width = 320;
 const int height = 70;
@@ -367,7 +363,7 @@ QImage* loadXCursor(QString fileName, int size)
     return image;
 }
 
-QString getGlobal(QString id, QString descFile)
+QString getGlobal(QString id, QString descFile, QString gtkTheme)
 {
     if (!checkScaleFactor()) {
         qInfo() << "scaleFactor <= 0";
@@ -377,7 +373,7 @@ QString getGlobal(QString id, QString descFile)
     keyFile.loadFile(descFile);
     QStringList example = keyFile.getStrList("Deepin Theme", "Example");
     if (!example.isEmpty()) {
-        bool isdark = DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::ColorType::DarkType;
+        bool isdark = (gtkTheme == "deepin-dark") ;
         QString path = isdark ? example.last() : example.first();
         QFileInfo file(path);
         if (file.isRelative()) {

@@ -1,0 +1,13 @@
+{
+  "name": "org.deepin.dde.Appearance1",
+  "libPath": "libplugin-dde-appearance.so",
+  "group": "core",
+  "policyStartType": "Resident",
+  "pluginType": "qt",
+  "startDelay": 0,
+  "policy": [
+    {
+      "path": "/org/deepin/dde/Appearance1"
+    }
+  ]
+}

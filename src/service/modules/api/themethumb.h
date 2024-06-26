@@ -35,7 +35,7 @@ QImage CompositeImages(QVector<QImage *>, int width, int height, int inconSize, 
 QImage *loadXCursor(QString fileName, int size);
 QList<QIcon> getIcons(QString theme, int size);
 QVector<QImage *> getCursors(QString dir, int size);
-QString getGlobal(QString id, QString descFile);
+QString getGlobal(QString id, QString descFile,QString gtkTheme);
 QString getGtk(QString id, QString descFile);
 QString getIcon(QString id, QString descFile);
 bool shouldGenerateNew(QString descFile, QString out);

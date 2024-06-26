@@ -35,6 +35,7 @@ public:
     bool setWMTheme(QString name);
     bool setGlobalTheme(QString name);
     bool setGtkTheme(QString name);
+    QString getGtkTheme();
     bool setIconTheme(QString name);
     bool setCursorTheme(QString name);
     QString getThemePath(QString name, QString ty, QString key);
