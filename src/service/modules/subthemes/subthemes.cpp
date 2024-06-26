@@ -279,9 +279,9 @@ QString Subthemes::getGlobalThumbnail(QString id)
     {
         return "";
     }
-
+    QString gtkTheme = themeApi->getGtkTheme();
     QString path = theme->getPath()+"/index.theme";
-    return getGlobal(id,path);
+    return getGlobal(id,path,gtkTheme);
 }
 
 QString Subthemes::getGtkThumbnail(QString id)

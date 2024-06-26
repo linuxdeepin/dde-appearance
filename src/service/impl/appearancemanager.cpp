@@ -28,8 +28,11 @@
 #include <QTimer>
 #include <QMetaObject>
 #include <QCoreApplication>
+#include <X11/Xlib.h>
+#include <X11/extensions/Xrandr.h>
 
 #include <pwd.h>
+#include <QThread>
 
 #define NAN_ANGLE (-200.0)          // 异常经纬度
 #define DEFAULT_WORKSPACE_COUNT (2) // 默认工作区数量
@@ -86,13 +89,6 @@ bool AppearanceManager::init()
     initCoordinate();
     initUserObj();
     initCurrentBgs();
-
-    xcb_connection_t *conn = xcb_connect(nullptr, nullptr);
-    xcb_randr_query_version_reply_t *v = xcb_randr_query_version_reply(conn, xcb_randr_query_version(conn, 1, 1), nullptr);
-    if (v == nullptr) {
-        qWarning() << "xcb_randr_query_version_reply faile";
-        return false;
-    }
 
     connect(m_dbusProxy.get(), &AppearanceDBusProxy::workspaceCountChanged, this, &AppearanceManager::handleWmWorkspaceCountChanged);
     connect(m_dbusProxy.get(), &AppearanceDBusProxy::SetScaleFactorStarted, this, &AppearanceManager::handleSetScaleFactorStarted);

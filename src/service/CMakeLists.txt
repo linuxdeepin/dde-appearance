@@ -7,6 +7,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 add_compile_options(-DQT_NO_KEYWORDS)
+set(PROJECT_NAME dde-appearance)
+set(BIN_NAME "plugin-dde-appearance")
 
 find_package(Qt5 REQUIRED COMPONENTS Core DBus Concurrent Gui)
 find_package(DtkCore REQUIRED)
@@ -33,7 +35,7 @@ qt5_add_dbus_adaptor(ADAPTER_SOURCES
 
 
 set(SRCS
-    ./main.cpp
+    ./plugin.cpp
     ./dbus/scaleFactors.h
     ./dbus/scaleFactors.cpp
     ./dbus/appearancedbusproxy.h
@@ -94,11 +96,11 @@ set(SRCS
     ${ADAPTER_SOURCES}
 )
 
-add_executable(dde-appearance
-    ${SRCS}
+add_library(${BIN_NAME} MODULE
+        ${SRCS}
 )
 
-target_link_libraries(dde-appearance
+target_link_libraries(${BIN_NAME} PRIVATE
     Qt5::Core
     Qt5::DBus
     Qt5::Concurrent
@@ -113,5 +115,6 @@ target_link_libraries(dde-appearance
     ${DtkCore_LIBRARIES}
     ${DtkGui_LIBRARIES}
 )
-
-install(TARGETS dde-appearance DESTINATION ${CMAKE_INSTALL_BINDIR})
+include(GNUInstallDirs)
+install(TARGETS ${BIN_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}/deepin-service-manager/)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/plugin-dde-appearance.json DESTINATION share/deepin-service-manager/user/)

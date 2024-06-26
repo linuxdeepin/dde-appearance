@@ -12,6 +12,7 @@ const QString APPEARANCE_SERVICE = "org.deepin.dde.Appearance1";
 const QString APPEARANCE_PATH = "/org/deepin/dde/Appearance1";
 const QString APPEARANCE_INTERFACE = "org.deepin.dde.Appearance1";
 
+#define APPEARANCEAPPID     "org.deepin.dde.appearance"
 #define APPEARANCESCHEMA    "org.deepin.dde.appearance"
 #define XSETTINGSSCHEMA     "com.deepin.xsettings"
 #define WRAPBGSCHEMA        "com.deepin.wrap.gnome.desktop.background"
