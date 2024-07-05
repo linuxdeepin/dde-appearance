@@ -44,7 +44,7 @@ Q_GLOBAL_STATIC_WITH_ARGS(QGSettings, _gsettings_dde_zone, ("com.deepin.dde.zone
 #define KWinCloseWindowGroupName "Script-closewindowaction"
 #define KWinRunCommandGroupName "Script-runcommandaction"
 
-#define GlobalAccelComponentName "deepin-kwin"
+#define GlobalAccelComponentName "kwin"
 #define GlobalAccelComponentDisplayName "KWin"
 
 // kwin dbus
