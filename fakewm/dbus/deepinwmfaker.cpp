@@ -61,6 +61,7 @@ const char defaultSecondBackgroundUri[] = "francesco-ungaro-1fzbUyzsHV8-unsplash
 #define DEFAULTCURSORSIZE 24
 
 const char fallback_background_name[] = "file:///usr/share/backgrounds/default_background.jpg";
+const QStringList kwin_active_effects = {"blur", "scissor"};
 
 //using org::kde::KWin;
 
@@ -409,7 +410,15 @@ DeepinWMFaker::~DeepinWMFaker()
 
 bool DeepinWMFaker::compositingEnabled() const
 {
-    return QDBusInterface(KWinDBusService, KWinDBusCompositorPath, KWinDBusCompositorInterface).property("active").toBool();
+    QStringList active_effects = QDBusInterface("org.kde.KWin", "/Effects", "org.kde.kwin.Effects").property("activeEffects").toStringList();
+    bool enable = true;
+    for (const QString &effect : kwin_active_effects) {
+        if (!active_effects.contains(effect)) {
+            enable = false;
+            break;
+        }
+    }
+    return enable;
 }
 
 bool DeepinWMFaker::compositingPossible() const
@@ -998,30 +1007,28 @@ void DeepinWMFaker::SetDecorationDeepinTheme(const QString &name)
     SetDecorationTheme(name, "deepin");
 }
 
+void DeepinWMFaker::enableEffect(bool on)
+{
+    QDBusInterface interface("org.kde.KWin", "/Effects", "org.kde.kwin.Effects");
+    for (const QString& name : kwin_active_effects) {
+        if (on)
+            interface.call("toggleEffect", name);
+        else
+            interface.call("unloadEffect", name);
+    }
+}
+
 void DeepinWMFaker::setCompositingEnabled(bool on)
 {
     if (!compositingAllowSwitch()) {
         return;
     }
 
-    if (on) {
-        // 记录opengl被标记为不安全的次数
-        if (m_kwinConfig->group("Compositing").readEntry<bool>("OpenGLIsUnsafe", false)) {
-            int count = m_kwinConfig->group("Compositing").readEntry<int>("OpenGLIsUnsafeCount", 0);
-            m_kwinConfig->group("Compositing").writeEntry("OpenGLIsUnsafeCount", count + 1);
-        }
-
-        // 确保3D特效一定能被开启
-        m_kwinConfig->group("Compositing").writeEntry("OpenGLIsUnsafe", false);
-    }
-
-    m_kwinConfig->group("Compositing").writeEntry("Enabled", on);
-    // 只同步配置文件，不要通知kwin重新加载配置
-    m_kwinConfig->sync();
-
     if (compositingEnabled() == on) {
         return;
     }
+
+    enableEffect(on);
 
     if (on)
         Q_EMIT ResumeCompositorChanged(1);
@@ -1036,7 +1043,8 @@ void DeepinWMFaker::setCompositingEnabled(bool on)
 // 2D效果下不支持显示工作区、显示应用程序所有窗口、显示所有窗口等功能，此处调用对话框告知用户
 bool DeepinWMFaker::maybeShowWarningDialog()
 {
-    if (!compositingEnabled()) {
+    bool enable = QDBusInterface(KWinDBusService, KWinDBusCompositorPath, KWinDBusCompositorInterface).property("active").toBool();
+    if (!enable) {
         return QProcess::startDetached("/usr/lib/deepin-daemon/dde-warning-dialog");
     }
 
