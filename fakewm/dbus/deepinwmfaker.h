@@ -124,6 +124,7 @@ public Q_SLOTS:
     void SetDecorationDeepinTheme(const QString &name);
 
     void setCompositingEnabled(bool on);
+    void enableEffect(bool on);
 
     void ShowAllWindow();
     void ShowWindow();
