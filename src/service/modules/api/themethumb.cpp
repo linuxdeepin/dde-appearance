@@ -259,7 +259,7 @@ QVector<QImage*> getCursors(QString dir, int size)
             {
                 if(image->width() != size)
                 {
-                    image->scaled(size,image->height());
+                    *image = image->scaledToWidth(size);
                 }
                 images.push_back(image);
                 break;
