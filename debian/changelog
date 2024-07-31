@@ -1,3 +1,9 @@
+dde-appearance (1.1.30) unstable; urgency=medium
+
+  * fix: Cursor images are not scaled to the same size(Issue: 9892)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Wed, 31 Jul 2024 15:33:31 +0800
+
 dde-appearance (1.1.29) unstable; urgency=medium
 
   * release 1.1.29
