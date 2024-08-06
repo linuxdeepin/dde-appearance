@@ -1,3 +1,9 @@
+dde-appearance (1.1.31) unstable; urgency=medium
+
+  * fix: notify kwin to reload the config when sync config(Issue: 10016)
+
+ -- Zhang kun <zhangkun2@uniontech.com>  Tue, 06 Aug 2024 15:59:16 +0800
+
 dde-appearance (1.1.30) unstable; urgency=medium
 
   * fix: Cursor images are not scaled to the same size(Issue: 9892)
