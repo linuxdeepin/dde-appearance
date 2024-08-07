@@ -378,20 +378,9 @@ QString FontsManager::configContent(QString standard, QString monospace)
 <fontconfig>
     <match target="pattern">
         <test qual="any" name="family">
-            <string>serif</string>
-        </test>
-        <edit name="family" mode="assign" binding="strong">
-            <string>%s</string>
-            <string>%s</string>
-        </edit>
-    </match>
-
-    <match target="pattern">
-        <test qual="any" name="family">
             <string>sans-serif</string>
         </test>
-        <edit name="family" mode="assign" binding="strong">
-            <string>%s</string>
+        <edit name="family" mode="prepend" binding="strong">
             <string>%s</string>
         </edit>
     </match>
@@ -400,9 +389,7 @@ QString FontsManager::configContent(QString standard, QString monospace)
         <test qual="any" name="family">
             <string>monospace</string>
         </test>
-        <edit name="family" mode="assign" binding="strong">
-            <string>%s</string>
-            <string>%s</string>
+        <edit name="family" mode="prepend" binding="strong">
             <string>%s</string>
         </edit>
     </match>
@@ -412,12 +399,7 @@ QString FontsManager::configContent(QString standard, QString monospace)
     </match>
  </fontconfig>)",
     standard.toLatin1().data(),
-    "Noto Sans",
-    standard.toLatin1().data(),
-    "Noto Sans",
-    monospace.toLatin1().data(),
-    "Noto Mono",
-    standard.toLatin1().data());
+    monospace.toLatin1().data());
     return retString;
 }
 
