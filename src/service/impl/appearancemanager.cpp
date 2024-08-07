@@ -1765,6 +1765,10 @@ void AppearanceManager::initGlobalTheme()
         } else {
             setGlobalTheme(DEFAULTGLOBALTHEME);
         }
+    } else {
+        // 初始化m_currentGlobalTheme
+        if (m_currentGlobalTheme.isEmpty())
+            doSetGlobalTheme(globalID);
     }
 }
 
