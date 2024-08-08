@@ -1,3 +1,10 @@
+dde-appearance (1.1.32) unstable; urgency=medium
+
+  * fix: incorrect generated fontconfig configuration
+  * chore: 解决开机壁纸自动变更的问题
+
+ -- fuleyi <fuleyi@uniontech.com>  Thu, 08 Aug 2024 15:14:25 +0800
+
 dde-appearance (1.1.31) unstable; urgency=medium
 
   * fix: notify kwin to reload the config when sync config(Issue: 10016)
