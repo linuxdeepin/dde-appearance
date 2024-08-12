@@ -1,3 +1,9 @@
+dde-appearance (1.1.33) unstable; urgency=medium
+
+  * chore: 解决注销或者重启后外观变成自动的问题 
+
+ -- fuleyi <fuleyi@uniontech.com>  Mon, 12 Aug 2024 16:51:37 +0800
+
 dde-appearance (1.1.32) unstable; urgency=medium
 
   * fix: incorrect generated fontconfig configuration
