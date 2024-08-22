@@ -44,7 +44,7 @@ Q_GLOBAL_STATIC_WITH_ARGS(QGSettings, _gsettings_dde_zone, ("com.deepin.dde.zone
 #define KWinCloseWindowGroupName "Script-closewindowaction"
 #define KWinRunCommandGroupName "Script-runcommandaction"
 
-#define GlobalAccelComponentName "kwin"
+#define GlobalAccelComponentName "deepin-kwin"
 #define GlobalAccelComponentDisplayName "KWin"
 
 // kwin dbus
@@ -707,7 +707,7 @@ static QMap<QString, QList<QKeySequence>> getShoutcutListFromKDEConfigFile()
 {
     // 认为系统配置文件中存储的快捷键为默认值
     KConfig kglobalshortcutsrc("/etc/xdg/kglobalshortcutsrc");
-    KConfigGroup kwin(&kglobalshortcutsrc, "deepin-kwin");
+    KConfigGroup kwin(&kglobalshortcutsrc, GlobalAccelComponentName);
 
     if (!kwin.isValid())
         return {};
