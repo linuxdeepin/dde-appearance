@@ -1,3 +1,10 @@
+dde-appearance (1.1.34) unstable; urgency=medium
+
+  * chore: 解决快捷键无法恢复的问题
+  * Revert "chore: 解决快捷键无法恢复的问题"
+
+ -- fuleyi <fuleyi@uniontech.com>  Thu, 22 Aug 2024 11:08:54 +0800
+
 dde-appearance (1.1.33) unstable; urgency=medium
 
   * chore: 解决注销或者重启后外观变成自动的问题 
