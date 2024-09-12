@@ -106,6 +106,10 @@ void AppearanceDBusProxy::SetString(const QString &prop, const QString &v)
 {
     m_xSettingsInterface->asyncCall(QStringLiteral("SetString"), prop, v);
 }
+void AppearanceDBusProxy::SetInteger(const QString &prop, const int &v)
+{
+    m_xSettingsInterface->asyncCall(QStringLiteral("SetInteger"), prop, v);
+}
 double AppearanceDBusProxy::GetScaleFactor()
 {
     return QDBusPendingReply<double>(m_xSettingsInterface->asyncCall(QStringLiteral("GetScaleFactor")));

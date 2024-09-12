@@ -86,6 +86,7 @@
     <property access='readwrite' type='s' name='QtActiveColor' />
     <property access='read' type='s' name='StandardFont' />
     <property access='readwrite' type='s' name='WallpaperSlideShow' />
+    <property access='readwrite' type='i' name='DTKSizeMode' />
     <property access='read' type='s' name='WallpaperURls' />
 
     <signal name='Changed'>

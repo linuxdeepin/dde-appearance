@@ -60,6 +60,9 @@ public: // PROPERTIES
     Q_PROPERTY(int WindowRadius READ windowRadius WRITE setWindowRadius)
     int windowRadius() const;
 
+    Q_PROPERTY(int DTKSizeMode READ dtkSizeMode WRITE setDTKSizeMode)
+    int dtkSizeMode() const;
+
 public Q_SLOTS:
     // PROPERTIES
     void setFontSize(double value);
@@ -67,6 +70,7 @@ public Q_SLOTS:
     void setQtActiveColor(const QString &value);
     void setWallpaperSlideShow(const QString &value);
     void setWindowRadius(int value);
+    void setDTKSizeMode(int value);
     // METHODS
     void Delete(const QString &ty, const QString &name, const QDBusMessage &message);
     QString GetCurrentWorkspaceBackground(const QDBusMessage &message);

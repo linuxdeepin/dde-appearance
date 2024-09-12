@@ -64,6 +64,7 @@ public:
     void setQtActiveColor(const QString &value);
     bool setWallpaperSlideShow(const QString &value);
     bool setWallpaperURls(const QString &value);
+    void setDTKSizeMode(int value);
     bool doSetFonts(double size);
     bool doUpdateFonts(double size);
     bool doSetGlobalTheme(QString value);
@@ -75,6 +76,7 @@ public:
     bool doSetBackground(QString value);
     bool doSetGreeterBackground(QString value);
     QString doGetWallpaperSlideShow(QString monitorName);
+    void doSetDTKSizeMode(int value);
     double getScaleFactor();
     ScaleFactors getScreenScaleFactors();
     bool setScaleFactor(double scale);
@@ -108,6 +110,7 @@ public:
     inline QString getWallpaperSlideShow() {return m_property->wallpaperSlideShow; }
     inline QString getWallpaperURls() {return m_property->wallpaperURls;}
     inline int getWindowRadius() {return m_property->windowRadius; }
+    inline int getDTKSizeMode() {return m_property->dtkSizeMode; }
 
     inline QString getGreetBg() {return m_greeterBg; }
     inline QMap<QString,QString>& getMonitor() {return m_monitorMap; }
@@ -139,6 +142,7 @@ private:
     void initUserObj();
     void initCurrentBgs();
     void initWallpaperSlideshow();
+    void initDtkSizeMode();
     void iso6709Parsing(QString city, QString coordinates);
     void doUpdateWallpaperURIs();
     void setPropertyWallpaperURIs(QMap<QString,QString> monitorWallpaperUris);
