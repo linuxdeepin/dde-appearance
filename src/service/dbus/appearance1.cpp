@@ -121,10 +121,21 @@ int Appearance1::windowRadius() const
     return appearance1Thread->windowRadius();
 }
 
+int Appearance1::dtkSizeMode() const
+{
+    return appearance1Thread->dtkSizeMode();
+}
+
 void Appearance1::setWindowRadius(int value)
 {
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "setWindowRadius", Qt::QueuedConnection, Q_ARG(int, value));
+}
+
+void Appearance1::setDTKSizeMode(int value)
+{
+    //    message.setDelayedReply(true);
+    QMetaObject::invokeMethod(appearance1Thread.get(), "setDTKSizeMode", Qt::QueuedConnection, Q_ARG(int, value));
 }
 
 void Appearance1::Delete(const QString &ty, const QString &name)

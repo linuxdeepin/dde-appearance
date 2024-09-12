@@ -65,6 +65,7 @@ public:
     DBusProperty<QString> wallpaperSlideShow;
     DBusProperty<QString> wallpaperURls;
     DBusProperty<int> windowRadius;
+    DBusProperty<int> dtkSizeMode;
 };
 
 #endif // APPEARANCEPROPERTY_H

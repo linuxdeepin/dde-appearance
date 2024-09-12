@@ -37,6 +37,7 @@ AppearanceProperty::AppearanceProperty()
     , wallpaperSlideShow("WallpaperSlideShow")
     , wallpaperURls("WallpaperURls")
     , windowRadius("WindowRadius")
+    , dtkSizeMode("DTKSizeMode")
 {
     fontSize.init(0.0);
     opacity.init(0.0);

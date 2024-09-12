@@ -117,6 +117,7 @@ bool AppearanceManager::init()
     connect(m_dbusProxy.get(), &AppearanceDBusProxy::TimeUpdate, this, &AppearanceManager::handleTimeUpdate);
     connect(m_dbusProxy.get(), &AppearanceDBusProxy::HandleForSleep, this, &AppearanceManager::handlePrepareForSleep);
 
+    initDtkSizeMode();
     initGlobalTheme();
 
     QVector<QSharedPointer<Theme>> iconList = m_subthemes->listIconThemes();
@@ -353,6 +354,10 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
             bSuccess = doSetMonospaceFont(value);
         } else if (key == GSKEYFONTSIZE) {
             type = TYPEFONTSIZE;
+            // 如果是紧凑模式，使用compact-font-size
+            if (m_property->dtkSizeMode == 1) {
+                break;
+            }
             double size = m_settingDconfig.value(key).toDouble();
             if (size == m_property->fontSize) {
                 break;
@@ -389,6 +394,25 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
                 break;
             }
             utils::writeWallpaperConfig(wallpaper);
+        } else if (key == DDTKSIZEMODE) {
+            type = TYPEDTKSIZEMODE;
+            bool ok = false;
+            int mode = m_settingDconfig.value(key).toInt(&ok);
+            if (ok) {
+                doSetDTKSizeMode(mode);
+                double size = m_settingDconfig.value(mode == 1 ? DCOMPACTFONTSIZE : GSKEYFONTSIZE).toDouble(&ok);
+                if (ok) {
+                    bSuccess = doSetFonts(size);
+                }
+            }
+        } else if (key == DCOMPACTFONTSIZE) {
+            type = TYPECOMPACTFONTSIZE;
+            bool ok = false;
+            double size = m_settingDconfig.value(key).toDouble(&ok);
+            if (ok && m_property->dtkSizeMode == 1) {
+                bSuccess = doSetFonts(size);
+                value = QString::number(size);
+            }
         } else {
             return;
         }
@@ -490,7 +514,7 @@ void AppearanceManager::setFontSize(double value)
     }
 
     if (m_settingDconfig.isValid() && !qFuzzyCompare(value, m_property->fontSize)) {
-        m_settingDconfig.setValue(GSKEYFONTSIZE, value);
+        m_settingDconfig.setValue(m_property->dtkSizeMode == 1 ? DCOMPACTFONTSIZE : GSKEYFONTSIZE, value);
         m_property->fontSize = value;
         updateCustomTheme(TYPEFONTSIZE, QString::number(value));
     }
@@ -551,6 +575,14 @@ void AppearanceManager::setMonospaceFont(QString value)
     if (m_settingDconfig.isValid() && value != m_property->monospaceFont) {
         m_settingDconfig.setValue(GSKEYFONTMONOSPACE, value);
         m_property->monospaceFont = value;
+    }
+}
+
+void AppearanceManager::setDTKSizeMode(int value)
+{
+    if (value != m_property->dtkSizeMode && m_settingDconfig.isValid()) {
+        m_settingDconfig.setValue(DDTKSIZEMODE, value);
+        m_property->dtkSizeMode = value;
     }
 }
 
@@ -1514,7 +1546,15 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
     } else if (type == TYPEWALLPAPER) {
         doSetCurrentWorkspaceBackground(value);
         updateValut = true;
+    } else if (type == TYPEDTKSIZEMODE) {
+        bool ok = false;
+        int mode = value.toInt(&ok);
+        if (ok) {
+            QString fontSizeKey = GSKEYFONTSIZE;
+            doSetDTKSizeMode(mode);
+        }
     }
+
     if (updateValut) {
         updateCustomTheme(type, value);
     }
@@ -1734,6 +1774,10 @@ QString AppearanceManager::getWallpaperUri(const QString &index, const QString &
     return wallpaper;
 }
 
+void AppearanceManager::initDtkSizeMode(){
+    m_dbusProxy->SetInteger("DTK/SizeMode",m_property->dtkSizeMode);
+}
+
 void AppearanceManager::initGlobalTheme()
 {
     QVector<QSharedPointer<Theme>> globalList = m_subthemes->listGlobalThemes();
@@ -1825,6 +1869,13 @@ void AppearanceManager::doSetWorkspaceBackgroundForMonitor(const int &index, con
 QString AppearanceManager::doGetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName)
 {
     return getWallpaperUri(QString::number(index), strMonitorName);
+}
+
+void AppearanceManager::doSetDTKSizeMode(int value) {
+    if (value != m_property->dtkSizeMode) {
+        setDTKSizeMode(value);
+        m_dbusProxy->SetInteger("DTK/SizeMode",value);
+    }
 }
 
 void AppearanceManager::autoChangeBg(QString monitorSpace, QDateTime date)
