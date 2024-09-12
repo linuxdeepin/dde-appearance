@@ -161,6 +161,26 @@
             "description": "Save all the wallpaper URL information.",
             "permissions": "readwrite",
             "visibility": "private"
+        },
+        "Dtk_Size_Mode": {
+            "value": 0,
+            "serial": 0,
+            "flags": [],
+            "name": "Dtk_Size_Mode",
+            "name[zh_CN]": "紧凑模式",
+            "description": "Compact Mode.",
+            "permissions": "readwrite",
+            "visibility": "private"
+        },
+        "Compact_Font_Size": {
+            "value": 9.0,
+            "serial": 0,
+            "flags": [],
+            "name": "Compact_Font_Size",
+            "name[zh_CN]": "紧凑模式下，字体大小",
+            "description": "Compact font size.",
+            "permissions": "readwrite",
+            "visibility": "private"
         }
     }
 }

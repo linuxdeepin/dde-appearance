@@ -37,6 +37,8 @@ const QString APPEARANCE_INTERFACE = "org.deepin.dde.Appearance1";
 #define GSKEYDTKWINDOWRADIUS     "dtkWindowRadius"
 #define GSKEYFONTNAME            "gtkFontName"
 #define DCKEYALLWALLPAPER        "All_Wallpaper_Uris"
+#define DDTKSIZEMODE             "Dtk_Size_Mode"
+#define DCOMPACTFONTSIZE         "Compact_Font_Size"
 
 #define GTK2CONFDELIM            "="
 #define GTK3GROUPSETTINGS        "Settings"
@@ -84,6 +86,8 @@ const QString APPEARANCE_INTERFACE = "org.deepin.dde.Appearance1";
 #define TYPWINDOWRADIUS         "windowradius"
 #define TYPEWALLPAPERSLIDESHOW  "wallpaperflideshow"
 #define TYPEALLWALLPAPER        "allwallpaperuris"
+#define TYPEDTKSIZEMODE         "dtksizemode"
+#define TYPECOMPACTFONTSIZE     "compactfontsize"
 #define MIMETYPEGLOBAL          "application/x-global-theme"
 #define MIMETYPEGTK             "application/x-gtk-theme"
 #define MIMETYPEICON            "application/x-icon-theme"

@@ -61,6 +61,7 @@ Q_SIGNALS:
     // xSettingsInterface
 public Q_SLOTS:
     void SetString(const QString &prop, const QString &v);
+    void SetInteger(const QString &prop, const int &v);
     double GetScaleFactor();
     void SetScaleFactor(double scale);
     ScaleFactors GetScreenScaleFactors();

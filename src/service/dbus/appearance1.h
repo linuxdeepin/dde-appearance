@@ -65,6 +65,10 @@ public: // PROPERTIES
     int windowRadius() const;
     void setWindowRadius(int value);
 
+    Q_PROPERTY(int DTKSizeMode READ dtkSizeMode WRITE setDTKSizeMode)
+    int dtkSizeMode() const;
+    void setDTKSizeMode(int value);
+
 public Q_SLOTS: // METHODS
     void Delete(const QString &ty, const QString &name);
     QString GetCurrentWorkspaceBackground();
