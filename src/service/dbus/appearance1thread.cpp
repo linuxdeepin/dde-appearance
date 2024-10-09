@@ -31,6 +31,7 @@ Appearance1Thread::Appearance1Thread()
     property->dtkSizeMode.init(settingDconfig.value(DDTKSIZEMODE).toInt());
     // dtkSizeMode必须先于fontSize初始化，紧凑模式下，使用Compact_Font_Size配置
     property->fontSize.init(settingDconfig.value(property->dtkSizeMode == 1 ? DCOMPACTFONTSIZE : GSKEYFONTSIZE).toDouble());
+    property->qtScrollBarPolicy.init(settingDconfig.value(DQTSCROLLBARPOLICY).toInt());
     property->opacity.init(settingDconfig.value(GSKEYOPACITY).toDouble());
     property->wallpaperSlideShow.init(settingDconfig.value(GSKEYWALLPAPERSLIDESHOW).toString());
     property->wallpaperURls.init(settingDconfig.value(GSKEYWALLPAPERURIS).toString());
@@ -150,6 +151,17 @@ void Appearance1Thread::setDTKSizeMode(int value)
 {
     QMutexLocker locker(&mutex);
     appearanceManager->doSetDTKSizeMode(value);
+}
+
+int Appearance1Thread::qtScrollBarPolicy() const
+{
+    return property->qtScrollBarPolicy;
+}
+
+void Appearance1Thread::setQtScrollBarPolicy(int value)
+{
+    QMutexLocker locker(&mutex);
+    appearanceManager->doSetQtScrollBarPolicy(value);
 }
 
 int Appearance1Thread::windowRadius() const

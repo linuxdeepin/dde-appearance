@@ -413,7 +413,16 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
                 bSuccess = doSetFonts(size);
                 value = QString::number(size);
             }
-        } else {
+        } else if (key == DQTSCROLLBARPOLICY) {
+            type = TYPEQTSCROLLBARPOLICY;
+            bool ok = false;
+            int policy = m_settingDconfig.value(key).toInt(&ok);
+            if (ok) {
+                setQtScrollBarPolicy(policy);
+                value = QString::number(policy);
+            }
+        }
+        else {
             return;
         }
     } while (false);
@@ -583,6 +592,14 @@ void AppearanceManager::setDTKSizeMode(int value)
     if (value != m_property->dtkSizeMode && m_settingDconfig.isValid()) {
         m_settingDconfig.setValue(DDTKSIZEMODE, value);
         m_property->dtkSizeMode = value;
+    }
+}
+
+void AppearanceManager::setQtScrollBarPolicy(int value)
+{
+    if (value != m_property->qtScrollBarPolicy && m_settingDconfig.isValid()) {
+        m_settingDconfig.setValue(DQTSCROLLBARPOLICY, value);
+        m_property->qtScrollBarPolicy = value;
     }
 }
 
@@ -1553,6 +1570,12 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
             QString fontSizeKey = GSKEYFONTSIZE;
             doSetDTKSizeMode(mode);
         }
+    } else if (type == TYPEQTSCROLLBARPOLICY) {
+        bool ok = false;
+        int policy = value.toInt(&ok);
+        if (ok) {
+            doSetQtScrollBarPolicy(policy);
+        }
     }
 
     if (updateValut) {
@@ -1875,6 +1898,14 @@ void AppearanceManager::doSetDTKSizeMode(int value) {
     if (value != m_property->dtkSizeMode) {
         setDTKSizeMode(value);
         m_dbusProxy->SetInteger("DTK/SizeMode",value);
+    }
+}
+
+void AppearanceManager::doSetQtScrollBarPolicy(int value)
+{
+    if (value != m_property->qtScrollBarPolicy) {
+        setQtScrollBarPolicy(value);
+        m_dbusProxy->SetInteger("Qt/ScrollBarPolicy",value);
     }
 }
 
