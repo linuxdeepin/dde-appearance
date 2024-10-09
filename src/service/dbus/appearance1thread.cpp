@@ -152,6 +152,17 @@ void Appearance1Thread::setDTKSizeMode(int value)
     appearanceManager->doSetDTKSizeMode(value);
 }
 
+int Appearance1Thread::qtScrollBarPolicy() const
+{
+    return property->qtScrollBarPolicy;
+}
+
+void Appearance1Thread::setQtScrollBarPolicy(int value)
+{
+    QMutexLocker locker(&mutex);
+    appearanceManager->doSetQtScrollBarPolicy(value);
+}
+
 int Appearance1Thread::windowRadius() const
 {
     return property->windowRadius;
