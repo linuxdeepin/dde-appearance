@@ -346,6 +346,7 @@ DeepinWMFaker::DeepinWMFaker(QObject* appearance)
 
     QDBusConnection::sessionBus().connect(KWinDBusService, KWinDBusCompositorPath, KWinDBusCompositorInterface,
                                           "compositingToggled", "b", this, SLOT(wmCompositingEnabledChanged(bool)));
+    QDBusConnection::sessionBus().connect(KWinDBusService, KWinDBusPath, KWinDBusInterface, "MultitaskStateChanged", this, SLOT(SlotUpdateMultitaskStatus(bool)));
 
     // 迁移旧的标题栏主题插件配置
     KConfigGroup decoration_group(m_kwinConfig, "org.kde.kdecoration2");
@@ -1429,6 +1430,11 @@ bool DeepinWMFaker::GetMultiTaskingStatus()
 }
 
 void DeepinWMFaker::SetMultiTaskingStatus(bool isActive)
+{
+    m_isMultitaskingActived = isActive;
+}
+
+void DeepinWMFaker::SlotUpdateMultitaskStatus(bool isActive)
 {
     m_isMultitaskingActived = isActive;
 }
