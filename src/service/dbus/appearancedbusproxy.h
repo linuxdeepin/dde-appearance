@@ -16,8 +16,8 @@ class AppearanceDBusProxy : public QObject
 {
     Q_OBJECT
 public:
-    explicit AppearanceDBusProxy(QObject *parent = nullptr);
     void setUserInterface(const QString &userPath);
+    explicit AppearanceDBusProxy(QObject *parent = nullptr);
     // Notifications
 public Q_SLOTS:
     void Notify(const QString &in0, const QString &in2, const QString &summary, const QString &body, const QStringList &options, const QVariantMap &optionMap, int expireTimeout);

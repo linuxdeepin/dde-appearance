@@ -69,6 +69,10 @@ public: // PROPERTIES
     int dtkSizeMode() const;
     void setDTKSizeMode(int value);
 
+    Q_PROPERTY(int QtScrollBarPolicy READ qtScrollBarPolicy WRITE setQtScrollBarPolicy)
+    int qtScrollBarPolicy() const;
+    void setQtScrollBarPolicy(int value);
+
 public Q_SLOTS: // METHODS
     void Delete(const QString &ty, const QString &name);
     QString GetCurrentWorkspaceBackground();

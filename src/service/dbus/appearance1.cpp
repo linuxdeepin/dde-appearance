@@ -117,6 +117,16 @@ int Appearance1::dtkSizeMode() const
     return appearance1Thread->dtkSizeMode();
 }
 
+int Appearance1::qtScrollBarPolicy() const
+{
+    return appearance1Thread->qtScrollBarPolicy();
+}
+
+void Appearance1::setQtScrollBarPolicy(int value)
+{
+    QMetaObject::invokeMethod(appearance1Thread.get(), "setQtScrollBarPolicy", Qt::QueuedConnection, Q_ARG(int, value));
+}
+
 void Appearance1::setWindowRadius(int value)
 {
     //    message.setDelayedReply(true);
