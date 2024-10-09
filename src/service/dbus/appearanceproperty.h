@@ -66,6 +66,7 @@ public:
     DBusProperty<QString> wallpaperURls;
     DBusProperty<int> windowRadius;
     DBusProperty<int> dtkSizeMode;
+    DBusProperty<int> qtScrollBarPolicy;
 };
 
 #endif // APPEARANCEPROPERTY_H
