@@ -39,6 +39,7 @@ const QString APPEARANCE_INTERFACE = "org.deepin.dde.Appearance1";
 #define GSKEYFONTNAME            "gtkFontName"
 #define DCKEYALLWALLPAPER        "All_Wallpaper_Uris"
 #define DDTKSIZEMODE             "Dtk_Size_Mode"
+#define DQTSCROLLBARPOLICY        "Qt_Scrollbar_Policy"
 
 #define GTK2CONFDELIM            "="
 #define GTK3GROUPSETTINGS        "Settings"
@@ -88,6 +89,7 @@ const QString APPEARANCE_INTERFACE = "org.deepin.dde.Appearance1";
 #define TYPEALLWALLPAPER        "allwallpaperuris"
 #define TYPEDTKSIZEMODE         "dtksizemode"
 #define TYPECOMPACTFONTSIZE     "compactfontsize"
+#define TYPEQTSCROLLBARPOLICY   "qtscrollbarpolicy"
 #define MIMETYPEGLOBAL          "application/x-global-theme"
 #define MIMETYPEGTK             "application/x-gtk-theme"
 #define MIMETYPEICON            "application/x-icon-theme"

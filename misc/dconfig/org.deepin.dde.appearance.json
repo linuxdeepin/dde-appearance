@@ -171,6 +171,16 @@
             "description": "Compact Mode.",
             "permissions": "readwrite",
             "visibility": "private"
+        },
+        "Qt_Scrollbar_Policy": {
+            "value": 0,
+            "serial": 0,
+            "flags": [],
+            "name": "Qt_Scrollbar_Policy",
+            "name[zh_CN]": "滚动条显示策略",
+            "description": "Scroll bar display strategy.",
+            "permissions": "readwrite",
+            "visibility": "private"
         }
     }
 }
