@@ -514,7 +514,11 @@ void AppearanceManager::setFontSize(double value)
     }
 
     if (m_settingDconfig.isValid() && !qFuzzyCompare(value, m_property->fontSize)) {
-        m_settingDconfig.setValue(m_property->dtkSizeMode == 1 ? DCOMPACTFONTSIZE : GSKEYFONTSIZE, value);
+        if (m_property->dtkSizeMode == 1) {
+            m_settingDconfig.setValue(DCOMPACTFONTSIZE, QString::number(value, 'g'));
+        } else {
+            m_settingDconfig.setValue(GSKEYFONTSIZE, value);
+        }
         m_property->fontSize = value;
         updateCustomTheme(TYPEFONTSIZE, QString::number(value));
     }

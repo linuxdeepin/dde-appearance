@@ -173,7 +173,7 @@
             "visibility": "private"
         },
         "Compact_Font_Size": {
-            "value": 9.0,
+            "value": "9.0",
             "serial": 0,
             "flags": [],
             "name": "Compact_Font_Size",

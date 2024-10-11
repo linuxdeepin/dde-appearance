@@ -30,7 +30,13 @@ Appearance1Thread::Appearance1Thread()
     property->monospaceFont.init(settingDconfig.value(GSKEYFONTMONOSPACE).toString());
     property->dtkSizeMode.init(settingDconfig.value(DDTKSIZEMODE).toInt());
     // dtkSizeMode必须先于fontSize初始化，紧凑模式下，使用Compact_Font_Size配置
-    property->fontSize.init(settingDconfig.value(property->dtkSizeMode == 1 ? DCOMPACTFONTSIZE : GSKEYFONTSIZE).toDouble());
+    bool getFontSizeSuc = false;
+    settingDconfig.value(DCOMPACTFONTSIZE).toDouble(&getFontSizeSuc);
+    if (!getFontSizeSuc) {
+        settingDconfig.reset(DCOMPACTFONTSIZE);
+    }
+    double fontSize = settingDconfig.value(property->dtkSizeMode == 1 ? DCOMPACTFONTSIZE : GSKEYFONTSIZE).toDouble(&getFontSizeSuc);
+    property->fontSize.init(getFontSizeSuc ? fontSize : 9.0);
     property->opacity.init(settingDconfig.value(GSKEYOPACITY).toDouble());
     property->wallpaperSlideShow.init(settingDconfig.value(GSKEYWALLPAPERSLIDESHOW).toString());
     property->wallpaperURls.init(settingDconfig.value(GSKEYWALLPAPERURIS).toString());
