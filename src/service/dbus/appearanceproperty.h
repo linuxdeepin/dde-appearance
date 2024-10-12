@@ -8,6 +8,7 @@
 #include <QVariant>
 
 void AppearancePropertiesChanged(const QString &property, const QVariant &value);
+bool isTreeLand();
 
 template<typename T>
 class DBusProperty

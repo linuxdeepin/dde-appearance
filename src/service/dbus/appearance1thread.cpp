@@ -10,8 +10,11 @@
 #include <QMutexLocker>
 
 #include <DConfig>
+#include <DGuiApplicationHelper>
+#include <DPlatformTheme>
 #include <QThread>
 
+DGUI_USE_NAMESPACE
 // AppearanceManager是实际功能实现
 // Appearance1Thread在线程中处理，并处理DBus返回及属性设置
 // 属性获取不能在线程中，需先初始化
@@ -65,6 +68,10 @@ QString Appearance1Thread::background() const
 
 QString Appearance1Thread::cursorTheme() const
 {
+    if (isTreeLand()) {
+        return DGuiApplicationHelper::instance()->systemTheme()->cursorThemeName();
+    }
+
     return property->cursorTheme;
 }
 
@@ -91,11 +98,19 @@ QString Appearance1Thread::gtkTheme() const
 
 QString Appearance1Thread::iconTheme() const
 {
+    if (isTreeLand()) {
+        return DGuiApplicationHelper::instance()->systemTheme()->iconThemeName();
+    }
+
     return property->iconTheme;
 }
 
 QString Appearance1Thread::monospaceFont() const
 {
+    if (isTreeLand()) {
+        return DGuiApplicationHelper::instance()->systemTheme()->monoFontName();
+    }
+
     return property->monospaceFont;
 }
 
@@ -123,6 +138,10 @@ void Appearance1Thread::setQtActiveColor(const QString &value)
 
 QString Appearance1Thread::standardFont() const
 {
+    if (isTreeLand()) {
+        return DGuiApplicationHelper::instance()->systemTheme()->fontName();
+    }
+
     return property->standardFont;
 }
 
@@ -155,6 +174,10 @@ void Appearance1Thread::setDTKSizeMode(int value)
 
 int Appearance1Thread::windowRadius() const
 {
+    if (isTreeLand()) {
+        return DGuiApplicationHelper::instance()->systemTheme()->windowRadius();
+    }
+
     return property->windowRadius;
 }
 

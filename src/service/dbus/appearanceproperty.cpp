@@ -23,6 +23,11 @@ void AppearancePropertiesChanged(const QString &property, const QVariant &value)
     APPEARANCEDBUS.send(msg);
 }
 
+bool isTreeLand()
+{
+    return qEnvironmentVariable("DDE_CURRENT_COMPOSITOR") == "TreeLand";
+}
+
 AppearanceProperty::AppearanceProperty()
     : background("Background")
     , cursorTheme("CursorTheme")
