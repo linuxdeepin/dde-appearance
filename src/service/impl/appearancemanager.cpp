@@ -1312,7 +1312,13 @@ QString AppearanceManager::doGetWallpaperSlideShow(QString monitorName)
 
 double AppearanceManager::getScaleFactor()
 {
-    double scaleFactor = m_dbusProxy->GetScaleFactor();
+    double scaleFactor = 0.0;
+    if (QGSettings::isSchemaInstalled(XSETTINGSSCHEMA)) {
+        QGSettings xSetting(XSETTINGSSCHEMA);
+        scaleFactor = xSetting.get("scale-factor").toDouble();
+    } else {
+        scaleFactor = m_dbusProxy->GetScaleFactor();
+    }
     qInfo() << __FUNCTION__ << "UpdateScaleFactor" << scaleFactor;
     UpdateScaleFactor(scaleFactor);
     return scaleFactor;
