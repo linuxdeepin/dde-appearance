@@ -25,11 +25,10 @@ extern "C" int DSMRegister(const char *name, void *data)
     appearance = new Appearance1();
 
     new Appearance1Adaptor(appearance);
-    bool appearanceRegister = pluginDbus->registerService(APPEARANCE_SERVICE);
     bool appearanceObjectRegister = pluginDbus->registerObject(APPEARANCE_PATH, APPEARANCE_INTERFACE, appearance);
 
-    if (!appearanceRegister || ! appearanceObjectRegister) {
-        qWarning() << "appearance dbus service already registered";
+    if (!appearanceObjectRegister) {
+        qWarning() << "appearance dbus object already registered";
         return -1;
     }
     return 0;
