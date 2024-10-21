@@ -30,8 +30,7 @@ Appearance1Thread::Appearance1Thread()
     property->standardFont.init(settingDconfig.value(GSKEYFONTSTANDARD).toString());
     property->monospaceFont.init(settingDconfig.value(GSKEYFONTMONOSPACE).toString());
     property->dtkSizeMode.init(settingDconfig.value(DDTKSIZEMODE).toInt());
-    // dtkSizeMode必须先于fontSize初始化，紧凑模式下，使用Compact_Font_Size配置
-    property->fontSize.init(settingDconfig.value(property->dtkSizeMode == 1 ? DCOMPACTFONTSIZE : GSKEYFONTSIZE).toDouble());
+    property->fontSize.init(settingDconfig.value(GSKEYFONTSIZE).toDouble());
     property->opacity.init(settingDconfig.value(GSKEYOPACITY).toDouble());
     property->wallpaperSlideShow.init(settingDconfig.value(GSKEYWALLPAPERSLIDESHOW).toString());
     property->wallpaperURls.init(settingDconfig.value(GSKEYWALLPAPERURIS).toString());
@@ -224,7 +223,7 @@ void Appearance1Thread::Reset(const QDBusMessage &message)
 {
     Q_UNUSED(message);
     QMutexLocker locker(&mutex);
-    QStringList keys{GSKEYGLOBALTHEME, GSKEYGTKTHEME, GSKEYICONTHEM, GSKEYCURSORTHEME, GSKEYFONTSIZE, DDTKSIZEMODE, DCOMPACTFONTSIZE};
+    QStringList keys{GSKEYGLOBALTHEME, GSKEYGTKTHEME, GSKEYICONTHEM, GSKEYCURSORTHEME, GSKEYFONTSIZE, DDTKSIZEMODE};
 
     appearanceManager->doResetSettingBykeys(keys);
 
