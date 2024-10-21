@@ -354,10 +354,6 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
             bSuccess = doSetMonospaceFont(value);
         } else if (key == GSKEYFONTSIZE) {
             type = TYPEFONTSIZE;
-            // 如果是紧凑模式，使用compact-font-size
-            if (m_property->dtkSizeMode == 1) {
-                break;
-            }
             double size = m_settingDconfig.value(key).toDouble();
             if (size == m_property->fontSize) {
                 break;
@@ -400,18 +396,6 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
             int mode = m_settingDconfig.value(key).toInt(&ok);
             if (ok) {
                 doSetDTKSizeMode(mode);
-                double size = m_settingDconfig.value(mode == 1 ? DCOMPACTFONTSIZE : GSKEYFONTSIZE).toDouble(&ok);
-                if (ok) {
-                    bSuccess = doSetFonts(size);
-                }
-            }
-        } else if (key == DCOMPACTFONTSIZE) {
-            type = TYPECOMPACTFONTSIZE;
-            bool ok = false;
-            double size = m_settingDconfig.value(key).toDouble(&ok);
-            if (ok && m_property->dtkSizeMode == 1) {
-                bSuccess = doSetFonts(size);
-                value = QString::number(size);
             }
         } else {
             return;
@@ -514,11 +498,7 @@ void AppearanceManager::setFontSize(double value)
     }
 
     if (m_settingDconfig.isValid() && !qFuzzyCompare(value, m_property->fontSize)) {
-        if (m_property->dtkSizeMode == 1) {
-            m_settingDconfig.setValue(DCOMPACTFONTSIZE, QString::number(value, 'g'));
-        } else {
-            m_settingDconfig.setValue(GSKEYFONTSIZE, value);
-        }
+        m_settingDconfig.setValue(GSKEYFONTSIZE, value);
         m_property->fontSize = value;
         updateCustomTheme(TYPEFONTSIZE, QString::number(value));
     }

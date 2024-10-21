@@ -38,7 +38,6 @@ const QString APPEARANCE_INTERFACE = "org.deepin.dde.Appearance1";
 #define GSKEYFONTNAME            "gtkFontName"
 #define DCKEYALLWALLPAPER        "All_Wallpaper_Uris"
 #define DDTKSIZEMODE             "Dtk_Size_Mode"
-#define DCOMPACTFONTSIZE         "Compact_Font_Size"
 
 #define GTK2CONFDELIM            "="
 #define GTK3GROUPSETTINGS        "Settings"
