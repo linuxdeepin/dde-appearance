@@ -138,6 +138,7 @@ public Q_SLOTS:
     // Touch Screen
     bool GetMultiTaskingStatus();
     void SetMultiTaskingStatus(bool isActive);
+    void SlotUpdateMultitaskStatus(bool isActive);
 
     // minin client
     bool GetIsShowDesktop();
