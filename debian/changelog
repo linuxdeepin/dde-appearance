@@ -1,3 +1,10 @@
+dde-appearance (1.1.36) unstable; urgency=medium
+
+  * Release 1.1.36
+  * feat: Compact mode does not affect the font setting range
+
+ -- Zhang Kun <zhangkun2@uniontech.com>  Fri, 25 Oct 2024 18:18:04 +0800
+
 dde-appearance (1.1.35) unstable; urgency=medium
 
   * feat: 添加紧凑模式属性
