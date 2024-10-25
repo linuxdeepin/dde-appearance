@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-add_subdirectory(systemd)
 add_subdirectory(dconfig)
 add_subdirectory(dbusservice)
 add_subdirectory(data)
