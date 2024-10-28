@@ -9,17 +9,12 @@
 #include <QDBusPendingReply>
 #include <QDebug>
 // 数据同步处理，和UOS ID同步数据
-extern QDBusConnection *pluginDbus;
 SyncConfig::SyncConfig(QString name, QString path)
     : name(name)
     , path(path)
 {
-    if (!pluginDbus) {
-        qWarning() << "pluginDbus is null:" <<name << path;
-        return;
-    }
-    pluginDbus->registerObject(path, this, QDBusConnection::ExportNonScriptableSlots);
-    pluginDbus->connect("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "NameOwnerChanged", this, SLOT(handleNameOwnerChanged(QString, QString, QString)));
+    APPEARANCEDBUS.registerObject(path, this, QDBusConnection::ExportNonScriptableSlots);
+    APPEARANCEDBUS.connect("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "NameOwnerChanged", this, SLOT(handleNameOwnerChanged(QString, QString, QString)));
     registerConfig();
 }
 
