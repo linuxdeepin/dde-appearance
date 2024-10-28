@@ -8,13 +8,14 @@
 #include <QCoreApplication>
 
 static Appearance1 *appearance = nullptr;
-QDBusConnection *pluginDbus = nullptr;
+// QDBusConnection *pluginDbus = nullptr;
 
 extern "C" int DSMRegister(const char *name, void *data)
 {
     (void)name;
     (void)data;
-    pluginDbus = reinterpret_cast<QDBusConnection *>(data);
+    // TODO: deepin-service-manager 传递进来的dbus在后面使用会无效，因此暂时采用QDBusConnection::sessionBus()
+    // pluginDbus = reinterpret_cast<QDBusConnection *>(data);
     QTranslator translator;
     QString languagePath = QStandardPaths::locate(QStandardPaths::GenericDataLocation,
                                                   QString("dde-appearance/translations"),
@@ -25,9 +26,10 @@ extern "C" int DSMRegister(const char *name, void *data)
     appearance = new Appearance1();
 
     new Appearance1Adaptor(appearance);
-    bool appearanceObjectRegister = pluginDbus->registerObject(APPEARANCE_PATH, APPEARANCE_INTERFACE, appearance);
+    bool appearanceRegister = APPEARANCEDBUS.registerService(APPEARANCE_SERVICE);
+    bool appearanceObjectRegister = APPEARANCEDBUS.registerObject(APPEARANCE_PATH, APPEARANCE_INTERFACE, appearance);
 
-    if (!appearanceObjectRegister) {
+    if (!appearanceRegister ||!appearanceObjectRegister) {
         qWarning() << "appearance dbus object already registered";
         return -1;
     }

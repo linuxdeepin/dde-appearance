@@ -5,12 +5,15 @@
 #ifndef COMMONDEFINE_H
 #define COMMONDEFINE_H
 #include <QString>
-
-#define APPEARANCEDBUS QDBusConnection::sessionBus()
+#include <QDBusConnection>
 
 const QString APPEARANCE_SERVICE = "org.deepin.dde.Appearance1";
 const QString APPEARANCE_PATH = "/org/deepin/dde/Appearance1";
 const QString APPEARANCE_INTERFACE = "org.deepin.dde.Appearance1";
+
+extern QDBusConnection *pluginDbus;
+#define APPEARANCEDBUS QDBusConnection::sessionBus()
+// #define APPEARANCEDBUS (pluginDbus?(*pluginDbus):QDBusConnection::sessionBus())
 
 #define APPEARANCEAPPID     "org.deepin.dde.appearance"
 #define APPEARANCESCHEMA    "org.deepin.dde.appearance"
