@@ -1,11 +1,22 @@
-dde-appearance (1.1.35) UNRELEASED; urgency=medium
+dde-appearance (1.1.36) unstable; urgency=medium
+
+  * fix: monitor multitask status signal
+  * chore: 解决dbus调用，获取不到返回值的问题
+  * chore: 解决CI license 校验通过的问题
+  * chore: dbus激活dde-appearance接口的时候，应该启动deepin-service-manager服务
+  * feat: add interface for scrollbar policy
+  * feat: Compact mode does not affect the font setting range
+
+ -- fuleyi <fuleyi@uniontech.com>  Tue, 29 Oct 2024 17:10:44 +0800
+
+dde-appearance (1.1.35) unstable; urgency=medium
 
   * chore: 解决控制中心个性化中主题图片加载不出来的问题
   * fix:修复dde-appearance不能正常启动
   * chore: 将dde-appearance 改成插件
   * chore: 添加紧凑模式属性
 
- -- fuleyi <uos@uos-PC>  Fri, 18 Oct 2024 16:39:25 +0800
+ -- fuleyi <fuleyi@uniontech.com>  Tue, 29 Oct 2024 17:09:55 +0800
 
 dde-appearance (1.1.34) unstable; urgency=medium
 
