@@ -1,3 +1,9 @@
+dde-appearance (1.1.37) unstable; urgency=medium
+
+  * release 1.1.37
+
+ -- Mike Chen <chenke@deepin.org>  Tue, 05 Nov 2024 09:59:56 +0800
+
 dde-appearance (1.1.36) unstable; urgency=medium
 
   * fix: monitor multitask status signal
