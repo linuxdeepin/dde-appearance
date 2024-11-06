@@ -171,6 +171,16 @@
             "description": "Compact Mode.",
             "permissions": "readwrite",
             "visibility": "private"
+        },
+        "Active_Colors": {
+            "value": "",
+            "serial": 0,
+            "flags": [],
+            "name": "Active_Colors",
+            "name[zh_CN]": "亮暗活动色",
+            "description": "Active colors in light and dark themes.",
+            "permissions": "readwrite",
+            "visibility": "private"
         }
     }
 }

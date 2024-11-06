@@ -15,6 +15,7 @@
 #include "modules/dconfig/phasewallpaper.h"
 #include "modules/subthemes/customtheme.h"
 
+#include <dguiapplicationhelper.h>
 #include <xcb/randr.h>
 #include <xcb/xcb.h>
 
@@ -35,6 +36,7 @@
 #define DEFAULT_WORKSPACE_COUNT (2) // 默认工作区数量
 
 DCORE_USE_NAMESPACE
+DGUI_USE_NAMESPACE
 
 AppearanceManager::AppearanceManager(AppearanceProperty *prop, QObject *parent)
     : QObject(parent)
@@ -286,8 +288,10 @@ void AppearanceManager::handlethemeFileChange(QString theme)
 
 void AppearanceManager::handleXsettingDConfigChange(QString key)
 {
-    if (key == GSKEYQTACTIVECOLOR) {
-        QString value = qtActiveColorToHexColor(m_xSetting->get(GSKEYQTACTIVECOLOR).toString());
+    if (key == GSKEYQTACTIVECOLOR || key == GSKEYQTACTIVECOLOR_DARK) {
+        QString result = m_settingDconfig.value(GSKEYGLOBALTHEME).toString().endsWith("dark") ?
+            m_xSetting->get(GSKEYQTACTIVECOLOR_DARK).toString() : m_xSetting->get(GSKEYQTACTIVECOLOR).toString();
+        QString value = qtActiveColorToHexColor(result);
 
         m_property->qtActiveColor = value;
         Q_EMIT Changed("QtActiveColor", value);
@@ -315,6 +319,7 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
             }
             bSuccess = doSetGlobalTheme(value);
             if (bSuccess) {
+                setQtActiveColor("");
                 setGlobalTheme(value);
             }
         } else if (key == GSKEYGTKTHEME) {
@@ -570,6 +575,17 @@ void AppearanceManager::setDTKSizeMode(int value)
     }
 }
 
+void AppearanceManager::setActiveColors(const QString &value)
+{
+    m_settingDconfig.setValue(DACTIVECOLORS, value);
+    QStringList colors = value.split(',');
+    if (colors.isEmpty()) {
+        return;
+    }
+    m_xSetting->set(GSKEYQTACTIVECOLOR, hexColorToQtActiveColor(colors.value(0)));
+    m_xSetting->set(GSKEYQTACTIVECOLOR_DARK, hexColorToQtActiveColor(colors.value(1)));
+}
+
 void AppearanceManager::setWindowRadius(int value)
 {
     if (value != m_property->windowRadius && m_xSetting) {
@@ -591,9 +607,11 @@ void AppearanceManager::setOpacity(double value)
 void AppearanceManager::setQtActiveColor(const QString &value)
 {
     if (value != m_property->qtActiveColor && m_xSetting) {
-        m_xSetting->set(GSKEYQTACTIVECOLOR, hexColorToQtActiveColor(value));
-        m_property->qtActiveColor = value;
-        updateCustomTheme(TYPEACTIVECOLOR, value);
+        QStringList colors = m_settingDconfig.value(DACTIVECOLORS).toString().split(',');
+        QString result = m_settingDconfig.value(GSKEYGLOBALTHEME).toString().endsWith("dark") ?
+            colors.value(1) : colors.value(0);
+        m_property->qtActiveColor = result;
+        updateCustomTheme(TYPEACTIVECOLOR, result);
     }
 }
 
@@ -1860,6 +1878,11 @@ void AppearanceManager::doSetDTKSizeMode(int value) {
         setDTKSizeMode(value);
         m_dbusProxy->SetInteger("DTK/SizeMode",value);
     }
+}
+
+QString AppearanceManager::getActiveColors()
+{
+    return m_settingDconfig.value(DACTIVECOLORS).toString();
 }
 
 void AppearanceManager::autoChangeBg(QString monitorSpace, QDateTime date)
