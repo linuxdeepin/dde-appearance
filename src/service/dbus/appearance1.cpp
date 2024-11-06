@@ -181,6 +181,15 @@ ScaleFactors Appearance1::GetScreenScaleFactors()
     return ScaleFactors();
 }
 
+QString Appearance1::GetActiveColors()
+{
+    auto message = this->message();
+    setDelayedReply(true);
+    message.setDelayedReply(true);
+    QMetaObject::invokeMethod(appearance1Thread.get(), "GetActiveColors", Qt::QueuedConnection, Q_ARG(QDBusMessage, message));
+    return QString();
+}
+
 QString Appearance1::GetWallpaperSlideShow(const QString &monitorName)
 {
     auto message = this->message();
@@ -262,6 +271,14 @@ void Appearance1::SetScreenScaleFactors(ScaleFactors scaleFactors)
     setDelayedReply(false);
     //    message.setDelayedReply(true);
     QMetaObject::invokeMethod(appearance1Thread.get(), "SetScreenScaleFactors", Qt::QueuedConnection, Q_ARG(ScaleFactors, scaleFactors), Q_ARG(QDBusMessage, message));
+}
+
+void Appearance1::SetActiveColors(const QString &activeColors)
+{
+    auto message = this->message();
+    setDelayedReply(false);
+    //    message.setDelayedReply(true);
+    QMetaObject::invokeMethod(appearance1Thread.get(), "SetActiveColors", Qt::QueuedConnection, Q_ARG(QString, activeColors), Q_ARG(QDBusMessage, message));
 }
 
 void Appearance1::SetWallpaperSlideShow(const QString &monitorName, const QString &slideShow)
