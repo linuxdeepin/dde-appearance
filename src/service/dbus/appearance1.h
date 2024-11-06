@@ -79,6 +79,7 @@ public Q_SLOTS: // METHODS
     QString GetCurrentWorkspaceBackgroundForMonitor(const QString &strMonitorName);
     double GetScaleFactor();
     ScaleFactors GetScreenScaleFactors();
+    QString GetActiveColors();
     QString GetWallpaperSlideShow(const QString &monitorName);
     QString GetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName);
     QString List(const QString &ty);
@@ -89,6 +90,7 @@ public Q_SLOTS: // METHODS
     void SetMonitorBackground(const QString &monitorName, const QString &imageGile);
     void SetScaleFactor(double scale);
     void SetScreenScaleFactors(ScaleFactors scaleFactors);
+    void SetActiveColors(const QString &activeColors);
     void SetWallpaperSlideShow(const QString &monitorName, const QString &slideShow);
     void SetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QString &uri);
     QString Show(const QString &ty, const QStringList &names);

@@ -66,6 +66,7 @@ public:
     bool setWallpaperURls(const QString &value);
     void setDTKSizeMode(int value);
     void setQtScrollBarPolicy(int value);
+    void setActiveColors(const QString &value);
     bool doSetFonts(double size);
     bool doUpdateFonts(double size);
     bool doSetGlobalTheme(QString value);
@@ -113,6 +114,7 @@ public:
     inline QString getWallpaperURls() {return m_property->wallpaperURls;}
     inline int getWindowRadius() {return m_property->windowRadius; }
     inline int getDTKSizeMode() {return m_property->dtkSizeMode; }
+    QString getActiveColors();
 
     inline QString getGreetBg() {return m_greeterBg; }
     inline QMap<QString,QString>& getMonitor() {return m_monitorMap; }

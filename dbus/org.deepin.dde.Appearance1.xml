@@ -73,6 +73,12 @@
         <arg type='s' name='strMonitorName' direction='in' />
         <arg type='s' name='uri' direction='out' />
     </method>
+    <method name='SetActiveColors'>
+         <arg type='s' name='activeColors' direction='in' />
+    </method>
+    <method name='GetActiveColors'>
+         <arg type='s' name='activeColors' direction='out' />
+    </method>
 
     <property access='readwrite' type='d' name='FontSize' />
     <property access='readwrite' type='d' name='Opacity' />

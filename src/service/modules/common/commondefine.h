@@ -35,6 +35,7 @@ extern QDBusConnection *pluginDbus;
 #define GSKEYFONTMONOSPACE       "Font_Monospace"
 #define GSKEYOPACITY             "Opacity"
 #define GSKEYQTACTIVECOLOR       "qtActiveColor"
+#define GSKEYQTACTIVECOLOR_DARK  "qtDarkActiveColor"
 #define GSKEYFONTSTANDARD        "Font_Standard"
 #define GSKEYWALLPAPERSLIDESHOW  "Wallpaper_Slideshow"
 #define GSKEYWALLPAPERURIS       "Wallpaper_Uris"
@@ -43,6 +44,7 @@ extern QDBusConnection *pluginDbus;
 #define DCKEYALLWALLPAPER        "All_Wallpaper_Uris"
 #define DDTKSIZEMODE             "Dtk_Size_Mode"
 #define DQTSCROLLBARPOLICY        "Qt_Scrollbar_Policy"
+#define DACTIVECOLORS            "Active_Colors"
 
 #define GTK2CONFDELIM            "="
 #define GTK3GROUPSETTINGS        "Settings"
