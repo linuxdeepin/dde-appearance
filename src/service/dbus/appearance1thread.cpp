@@ -37,6 +37,8 @@ Appearance1Thread::Appearance1Thread()
     if (QGSettings::isSchemaInstalled(XSETTINGSSCHEMA)) {
         QGSettings xSetting(XSETTINGSSCHEMA);
         property->windowRadius.init(xSetting.get(GSKEYDTKWINDOWRADIUS).toInt());
+        QString activeColor = settingDconfig.value(GSKEYGLOBALTHEME).toString().endsWith("dark") ?
+            xSetting.get(GSKEYQTACTIVECOLOR_DARK).toString() : xSetting.get(GSKEYQTACTIVECOLOR).toString();
         property->qtActiveColor.init(AppearanceManager::qtActiveColorToHexColor(xSetting.get(GSKEYQTACTIVECOLOR).toString()));
     }
     if (QGSettings::isSchemaInstalled(WRAPBGSCHEMA)) {
@@ -209,6 +211,13 @@ ScaleFactors Appearance1Thread::GetScreenScaleFactors(const QDBusMessage &messag
     return ScaleFactors();
 }
 
+QString Appearance1Thread::GetActiveColors(const QDBusMessage &message)
+{
+    QMutexLocker locker(&mutex);
+    APPEARANCEDBUS.send(message.createReply(QVariant::fromValue(appearanceManager->getActiveColors())));
+    return QString();
+}
+
 QString Appearance1Thread::GetWallpaperSlideShow(const QString &monitorName, const QDBusMessage &message)
 {
     QMutexLocker locker(&mutex);
@@ -285,6 +294,13 @@ void Appearance1Thread::SetScreenScaleFactors(ScaleFactors scaleFactors, const Q
     Q_UNUSED(message);
     QMutexLocker locker(&mutex);
     appearanceManager->setScreenScaleFactors(scaleFactors);
+}
+
+void Appearance1Thread::SetActiveColors(const QString &activeColors, const QDBusMessage &message)
+{
+    Q_UNUSED(message);
+    QMutexLocker locker(&mutex);
+    appearanceManager->setActiveColors(activeColors);
 }
 
 void Appearance1Thread::SetWallpaperSlideShow(const QString &monitorName, const QString &slideShow, const QDBusMessage &message)
