@@ -56,6 +56,7 @@ AppearanceManager::AppearanceManager(AppearanceProperty *prop, QObject *parent)
     , m_customTheme(new CustomTheme())
     , m_globalThemeUpdating(false)
     , m_wallpaperConfig({})
+    , m_opacityTriggerTimer(new QTimer(this))
 {
     if (QGSettings::isSchemaInstalled(XSETTINGSSCHEMA)) {
         m_xSetting = QSharedPointer<QGSettings>(new QGSettings(XSETTINGSSCHEMA));
@@ -95,6 +96,10 @@ bool AppearanceManager::init()
         qWarning() << "xcb_randr_query_version_reply faile";
         return false;
     }
+    m_opacityTriggerTimer->setSingleShot(true);
+    m_opacityTriggerTimer->setInterval(200);
+
+    connect(m_opacityTriggerTimer, &QTimer::timeout, this, &AppearanceManager::onOpacityTriggerTimeout);
 
     connect(m_dbusProxy.get(), &AppearanceDBusProxy::workspaceCountChanged, this, &AppearanceManager::handleWmWorkspaceCountChanged);
     connect(m_dbusProxy.get(), &AppearanceDBusProxy::SetScaleFactorStarted, this, &AppearanceManager::handleSetScaleFactorStarted);
@@ -597,10 +602,18 @@ void AppearanceManager::setWindowRadius(int value)
 
 void AppearanceManager::setOpacity(double value)
 {
-    if (m_settingDconfig.isValid() && !qFuzzyCompare(value, m_property->opacity)) {
-        m_settingDconfig.setValue(GSKEYOPACITY, value);
-        m_property->opacity = value;
-        updateCustomTheme(TYPEWINDOWOPACITY, QString::number(value));
+    m_tmpOpacity = value;
+    if (!m_opacityTriggerTimer->isActive()) {
+        m_opacityTriggerTimer->start();
+    }
+}
+
+void AppearanceManager::onOpacityTriggerTimeout()
+{
+    if (m_settingDconfig.isValid() && !qFuzzyCompare(m_tmpOpacity, m_property->opacity)) {
+        m_settingDconfig.setValue(GSKEYOPACITY, m_tmpOpacity);
+        m_property->opacity = m_tmpOpacity;
+        updateCustomTheme(TYPEWINDOWOPACITY, QString::number(m_tmpOpacity));
     }
 }
 
