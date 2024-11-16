@@ -1,3 +1,9 @@
+dde-appearance (1.1.37) unstable; urgency=medium
+
+  * fix: active colors are same in different themes
+
+ -- xionglinlin <xionglinlin@uniontech.com>  Wed, 13 Nov 2024 14:54:46 +0800
+
 dde-appearance (1.1.36) unstable; urgency=medium
 
   * Release 1.1.36
