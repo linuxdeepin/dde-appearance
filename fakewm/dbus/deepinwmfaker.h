@@ -197,6 +197,7 @@ private:
     void syncConfigForKWin();
     void updateCursorConfig();
     bool maybeShowWarningDialog();
+    void callHighlightWindows(const QStringList &windowIds);
 
     KWindowSystem *m_windowSystem;
     KConfig *m_deepinWMConfig;

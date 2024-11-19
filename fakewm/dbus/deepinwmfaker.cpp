@@ -4,7 +4,6 @@
 
 #include "deepinwmfaker.h"
 
-#include <QDBusConnection>
 #include <QDBusMessage>
 #include <QDebug>
 #include <QJsonArray>
@@ -14,16 +13,19 @@
 #include <QProcess>
 #include <QStringList>
 #include <QFileInfo>
-#include <QDBusReply>
 #include <QMetaEnum>
+#include <QDBusConnectionInterface>
 #include <mutex>
 
-#include <KF5/KConfigCore/KConfig>
-#include <KF5/KConfigCore/KConfigGroup>
-#include <KF5/KConfigCore/KSharedConfig>
-#include <KF5/KWindowSystem/KWindowSystem>
-#include <KF5/KWindowSystem/KWindowEffects>
-#include <KF5/KGlobalAccel/KGlobalAccel>
+#include <KF6/KConfigCore/KConfigGroup>
+#include <KF6/KConfigCore/KSharedConfig>
+#include <KF6/KGlobalAccel/KGlobalAccel>
+#include <KF6/KWindowSystem/KWindowSystem>
+#include <KF6/KWindowSystem/KWindowEffects>
+#include <KWindowInfo>
+#include <KX11Extras>
+
+#include <DConfig>
 
 #ifndef DISABLE_DEEPIN_WM
 #define DconfigBackgroundUri "Background_Uris"
@@ -327,11 +329,11 @@ DeepinWMFaker::DeepinWMFaker(QObject* appearance)
 #ifndef DISABLE_DEEPIN_WM
     m_currentDesktop = m_kwinConfig->group("Workspace").readEntry<int>("CurrentDesktop", 1);
 
-    connect(m_windowSystem, &KWindowSystem::currentDesktopChanged, this, [this] (int to) {
+    connect(KX11Extras::self(), &KX11Extras::currentDesktopChanged, this, [this] (int to) {
         Q_EMIT WorkspaceSwitched(m_currentDesktop, to);
         m_currentDesktop = to;
     });
-    connect(m_windowSystem, &KWindowSystem::numberOfDesktopsChanged, this, &DeepinWMFaker::workspaceCountChanged);
+    connect(KX11Extras::self(), &KX11Extras::numberOfDesktopsChanged, this, &DeepinWMFaker::workspaceCountChanged);
     connect(m_appearance.data(), SIGNAL(valueChanged(const QString &)),this,SLOT(DeepinWMFaker::onGsettingsDDEAppearanceChanged));
 #endif // DISABLE_DEEPIN_WM
 
@@ -580,7 +582,7 @@ void DeepinWMFaker::SetTransientBackground(const QString &uri)
 
 void DeepinWMFaker::SetTransientBackgroundForMonitor(const QString &uri, const QString &strMonitorName)
 {
-     int current = m_windowSystem->currentDesktop();
+     int current = KX11Extras::currentDesktop();
 
      m_transientBackgroundUri = uri;
      Q_EMIT WorkspaceBackgroundChangedForMonitor( current,strMonitorName,uri );
@@ -879,11 +881,13 @@ void DeepinWMFaker::PreviewWindow(uint xid)
     }
 
     // 使用kwin自带的预览特效
-    if (KWindowEffects::isEffectAvailable(KWindowEffects::HighlightWindows)) {
+    if (QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.KWin.HighlightWindow")) {
+        //if (KWindowEffects::isEffectAvailable(KWindowEffects::HighlightWindows)) {
         // ###(zccrs): 按道理讲 previewingController 应该为dock的预览展示窗口（发起预览请求的窗口）
         // 不过，dde-dock中不支持此种用法，而且对kwin接口的调用仅仅是fallback，因此直接将xid作为预览请求的controller窗口
-        previewingController = xid;
-        KWindowEffects::highlightWindows(previewingController, {xid});
+        //previewingController = xid;
+        //KWindowEffects::highlightWindows(previewingController, {xid});
+        callHighlightWindows({QString::number(xid)});
         return;
     }
 
@@ -894,7 +898,7 @@ void DeepinWMFaker::PreviewWindow(uint xid)
     // qDebug() << "order" << m_windowSystem->stackingOrder();
     // qDebug() << "contains" << m_windowSystem->hasWId(xid);
 
-    m_windowSystem->forceActiveWindow(xid);
+    KX11Extras::forceActiveWindow(xid);
     m_previewWinMiniPair.first = xid;
     m_previewWinMiniPair.second = false;
 
@@ -918,20 +922,23 @@ void DeepinWMFaker::CancelPreviewWindow()
 
     // 退出kwin自带的预览特效
     if (previewingController) {
-        KWindowEffects::highlightWindows(previewingController, {});
+        //KWindowEffects::highlightWindows(previewingController, {});
+        callHighlightWindows({QString::number(previewingController)});
         previewingController = 0;
         return;
     }
 
     // FIXME: same as above
-    if (m_windowSystem->windows().contains(m_previewWinMiniPair.first)) {
+    if (KX11Extras::windows().contains(m_previewWinMiniPair.first)) {
         if (m_previewWinMiniPair.second) {
-//            m_windowSystem->minimizeWindow(m_previewWinMiniPair.first);
+            // m_windowSystem->minimizeWindow(m_previewWinMiniPair.first);
             // using this way to minimize a window without animation
-            m_windowSystem->setState(m_previewWinMiniPair.first, NET::Hidden);
+            KX11Extras::setState(m_previewWinMiniPair.first, NET::Hidden);
             return;
         }
-        m_windowSystem->lowerWindow(m_previewWinMiniPair.first);
+        // TODO, in kf6, lowerWindow is deprecated and be removed,and the source code lowerWindow implementation is empty
+        // https://github.com/KDE/kwindowsystem/blob/kf5/src/kwindowsystem.cpp
+        //m_windowSystem->lowerWindow(m_previewWinMiniPair.first);
     }
 }
 
@@ -980,7 +987,7 @@ void DeepinWMFaker::ToggleActiveWindowMaximize()
 
 void DeepinWMFaker::MinimizeActiveWindow()
 {
-    m_windowSystem->minimizeWindow(m_windowSystem->activeWindow());
+    KX11Extras::minimizeWindow(KX11Extras::activeWindow());
 }
 
 void DeepinWMFaker::SetDecorationTheme(const QString &type, const QString &name)
@@ -1041,6 +1048,22 @@ bool DeepinWMFaker::maybeShowWarningDialog()
     }
 
     return false;
+}
+
+void DeepinWMFaker::callHighlightWindows(const QStringList &windowIds)
+{
+    QDBusInterface interface("org.kde.KWin.HighlightWindow", "/org/kde/KWin/HighlightWindow",
+        "org.kde.KWin.HighlightWindow", QDBusConnection::sessionBus());
+    if (interface.isValid()) {
+        QDBusReply<void> reply = interface.call("highlightWindows", QVariant::fromValue(windowIds));
+        if (reply.isValid()) {
+            qDebug() << "Successfully called highlightWindows with" << windowIds;
+        } else {
+            qWarning() << "Failed to call highlightWindows:" << reply.error().message();
+        }
+    } else {
+        qWarning() << "Failed to call highlightWindows:" << interface.lastError().message();
+    }
 }
 
 void DeepinWMFaker::ShowAllWindow()
@@ -1122,7 +1145,8 @@ void DeepinWMFaker::PresentWindows(const QList<uint> &xids)
         for (uint w : xids)
             windows << w;
 
-        KWindowEffects::presentWindows(windows.first(), windows);
+        // TODO kf6 has no method to present windows
+        //KWindowEffects::presentWindows(windows.first(), windows);
     } else {
         QDBusInterface Interface("org.kde.KWin",
                                  "/org/kde/KWin/PresentWindows",
