@@ -12,10 +12,9 @@ static Appearance1 *appearance = nullptr;
 
 extern "C" int DSMRegister(const char *name, void *data)
 {
-    (void)name;
-    (void)data;
     // TODO: deepin-service-manager 传递进来的dbus在后面使用会无效，因此暂时采用QDBusConnection::sessionBus()
-    // pluginDbus = reinterpret_cast<QDBusConnection *>(data);
+    // (void)data;
+    // pluginDbus = static_cast<QDBusConnection*>(data);
     QTranslator translator;
     QString languagePath = QStandardPaths::locate(QStandardPaths::GenericDataLocation,
                                                   QString("dde-appearance/translations"),
@@ -40,8 +39,6 @@ extern "C" int DSMRegister(const char *name, void *data)
 // 非常驻插件必须实现该函数，以防内存泄漏
 extern "C" int DSMUnRegister(const char *name, void *data)
 {
-    (void)name;
-    (void)data;
     if (appearance) {
         appearance->deleteLater();
     }

@@ -209,7 +209,8 @@ bool ThemesApi::setGlobalTheme(QString name)
     return true;
 }
 
-QString ThemesApi::getGtkTheme(){
+QString ThemesApi::getGtkTheme()
+{
     if (!xSetting) {
         return QString();
     }
