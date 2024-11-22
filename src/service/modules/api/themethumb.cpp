@@ -173,7 +173,7 @@ bool genCursor(QString descFile,int width,int height,double scaleFactor,QString 
     return true;
 }
 
-bool genIcon(QString theme,int width,int height,double scaleFactor,QString out)
+bool genIcon(QString theme, int width, int height, double scaleFactor, QString out)
 {
     int iconSize = static_cast<int>(baseIconSize * scaleFactor);
     int padding  = static_cast<int>(baseIconPadding * scaleFactor);
@@ -182,22 +182,26 @@ bool genIcon(QString theme,int width,int height,double scaleFactor,QString out)
 
     QList<QIcon> images = getIcons(theme, iconSize);
 
-    QPixmap pixmap(width, height);
-    pixmap.fill(Qt::transparent);
+    // 使用 QImage 替代 QPixmap
+    QImage image(width, height, QImage::Format_ARGB32);
+    image.fill(Qt::transparent); // 设置透明背景
+
     QPainter painter;
-    painter.begin(&pixmap);
+    painter.begin(&image);
 
     int spaceW = width - iconSize * images.size();
     int x = (spaceW - (images.size() - 1) * padding) / 2;
     int y = (height - iconSize) / 2;
-    int i = 0;
 
-    for (auto iter : images) {
+    for (const auto& iter : images) {
+        // 绘制图标到 QImage 上
         iter.paint(&painter, QRect(x, y, iconSize, iconSize));
         x += iconSize + padding;
     }
     painter.end();
-    return pixmap.save(out);
+
+    // 将 QImage 保存到指定路径
+    return image.save(out);
 }
 
 bool genGtk(QString name,int width,int height,double scaleFactor,QString dest)
