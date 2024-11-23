@@ -14,7 +14,11 @@ int main (int argc, char *argv[])
     QGuiApplication app(argc, argv);
     app.setOrganizationName("deepin");
     app.setApplicationName("org.deepin.dde.deepinwmfaker");
-
+    const QString sessionType = qEnvironmentVariable("XDG_SESSION_TYPE");
+    if (sessionType == "wayland") {
+        qWarning() << "dde-fakewm does not support session type:" << sessionType;
+        return -1;
+    }
     DeepinWMFaker faker;
     WmAdaptor wmAdaptor(&faker);
     bool registerWmServiceSuccessed = QDBusConnection::sessionBus().registerService("com.deepin.wm");
