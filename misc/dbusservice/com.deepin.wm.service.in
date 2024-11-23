@@ -1,3 +1,5 @@
 [D-BUS Service]
 Name=com.deepin.wm
-Exec=@CMAKE_INSTALL_FULL_BINDIR@/dde-fakewm
+Exec=/bin/false
+SystemdService=dde-fakewm.service
+

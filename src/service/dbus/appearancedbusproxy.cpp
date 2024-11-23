@@ -12,12 +12,17 @@ const QString DaemonInterface = QStringLiteral("org.deepin.dde.Daemon1");
 
 AppearanceDBusProxy::AppearanceDBusProxy(QObject *parent)
     : QObject(parent)
-    , m_wmInterface(new DDBusInterface("com.deepin.wm", "/com/deepin/wm", "com.deepin.wm", QDBusConnection::sessionBus(), this))
     , m_displayInterface(new DDBusInterface("org.deepin.dde.Display1", "/org/deepin/dde/Display1", "org.deepin.dde.Display1", QDBusConnection::sessionBus(), this))
     , m_xSettingsInterface(new DDBusInterface("org.deepin.dde.XSettings1", "/org/deepin/dde/XSettings1", "org.deepin.dde.XSettings1", QDBusConnection::sessionBus(), this))
     , m_timeDateInterface(new DDBusInterface("org.freedesktop.timedate1", "/org/freedesktop/timedate1", "org.freedesktop.timedate1", QDBusConnection::systemBus(), this))
     , m_nid(0)
 {
+    const QString sessionType = qEnvironmentVariable("XDG_SESSION_TYPE");
+    if (sessionType == "wayland") {
+        m_wmInterface = nullptr;
+    } else {
+        m_wmInterface = new DDBusInterface("com.deepin.wm", "/com/deepin/wm", "com.deepin.wm", QDBusConnection::sessionBus(), this);
+    }
     registerScaleFactorsMetaType();
     QDBusConnection::systemBus().connect(DaemonService, DaemonPath, DaemonInterface, "HandleForSleep", this, SIGNAL(HandleForSleep(bool)));
     QDBusConnection::sessionBus().connect(QStringLiteral("org.deepin.dde.Timedate1"), QStringLiteral("/org/deepin/dde/Timedate1"), QStringLiteral("org.deepin.dde.Timedate1"), "TimeUpdate", this, SIGNAL(TimeUpdate()));
@@ -49,41 +54,68 @@ void AppearanceDBusProxy::NotifyNid(uint id)
 // wmInterface
 QString AppearanceDBusProxy::cursorTheme()
 {
+    if (m_wmInterface == nullptr) {
+        return "";
+    }
     return qvariant_cast<QString>(m_wmInterface->property("cursorTheme"));
 }
 
 void AppearanceDBusProxy::setcursorTheme(const QString &cursorTheme)
 {
+    if (m_wmInterface == nullptr) {
+        return;
+    }
     m_wmInterface->setProperty("cursorTheme", cursorTheme);
 }
 
 int AppearanceDBusProxy::WorkspaceCount()
 {
+    if (m_wmInterface == nullptr) {
+        return 0;
+    }
     return QDBusPendingReply<int>(m_wmInterface->asyncCall(QStringLiteral("WorkspaceCount")));
 }
 QString AppearanceDBusProxy::GetWorkspaceBackgroundForMonitor(int index, const QString &strMonitorName)
 {
+    if (m_wmInterface == nullptr) {
+        return "";
+    }
     return QDBusPendingReply<QString>(m_wmInterface->asyncCall(QStringLiteral("GetWorkspaceBackgroundForMonitor"), index, strMonitorName));
 }
 void AppearanceDBusProxy::SetCurrentWorkspaceBackgroundForMonitor(const QString &uri, const QString &strMonitorName)
 {
+    if (m_wmInterface == nullptr) {
+        return;
+    }
     m_wmInterface->asyncCall(QStringLiteral("SetCurrentWorkspaceBackgroundForMonitor"), uri, strMonitorName);
 }
 void AppearanceDBusProxy::SetDecorationDeepinTheme(const QString &deepinThemeName)
 {
+    if (m_wmInterface == nullptr) {
+        return;
+    }
     m_wmInterface->asyncCall(QStringLiteral("SetDecorationDeepinTheme"), deepinThemeName);
 }
 void AppearanceDBusProxy::ChangeCurrentWorkspaceBackground(const QString &uri)
 {
+    if (m_wmInterface == nullptr) {
+        return;
+    }
     m_wmInterface->asyncCall(QStringLiteral("ChangeCurrentWorkspaceBackground"), uri);
 }
 int AppearanceDBusProxy::GetCurrentWorkspace()
 {
+    if (m_wmInterface == nullptr) {
+        return 0;
+    }
     return QDBusPendingReply<int>(m_wmInterface->asyncCall(QStringLiteral("GetCurrentWorkspace")));
 }
 
 void AppearanceDBusProxy::SetWorkspaceBackgroundForMonitor(int index, const QString &strMonitorName, const QString &uri)
 {
+    if (m_wmInterface == nullptr) {
+        return;
+    }
     m_wmInterface->asyncCall(QStringLiteral("SetWorkspaceBackgroundForMonitor"), index, strMonitorName, uri);
 }
 // displayInterface
