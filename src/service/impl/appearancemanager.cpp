@@ -1353,6 +1353,9 @@ double AppearanceManager::getScaleFactor()
         scaleFactor = m_dbusProxy->GetScaleFactor();
     }
     qInfo() << __FUNCTION__ << "UpdateScaleFactor" << scaleFactor;
+    if (scaleFactor <= 0) {
+        scaleFactor = 1.0;
+    }
     UpdateScaleFactor(scaleFactor);
     return scaleFactor;
 }
