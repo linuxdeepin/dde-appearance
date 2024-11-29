@@ -1,3 +1,11 @@
+dde-appearance (1.1.39) unstable; urgency=medium
+
+  * fix: 代码优化调整
+  * fix: the theme thumbnail is empty
+  * fix: teeland下不启动dde-fakewm 
+
+ -- fuleyi <fuleyi@uniontech.com>  Fri, 29 Nov 2024 14:03:03 +0800
+
 dde-appearance (1.1.38) unstable; urgency=medium
 
   * release 1.1.38
