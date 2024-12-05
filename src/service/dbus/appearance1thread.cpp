@@ -39,7 +39,7 @@ Appearance1Thread::Appearance1Thread()
         property->windowRadius.init(xSetting.get(GSKEYDTKWINDOWRADIUS).toInt());
         QString activeColor = settingDconfig.value(GSKEYGLOBALTHEME).toString().endsWith("dark") ?
             xSetting.get(GSKEYQTACTIVECOLOR_DARK).toString() : xSetting.get(GSKEYQTACTIVECOLOR).toString();
-        property->qtActiveColor.init(AppearanceManager::qtActiveColorToHexColor(xSetting.get(GSKEYQTACTIVECOLOR).toString()));
+        property->qtActiveColor.init(AppearanceManager::qtActiveColorToHexColor(activeColor));
     }
     if (QGSettings::isSchemaInstalled(WRAPBGSCHEMA)) {
         QGSettings wrapBgSetting(WRAPBGSCHEMA);
