@@ -319,7 +319,6 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
             }
             bSuccess = doSetGlobalTheme(value);
             if (bSuccess) {
-                setQtActiveColor("");
                 setGlobalTheme(value);
             }
         } else if (key == GSKEYGTKTHEME) {
@@ -631,12 +630,13 @@ void AppearanceManager::onOpacityTriggerTimeout()
 
 void AppearanceManager::setQtActiveColor(const QString &value)
 {
-    if (value != m_property->qtActiveColor && m_xSetting) {
-        QStringList colors = m_settingDconfig.value(DACTIVECOLORS).toString().split(',');
-        QString result = m_settingDconfig.value(GSKEYGLOBALTHEME).toString().endsWith("dark") ?
-            colors.value(1) : colors.value(0);
+    Q_UNUSED(value)
+    QString activeColors = m_settingDconfig.value(DACTIVECOLORS).toString();
+    QStringList colors = activeColors.split(',');
+    QString result = m_currentGlobalTheme.endsWith("dark") ? colors.value(1) : colors.value(0);
+    if (result != m_property->qtActiveColor && m_xSetting) {
         m_property->qtActiveColor = result;
-        updateCustomTheme(TYPEACTIVECOLOR, result);
+        updateCustomTheme(TYPEACTIVECOLOR, activeColors);
     }
 }
 
@@ -1176,11 +1176,22 @@ bool AppearanceManager::doSetGlobalTheme(QString value)
     KeyFile theme(',');
     theme.loadFile(themePath + "/index.theme");
     QString defaultTheme = theme.getStr("Deepin Theme", "DefaultTheme");
-    if (defaultTheme.isEmpty())
+    QString lightActiveColor;
+    if (defaultTheme.isEmpty()) {
         return false;
+    } else {
+        lightActiveColor = theme.getStr(defaultTheme, "ActiveColor");
+    }
+
     QString darkTheme = theme.getStr("Deepin Theme", "DarkTheme");
-    if (darkTheme.isEmpty())
+    QString darkActiveColor;
+    if (darkTheme.isEmpty()) {
         mode = Light;
+    } else {
+        darkActiveColor = theme.getStr(darkTheme, "ActiveColor", lightActiveColor);
+    }
+
+    setActiveColors(lightActiveColor + "," + darkActiveColor);
 
     m_currentGlobalTheme = value;
     switch (mode) {
@@ -1704,7 +1715,9 @@ void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeNam
 
     // 如果是用户自定义主题, 切换外观时只单独更新外观选项
     if (themePath.endsWith("custom")) {
-        return setGlobalItem("AppTheme", TYPEGTK);
+        setGlobalItem("AppTheme", TYPEGTK);
+        m_globalThemeUpdating = false;
+        return;
     }
 
     setGlobalFile("Wallpaper", TYPEWALLPAPER);

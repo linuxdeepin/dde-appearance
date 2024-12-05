@@ -72,6 +72,14 @@ void CustomTheme::updateValue(const QString &type, const QString &value, const Q
         Q_EMIT updateToCustom(modeStr);
     }
 
+    if (type == TYPEACTIVECOLOR) {
+        QStringList colors = value.split(',');
+        m_customTheme->setKey("DefaultTheme", typekeyMap.value(type), colors.value(0));
+        m_customTheme->setKey("DarkTheme", typekeyMap.value(type), colors.value(1));
+        saveCustomTheme();
+        return;
+    }
+
     if (mode & Light)
         m_customTheme->setKey("DefaultTheme", typekeyMap.value(type), value);
     if (mode & Dark)
