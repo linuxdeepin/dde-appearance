@@ -68,6 +68,9 @@ void Backgrounds::refreshBackground()
 {
     QStringList files = getCustomBgFiles();
     for (auto file : files) {
+        if (!QFile::exists(file)) {
+            continue;
+        }
         Background bg;
         bg.setId(utils::enCodeURI(file, SCHEME_FILE));
         bg.setDeletable(true);
@@ -76,6 +79,9 @@ void Backgrounds::refreshBackground()
 
     files = getSysBgFIles();
     for (auto file : files) {
+        if (!QFile::exists(file)) {
+            continue;
+        }
         Background bg;
         bg.setId(utils::enCodeURI(file, SCHEME_FILE));
         bg.setDeletable(false);
