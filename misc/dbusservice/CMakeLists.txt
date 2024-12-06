@@ -1,12 +1,12 @@
 configure_file(
   com.deepin.wm.service.in
   com.deepin.wm.service
-  ONLY
+  @ONLY
 )
 configure_file(
   org.deepin.dde.Appearance1.service.in
   org.deepin.dde.Appearance1.service
-  ONLY
+  @ONLY
 )
 
 set(DBUS_SERVICE_FILES

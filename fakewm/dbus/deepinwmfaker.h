@@ -185,7 +185,7 @@ private:
     void setWorkspaceBackgroundForMonitor(const int index, const QString &strMonitorName, const QString &uri) const;         // index 为工作区索引，strMonitorName为显示器的名称，uri为图片资源
     bool isX11Platform();
 #ifndef DISABLE_DEEPIN_WM
-    void onGsettingsDDEAppearanceChanged(const QString &key);
+    void onDConfigDDEAppearanceChanged(const QString &key);
     void onGsettingsDDEZoneChanged(const QString &key);
 #endif
 
@@ -193,6 +193,7 @@ private:
     void syncConfigForKWin();
     void updateCursorConfig();
     bool maybeShowWarningDialog();
+    void callHighlightWindows(const QStringList &windowIds);
 
     KWindowSystem *m_windowSystem;
     KConfig *m_deepinWMConfig;

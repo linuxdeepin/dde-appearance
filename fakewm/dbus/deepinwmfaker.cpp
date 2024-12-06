@@ -5,6 +5,7 @@
 #include "deepinwmfaker.h"
 
 #include <QDBusConnection>
+#include <QDBusConnectionInterface>
 #include <QDBusMessage>
 #include <QDebug>
 #include <QJsonArray>
@@ -18,18 +19,23 @@
 #include <QMetaEnum>
 #include <mutex>
 
-#include <KF5/KConfigCore/KConfig>
-#include <KF5/KConfigCore/KConfigGroup>
-#include <KF5/KConfigCore/KSharedConfig>
-#include <KF5/KWindowSystem/KWindowSystem>
-#include <KF5/KWindowSystem/KWindowEffects>
-#include <KF5/KGlobalAccel/KGlobalAccel>
+#include <KF6/KConfigCore/KConfig>
+#include <KF6/KConfigCore/KConfigGroup>
+#include <KF6/KConfigCore/KSharedConfig>
+#include <KF6/KGlobalAccel/KGlobalAccel>
+#include <KF6/KWindowSystem/KWindowSystem>
+#include <KWindowInfo>
+#include <KX11Extras>
+
+#include <DConfig>
 
 #ifndef DISABLE_DEEPIN_WM
-#include <QGSettings>
-Q_GLOBAL_STATIC_WITH_ARGS(QGSettings, _gsettings_dde_appearance, ("com.deepin.dde.appearance"))
-Q_GLOBAL_STATIC_WITH_ARGS(QGSettings, _gsettings_dde_zone, ("com.deepin.dde.zone"))
-#define GsettingsBackgroundUri "backgroundUris"
+static Dtk::Core::DConfig *appearanceConfig = nullptr;
+// TODO: from deepin-desktop-schemas: /usr/share/glib-2.0/schemas/com.deepin.dde.zone.gschema.xml
+// Q_GLOBAL_STATIC_WITH_ARGS(QGSettings, _gsettings_dde_zone, ("com.deepin.dde.zone"))
+#define AppearanceAppID "org.deepin.dde.appearance"
+#define AppearanceName "org.deepin.dde.appearance"
+#define DConfigBackgroundUri "backgroundUris"
 #define GsettingsZoneRightUp "rightUp"
 #define GsettingsZoneRightDown "rightDown"
 #define GsettingsZoneLeftDown "leftDown"
@@ -320,18 +326,19 @@ DeepinWMFaker::DeepinWMFaker(QObject* appearance)
     , m_globalAccel(KGlobalAccel::self())
     , m_previewWinMiniPair(QPair<uint, bool>(-1, false))
 {
+    appearanceConfig = Dtk::Core::DConfig::create(AppearanceAppID, AppearanceName, QString(), this);
     m_workspaceount =  QDBusInterface(KWinDBusService, "/VirtualDesktopManager", "org.kde.KWin.VirtualDesktopManager").property("count").value<int>();
     m_isPlatformX11 = isX11Platform();
 #ifndef DISABLE_DEEPIN_WM
     m_currentDesktop = m_kwinConfig->group("Workspace").readEntry<int>("CurrentDesktop", 1);
 
-    connect(m_windowSystem, &KWindowSystem::currentDesktopChanged, this, [this] (int to) {
+    connect(KX11Extras::self(), &KX11Extras::currentDesktopChanged, this, [this] (int to) {
         Q_EMIT WorkspaceSwitched(m_currentDesktop, to);
         m_currentDesktop = to;
     });
-    connect(m_windowSystem, &KWindowSystem::numberOfDesktopsChanged, this, &DeepinWMFaker::workspaceCountChanged);
-    connect(_gsettings_dde_appearance, &QGSettings::changed, this, &DeepinWMFaker::onGsettingsDDEAppearanceChanged);
-    connect(_gsettings_dde_zone, &QGSettings::changed, this, &DeepinWMFaker::onGsettingsDDEZoneChanged);
+    connect(KX11Extras::self(), &KX11Extras::numberOfDesktopsChanged, this, &DeepinWMFaker::workspaceCountChanged);
+    connect(appearanceConfig, &Dtk::Core::DConfig::valueChanged, this, &DeepinWMFaker::onDConfigDDEAppearanceChanged);
+    // connect(_gsettings_dde_zone, &QGSettings::changed, this, &DeepinWMFaker::onGsettingsDDEZoneChanged);
 
     // 启动后先将所有热区设置同步一遍
     const QStringList zoneKeyList = {GsettingsZoneRightUp, GsettingsZoneRightDown,
@@ -474,12 +481,12 @@ int DeepinWMFaker::cursorSize() const
 #ifndef DISABLE_DEEPIN_WM
 static QString getWorkspaceBackgroundOfDeepinWM(const int index)
 {
-    return _gsettings_dde_appearance->get(GsettingsBackgroundUri).toStringList().value(index - 1);
+    return appearanceConfig->value(DConfigBackgroundUri).toStringList().value(index - 1);
 }
 
 static void setWorkspaceBackgroundForDeepinWM(const int index, const QString &uri)
 {
-    QStringList all_wallpaper = _gsettings_dde_appearance->get(GsettingsBackgroundUri).toStringList();
+    QStringList all_wallpaper = appearanceConfig->value(DConfigBackgroundUri).toStringList();
 
     // 当设置的工作区编号大于列表长度时，先填充数据
     if (index > all_wallpaper.size()) {
@@ -492,7 +499,7 @@ static void setWorkspaceBackgroundForDeepinWM(const int index, const QString &ur
 
     all_wallpaper[index - 1] = uri;
     // 将壁纸设置同步到 deepin-wm
-    _gsettings_dde_appearance->set(GsettingsBackgroundUri, all_wallpaper);
+    appearanceConfig->setValue(DConfigBackgroundUri, all_wallpaper);
 }
 #endif // DISABLE_DEEPIN_WM
 
@@ -592,7 +599,7 @@ void DeepinWMFaker::SetTransientBackground(const QString &uri)
 
 void DeepinWMFaker::SetTransientBackgroundForMonitor(const QString &uri, const QString &strMonitorName)
 {
-     int current = m_windowSystem->currentDesktop();
+     int current = KX11Extras::currentDesktop();
 
      m_transientBackgroundUri = uri;
      Q_EMIT WorkspaceBackgroundChangedForMonitor( current,strMonitorName,uri );
@@ -891,11 +898,13 @@ void DeepinWMFaker::PreviewWindow(uint xid)
     }
 
     // 使用kwin自带的预览特效
-    if (KWindowEffects::isEffectAvailable(KWindowEffects::HighlightWindows)) {
+    // Check whether org.kde.KWin.HighlightWindow d-bus service is registered
+    if (QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.KWin.HighlightWindow")) {
         // ###(zccrs): 按道理讲 previewingController 应该为dock的预览展示窗口（发起预览请求的窗口）
         // 不过，dde-dock中不支持此种用法，而且对kwin接口的调用仅仅是fallback，因此直接将xid作为预览请求的controller窗口
         previewingController = xid;
-        KWindowEffects::highlightWindows(previewingController, {xid});
+        //KWindowEffects::highlightWindows(previewingController, {xid});
+        callHighlightWindows({QString::number(xid)});
         return;
     }
 
@@ -906,7 +915,7 @@ void DeepinWMFaker::PreviewWindow(uint xid)
     // qDebug() << "order" << m_windowSystem->stackingOrder();
     // qDebug() << "contains" << m_windowSystem->hasWId(xid);
 
-    m_windowSystem->forceActiveWindow(xid);
+    KX11Extras::forceActiveWindow(xid);
     m_previewWinMiniPair.first = xid;
     m_previewWinMiniPair.second = false;
 
@@ -930,20 +939,37 @@ void DeepinWMFaker::CancelPreviewWindow()
 
     // 退出kwin自带的预览特效
     if (previewingController) {
-        KWindowEffects::highlightWindows(previewingController, {});
+        //KWindowEffects::highlightWindows(previewingController, {});
+        callHighlightWindows({});
         previewingController = 0;
         return;
     }
 
     // FIXME: same as above
-    if (m_windowSystem->windows().contains(m_previewWinMiniPair.first)) {
+    if (KX11Extras::windows().contains(m_previewWinMiniPair.first)) {
         if (m_previewWinMiniPair.second) {
 //            m_windowSystem->minimizeWindow(m_previewWinMiniPair.first);
             // using this way to minimize a window without animation
-            m_windowSystem->setState(m_previewWinMiniPair.first, NET::Hidden);
+            KX11Extras::setState(m_previewWinMiniPair.first, NET::Hidden);
             return;
         }
-        m_windowSystem->lowerWindow(m_previewWinMiniPair.first);
+#if 0
+        auto lowerWindow = [](WId windowId) {
+            Display* display = XOpenDisplay(nullptr);
+            if (!display) {
+                qWarning() << "XOpenDisplay failed";
+                return;
+            }
+            XLowerWindow(display, windowId);
+            XFlush(display);
+
+            XCloseDisplay(display);
+        };
+#endif
+        // TODO, in kf6, lowerWindow is deprecated and be removed,and the source code lowerWindow implementation is empty
+        // https://github.com/KDE/kwindowsystem/blob/kf5/src/kwindowsystem.cpp
+        //m_windowSystem->lowerWindow(m_previewWinMiniPair.first);
+        //lowerWindow(m_previewWinMiniPair.first);
     }
 }
 
@@ -992,7 +1018,7 @@ void DeepinWMFaker::ToggleActiveWindowMaximize()
 
 void DeepinWMFaker::MinimizeActiveWindow()
 {
-    m_windowSystem->minimizeWindow(m_windowSystem->activeWindow());
+    KX11Extras::minimizeWindow(KX11Extras::activeWindow());
 }
 
 void DeepinWMFaker::SetDecorationTheme(const QString &type, const QString &name)
@@ -1128,23 +1154,16 @@ void DeepinWMFaker::PresentWindows(const QList<uint> &xids)
 {
     if (xids.isEmpty())
         return;
-    if (m_isPlatformX11) {
-        QList<WId> windows;
 
-        for (uint w : xids)
-            windows << w;
+    QStringList winIds;
+    for (uint w : xids)
+        winIds << QString::number(w);
 
-        KWindowEffects::presentWindows(windows.first(), windows);
-    } else {
-        QDBusInterface Interface("org.kde.KWin",
-                                 "/org/kde/KWin/PresentWindows",
-                                "org.kde.KWin.PresentWindows",
-                                QDBusConnection::sessionBus());
-        QStringList strList;
-        for (uint w : xids)
-            strList << QString::number(w);
-        Interface.call("PresentWindows",strList);
-    }
+    QDBusInterface Interface("org.kde.KWin",
+                             "/org/kde/KWin/PresentWindows",
+                             "org.kde.KWin.PresentWindows",
+                             QDBusConnection::sessionBus());
+    Interface.call("PresentWindows", winIds);
 }
 
 // TODO(zccrs): 开启/禁用热区
@@ -1280,7 +1299,7 @@ void DeepinWMFaker::setWorkspaceBackgroundForMonitor(const int index, const QStr
     m_deepinWMConfig->sync();
 
 #ifndef DISABLE_DEEPIN_WM
-    QStringList allWallpaper = _gsettings_dde_appearance->get(GsettingsBackgroundUri).toStringList();
+    QStringList allWallpaper = appearanceConfig->value(DConfigBackgroundUri).toStringList();
 
     if (index > allWallpaper.size()) {
         allWallpaper.reserve(index);
@@ -1291,7 +1310,7 @@ void DeepinWMFaker::setWorkspaceBackgroundForMonitor(const int index, const QStr
     }
 
     allWallpaper[index - 1] = uri;
-    _gsettings_dde_appearance->set(GsettingsBackgroundUri, allWallpaper);
+    appearanceConfig->setValue(DConfigBackgroundUri, allWallpaper);
 #endif // DISABLE_DEEPIN_WM
 }
 
@@ -1320,7 +1339,7 @@ void DeepinWMFaker::quitTransientBackground()
 #ifndef DISABLE_DEEPIN_WM
     if (!m_deepinWMBackgroundUri.isEmpty()) {
         // 在退出预览时不同步deepin-wm的设置
-        QSignalBlocker blocker(_gsettings_dde_appearance);
+        QSignalBlocker blocker(appearanceConfig);
         Q_UNUSED(blocker)
         setWorkspaceBackgroundForDeepinWM(GetCurrentWorkspaceInner(), m_deepinWMBackgroundUri);
         m_deepinWMBackgroundUri.clear();
@@ -1329,10 +1348,10 @@ void DeepinWMFaker::quitTransientBackground()
 }
 
 #ifndef DISABLE_DEEPIN_WM
-void DeepinWMFaker::onGsettingsDDEAppearanceChanged(const QString &key)
+void DeepinWMFaker::onDConfigDDEAppearanceChanged(const QString &key)
 {
-    if (QLatin1String(GsettingsBackgroundUri) == key) {
-        const QStringList &uris = _gsettings_dde_appearance->get(GsettingsBackgroundUri).toStringList();
+    if (QLatin1String(DConfigBackgroundUri) == key) {
+        const QStringList &uris = appearanceConfig->value(DConfigBackgroundUri).toStringList();
 
         for (int i = 0; i < uris.count(); ++i) {
             const QString &uri = uris.at(i);
@@ -1369,6 +1388,8 @@ static void setBorderActivate(KConfigGroup *group, int value, bool remove)
 
 void DeepinWMFaker::onGsettingsDDEZoneChanged(const QString &key)
 {
+    Q_UNUSED(key)
+#if 0
     ElectricBorder pos = ElectricNone;
 
     if (key == GsettingsZoneRightUp) {
@@ -1402,6 +1423,7 @@ void DeepinWMFaker::onGsettingsDDEZoneChanged(const QString &key)
     }
 
     syncConfigForKWin();
+#endif
 }
 
 void DeepinWMFaker::syncConfigForKWin()
@@ -1450,4 +1472,19 @@ bool DeepinWMFaker::GetIsShowDesktop()
 void DeepinWMFaker::SetShowDesktop(bool isShowDesktop)
 {
     m_isShowDesktop = isShowDesktop;
+}
+
+void DeepinWMFaker::callHighlightWindows(const QStringList &windowIds)
+{
+    QDBusInterface interface("org.kde.KWin.HighlightWindow", "/org/kde/KWin/HighlightWindow", "org.kde.KWin.HighlightWindow", QDBusConnection::sessionBus());
+    if (interface.isValid()) {
+        QDBusReply<void> reply = interface.call("highlightWindows", QVariant::fromValue(windowIds));
+        if (reply.isValid()) {
+            qDebug() << "Successfully called highlightWindows with" << windowIds;
+        } else {
+            qDebug() << "Failed to call highlightWindows:" << reply.error().message();
+        }
+    } else {
+        qDebug() << "Failed to call highlightWindows:" << interface.lastError().message();
+    }
 }
