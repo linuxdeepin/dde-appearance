@@ -139,6 +139,7 @@ public Q_SLOTS:
     void handleGlobalThemeChangeTimeOut();
     void updateMonitorMap();
     void handlePrepareForSleep(bool sleep);
+    void onOpacityTriggerTimeout();
 
 private:
     void initCoordinate();
@@ -215,6 +216,8 @@ private:
     bool                                             m_globalThemeUpdating;
     QString                                          m_currentGlobalTheme; // 当前主题，globalTheme+.light/.dark
     QJsonArray                                       m_wallpaperConfig; // store the config
+    QTimer                                           *m_opacityTriggerTimer; // 定时器限制opacity的变化速率，防止卡顿
+    double                                           m_tmpOpacity;
 };
 
 #endif // APPEARANCEMANAGER_H
