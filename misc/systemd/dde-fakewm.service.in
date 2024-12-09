@@ -2,7 +2,6 @@
 Description=dde window manager
 
 Requisite=plasma-kglobalaccel.service
-After=dde-session-pre.target
 
 [Service]
 Type=simple
