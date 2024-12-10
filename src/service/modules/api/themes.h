@@ -12,10 +12,12 @@
 #include <QMutex>
 #include <QSharedPointer>
 #include <QGSettings>
+#include <DConfig>
 
 class AppearanceManager;
 class AppearanceDBusProxy;
 
+using Dtk::Core::DConfig;
 class ThemesApi : public QObject
 {
     Q_OBJECT
@@ -69,7 +71,7 @@ private:
     QMutex                                          gtk3Mutex;
     QMap<QString, QString>                          gtk2ConfInfos;
     QSharedPointer<AppearanceDBusProxy>             dbusProxy;
-    QSharedPointer<QGSettings>                      xSetting;
+    QSharedPointer<DConfig>                         xSetting;
     QSharedPointer<QGSettings>                      metacitySetting;
     QSharedPointer<QGSettings>                      wmSetting;
     QSharedPointer<QGSettings>                      interfaceSetting;
