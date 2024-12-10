@@ -6,6 +6,7 @@
 #include "appearanceproperty.h"
 #include "impl/appearancemanager.h"
 #include "modules/common/commondefine.h"
+#include "modules/dconfig/dconfigsettings.h"
 
 #include <QMutexLocker>
 
@@ -34,13 +35,12 @@ Appearance1Thread::Appearance1Thread()
     property->opacity.init(settingDconfig.value(GSKEYOPACITY).toDouble());
     property->wallpaperSlideShow.init(settingDconfig.value(GSKEYWALLPAPERSLIDESHOW).toString());
     property->wallpaperURls.init(settingDconfig.value(GSKEYWALLPAPERURIS).toString());
-    if (QGSettings::isSchemaInstalled(XSETTINGSSCHEMA)) {
-        QGSettings xSetting(XSETTINGSSCHEMA);
-        property->windowRadius.init(xSetting.get(GSKEYDTKWINDOWRADIUS).toInt());
-        QString activeColor = settingDconfig.value(GSKEYGLOBALTHEME).toString().endsWith("dark") ?
-            xSetting.get(GSKEYQTACTIVECOLOR_DARK).toString() : xSetting.get(GSKEYQTACTIVECOLOR).toString();
-        property->qtActiveColor.init(AppearanceManager::qtActiveColorToHexColor(activeColor));
-    }
+    QString qtActivecolor =  DconfigSettings::ConfigValue(STARTCDDEAPPID,XSETTINGSNAME,GSKEYQTACTIVECOLOR,"").toString();
+    QString qtDarkActivecolor =  DconfigSettings::ConfigValue(STARTCDDEAPPID,XSETTINGSNAME,GSKEYQTACTIVECOLOR_DARK,"").toString();
+    int radius = DconfigSettings::ConfigValue(STARTCDDEAPPID,XSETTINGSNAME,DCKEYDTKWINDOWRADIUS,"").toInt();
+    property->windowRadius.init(radius);
+    QString activeColor = settingDconfig.value(GSKEYGLOBALTHEME).toString().endsWith("dark") ? qtDarkActivecolor : qtActivecolor;
+    property->qtActiveColor.init(AppearanceManager::qtActiveColorToHexColor(activeColor));
     if (QGSettings::isSchemaInstalled(WRAPBGSCHEMA)) {
         QGSettings wrapBgSetting(WRAPBGSCHEMA);
         property->background.init(wrapBgSetting.get(GSKEYBACKGROUND).toString());
