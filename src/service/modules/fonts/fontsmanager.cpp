@@ -24,10 +24,6 @@ FontsManager::FontsManager()
     ,familyBlacklist{"Symbol","webdings","MT Extra",
                      "Wingdings","Wingdings 2","Wingdings 3"}
 {
-    if(QGSettings::isSchemaInstalled(XSETTINGSSCHEMA))
-    {
-        xSetting = QSharedPointer<QGSettings>(new QGSettings(XSETTINGSSCHEMA));
-    }
     initFamily();
 }
 
@@ -132,9 +128,9 @@ bool FontsManager::setFamily(QString standard, QString monospace, double size)
         qWarning() << "xSetting is not exist";
         return false;
     }
-    if(xSetting->get(GSKEYFONTNAME).toString() != value)
+    if(xSetting->value(DCKEYFONTNAME).toString() != value)
     {
-        xSetting->set(GSKEYFONTNAME,value);
+        xSetting->setValue(DCKEYFONTNAME,value);
     }
 
     return true;
@@ -199,7 +195,7 @@ double FontsManager::getFontSize()
     {
         return 0;
     }
-    QString value = xSetting->get(GSKEYFONTNAME).toString();
+    QString value = xSetting->value(DCKEYFONTNAME).toString();
 
     QStringList tempList = value.split(" ");
     if(tempList.isEmpty())

@@ -186,7 +186,7 @@ private: // PROPERTIES
 
 private:
     DConfig                                          m_settingDconfig;
-    QSharedPointer<QGSettings>                       m_xSetting;
+    QSharedPointer<DConfig>                          m_XSettingsDconfig;
     QSharedPointer<QGSettings>                       m_wrapBgSetting;
     QSharedPointer<QGSettings>                       m_gnomeBgSetting;
     QSharedPointer<AppearanceDBusProxy>              m_dbusProxy;
