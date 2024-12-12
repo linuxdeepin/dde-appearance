@@ -13,7 +13,7 @@
             "visibility": "private"
         },
         "Font_Standard": {
-            "value": "Noto Sans",
+            "value": "Source Han Sans SC",
             "serial": 0,
             "flags": [],
             "name": "Font_Standard",
@@ -73,7 +73,7 @@
             "visibility": "private"
         },
         "Icon_Theme": {
-            "value": "bloom",
+            "value": "nirvana",
             "serial": 0,
             "flags": [],
             "name": "Icon_Theme",
@@ -83,7 +83,7 @@
             "visibility": "private"
         },
         "Global_Theme": {
-            "value": "bloom",
+            "value": "nirvana",
             "serial": 0,
             "flags": [],
             "name": "Global_Theme",
