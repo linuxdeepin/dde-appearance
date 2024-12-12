@@ -219,6 +219,7 @@ private:
     QJsonArray                                       m_wallpaperConfig; // store the config
     QTimer                                           *m_opacityTriggerTimer; // 定时器限制opacity的变化速率，防止卡顿
     double                                           m_tmpOpacity;
+    bool                                             m_setDefaulting;
 };
 
 #endif // APPEARANCEMANAGER_H
