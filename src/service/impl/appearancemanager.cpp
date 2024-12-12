@@ -58,6 +58,7 @@ AppearanceManager::AppearanceManager(AppearanceProperty *prop, QObject *parent)
     , m_globalThemeUpdating(false)
     , m_wallpaperConfig({})
     , m_opacityTriggerTimer(new QTimer(this))
+    , m_setDefaulting(false)
 {
     if (QGSettings::isSchemaInstalled(XSETTINGSSCHEMA)) {
         m_xSetting = QSharedPointer<QGSettings>(new QGSettings(XSETTINGSSCHEMA));
@@ -119,9 +120,6 @@ bool AppearanceManager::init()
     connect(m_dbusProxy.get(), &AppearanceDBusProxy::TimeUpdate, this, &AppearanceManager::handleTimeUpdate);
     connect(m_dbusProxy.get(), &AppearanceDBusProxy::HandleForSleep, this, &AppearanceManager::handlePrepareForSleep);
 
-    initDtkSizeMode();
-    initGlobalTheme();
-
     QVector<QSharedPointer<Theme>> iconList = m_subthemes->listIconThemes();
     bool bFound = false;
 
@@ -148,6 +146,9 @@ bool AppearanceManager::init()
         setCursorTheme(DEFAULTCURSORTHEME);
         doSetCursorTheme(DEFAULTCURSORTHEME);
     }
+
+    initDtkSizeMode();
+    initGlobalTheme();
 
     connect(m_fsnotify.data(), SIGNAL(themeFileChange(QString)), this, SLOT(handlethemeFileChange(QString)), Qt::QueuedConnection);
 
@@ -1513,7 +1514,7 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
 {
     bool updateValut = false;
     if (type == TYPEGTK) {
-        if (value == m_property->gtkTheme) {
+        if (!m_setDefaulting && value == m_property->gtkTheme) {
             return;
         }
 
@@ -1522,7 +1523,7 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
             updateValut = true;
         }
     } else if (type == TYPEICON) {
-        if (value == m_property->iconTheme) {
+        if (!m_setDefaulting && value == m_property->iconTheme) {
             return;
         }
 
@@ -1531,7 +1532,7 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
             updateValut = true;
         }
     } else if (type == TYPECURSOR) {
-        if (value == m_property->cursorTheme) {
+        if (!m_setDefaulting && value == m_property->cursorTheme) {
             return;
         }
 
@@ -1540,7 +1541,7 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
             updateValut = true;
         }
     } else if (type == TYPEGLOBALTHEME) {
-        if (value == m_property->globalTheme) {
+        if (!m_setDefaulting && value == m_property->globalTheme) {
             return;
         }
         if (doSetGlobalTheme(value)) {
@@ -1555,7 +1556,7 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
     } else if (type == TYPEGREETERBACKGROUND) {
         updateValut = doSetGreeterBackground(value);
     } else if (type == TYPESTANDARDFONT) {
-        if (m_property->standardFont == value) {
+        if (!m_setDefaulting &&m_property->standardFont == value) {
             return;
         }
         if (doSetStandardFont(value)) {
@@ -1563,7 +1564,7 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
             updateValut = true;
         }
     } else if (type == TYPEMONOSPACEFONT) {
-        if (m_property->monospaceFont == value) {
+        if (!m_setDefaulting && m_property->monospaceFont == value) {
             return;
         }
         if (doSetMonospaceFont(value)) {
@@ -1572,7 +1573,7 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
         }
     } else if (type == TYPEFONTSIZE) {
         double size = value.toDouble();
-        if (m_property->fontSize > size - 0.01 && m_property->fontSize < size + 0.01) {
+        if (!m_setDefaulting && m_property->fontSize > size - 0.01 && m_property->fontSize < size + 0.01) {
             return;
         }
         setFontSize(size);
@@ -1848,6 +1849,7 @@ void AppearanceManager::initGlobalTheme()
             break;
         }
     }
+    m_setDefaulting = true;
     if (!bFound) {
         for (auto theme : globalList) {
             if (theme->getId() == DEFAULTGLOBALTHEME) {
@@ -1869,6 +1871,7 @@ void AppearanceManager::initGlobalTheme()
         if (m_currentGlobalTheme.isEmpty())
             doSetGlobalTheme(m_property->globalTheme);
     }
+    m_setDefaulting = false;
 }
 
 void AppearanceManager::doSetCurrentWorkspaceBackground(const QString &uri)
