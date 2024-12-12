@@ -11,7 +11,6 @@
 #include <QObject>
 #include <QMutex>
 #include <QSharedPointer>
-#include <QGSettings>
 #include <DConfig>
 
 class AppearanceManager;
@@ -34,7 +33,6 @@ public:
     QVector<QString> doListTheme(QVector<QString> local, QVector<QString> sys, QString type);
     QVector<QString> scanThemeDirs(QVector<QString> dirs, QString type);
     QVector<QString> mergeThemeList(QVector<QString> src, QVector<QString> target);
-    bool setWMTheme(QString name);
     bool setGlobalTheme(QString name);
     bool setGtkTheme(QString name);
     QString getGtkTheme();
@@ -60,7 +58,6 @@ public:
     bool setDefaultCursor(QString name);
     void setGtkCursor(QString name);
     void setQtCursor(QString name);
-    void setWMCursor(QString name);
 
 private:
     QString getGtk2ConfFile();
@@ -72,9 +69,6 @@ private:
     QMap<QString, QString>                          gtk2ConfInfos;
     QSharedPointer<AppearanceDBusProxy>             dbusProxy;
     QSharedPointer<DConfig>                         xSetting;
-    QSharedPointer<QGSettings>                      metacitySetting;
-    QSharedPointer<QGSettings>                      wmSetting;
-    QSharedPointer<QGSettings>                      interfaceSetting;
 };
 
 #endif // THEMESApi_H

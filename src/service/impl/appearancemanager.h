@@ -18,7 +18,6 @@
 #include <QMap>
 #include <QTimerEvent>
 #include <QTimer>
-#include <QGSettings>
 #include <QJsonArray>
 
 #include <dbus/appearanceproperty.h>
@@ -133,8 +132,6 @@ public Q_SLOTS:
     void handlethemeFileChange(QString theme);
     void handleXsettingDConfigChange(QString key);
     void handleSettingDConfigChange(QString key);
-    void handleWrapBgDConfigChange(QString key);
-    void handleGnomeBgDConfigChange(QString key);
     void handleDetectSysClockTimeOut();
     void handleUpdateToCustom(const QString &mode);
     void handleGlobalThemeChangeTimeOut();
@@ -187,8 +184,6 @@ private: // PROPERTIES
 private:
     DConfig                                          m_settingDconfig;
     QSharedPointer<DConfig>                          m_XSettingsDconfig;
-    QSharedPointer<QGSettings>                       m_wrapBgSetting;
-    QSharedPointer<QGSettings>                       m_gnomeBgSetting;
     QSharedPointer<AppearanceDBusProxy>              m_dbusProxy;
     QSharedPointer<Subthemes>                        m_subthemes;
     QSharedPointer<Backgrounds>                      m_backgrounds;

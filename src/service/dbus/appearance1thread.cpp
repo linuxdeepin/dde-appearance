@@ -41,10 +41,7 @@ Appearance1Thread::Appearance1Thread()
     property->windowRadius.init(radius);
     QString activeColor = settingDconfig.value(GSKEYGLOBALTHEME).toString().endsWith("dark") ? qtDarkActivecolor : qtActivecolor;
     property->qtActiveColor.init(AppearanceManager::qtActiveColorToHexColor(activeColor));
-    if (QGSettings::isSchemaInstalled(WRAPBGSCHEMA)) {
-        QGSettings wrapBgSetting(WRAPBGSCHEMA);
-        property->background.init(wrapBgSetting.get(GSKEYBACKGROUND).toString());
-    }
+    property->background.init("file:////usr/share/backgrounds/default_background.jpg");
     init();
     // 线程
     moveToThread(thread);

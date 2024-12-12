@@ -26,18 +26,6 @@ ThemesApi::ThemesApi(AppearanceManager *parent)
     , dbusProxy(parent->getDBusProxy())
 {
     xSetting = QSharedPointer<DConfig>(DconfigSettings::ConfigPtr(STARTCDDEAPPID,XSETTINGSNAME));
-
-    if (QGSettings::isSchemaInstalled(METACITYSCHEMA)) {
-        metacitySetting = QSharedPointer<QGSettings>(new QGSettings(METACITYSCHEMA));
-    }
-
-    if (QGSettings::isSchemaInstalled(WMSCHEMA)) {
-        wmSetting = QSharedPointer<QGSettings>(new QGSettings(WMSCHEMA));
-    }
-
-    if (QGSettings::isSchemaInstalled(INTERFACESCHEMA)) {
-        interfaceSetting = QSharedPointer<QGSettings>(new QGSettings(INTERFACESCHEMA));
-    }
 }
 
 ThemesApi::~ThemesApi()
@@ -183,21 +171,6 @@ QVector<QString> ThemesApi::mergeThemeList(QVector<QString> src, QVector<QString
     return src;
 }
 
-bool ThemesApi::setWMTheme(QString name)
-{
-    if (metacitySetting) {
-        metacitySetting->set("theme", name);
-    }
-
-    if (!wmSetting) {
-        return false;
-    }
-
-    wmSetting->set("theme", name);
-
-    return true;
-}
-
 bool ThemesApi::setGlobalTheme(QString name)
 {
     if (!scanner->isGlobalTheme(getThemePath(name, TYPEGLOBALTHEME, "deepin-theme"))) {
@@ -237,16 +210,8 @@ bool ThemesApi::setGtkTheme(QString name)
     }
 
     xSetting->setValue(DCKEYTHEME, name);
-
-    if (!setWMTheme(name)) {
-        xSetting->setValue(DCKEYTHEME, old);
-        qWarning() << "setWMTheme failed";
-        return false;
-    }
-
     if (!setQTTheme()) {
         xSetting->setValue(DCKEYTHEME, old);
-        setWMTheme(old);
         qWarning() << "setQTTheme failed";
         return false;
     }
@@ -301,7 +266,6 @@ bool ThemesApi::setCursorTheme(QString name)
 
     setQtCursor(name);
     setGtkCursor(name);
-    setWMCursor(name);
 
     return true;
 }
@@ -729,14 +693,6 @@ void ThemesApi::setQtCursor(QString name)
 #endif
 }
 
-void ThemesApi::setWMCursor(QString name)
-{
-    if (interfaceSetting) {
-        interfaceSetting->set("cursorTheme", name);
-    }
-
-    dbusProxy->setcursorTheme(name);
-}
 
 QString ThemesApi::getGtk2ConfFile()
 {
