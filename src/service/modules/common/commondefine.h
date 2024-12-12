@@ -19,11 +19,6 @@ extern QDBusConnection *pluginDbus;
 #define APPEARANCESCHEMA    "org.deepin.dde.appearance"
 #define STARTCDDEAPPID      "org.deepin.startdde"
 #define XSETTINGSNAME       "org.deepin.XSettings"
-#define WRAPBGSCHEMA        "com.deepin.wrap.gnome.desktop.background"
-#define GNOMEBGSCHEMA       "org.gnome.desktop.background"
-#define WMSCHEMA            "com.deepin.wrap.gnome.desktop.wm.preferences"
-#define METACITYSCHEMA      "com.deepin.wrap.gnome.metacity"
-#define INTERFACESCHEMA     "com.deepin.wrap.gnome.desktop.interface"
 
 #define ZONEPATH                 "/usr/share/zoneinfo/zone1970.tab"
 #define GSKEYBACKGROUND          "pictureUri"

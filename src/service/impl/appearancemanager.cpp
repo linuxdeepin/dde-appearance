@@ -60,17 +60,10 @@ AppearanceManager::AppearanceManager(AppearanceProperty *prop, QObject *parent)
     , m_wallpaperConfig({})
     , m_opacityTriggerTimer(new QTimer(this))
 {
-    if (QGSettings::isSchemaInstalled(WRAPBGSCHEMA)) {
-        m_wrapBgSetting = QSharedPointer<QGSettings>(new QGSettings(WRAPBGSCHEMA));
-    }
-
-    if (QGSettings::isSchemaInstalled(GNOMEBGSCHEMA)) {
-        m_gnomeBgSetting = QSharedPointer<QGSettings>(new QGSettings(GNOMEBGSCHEMA));
-    }
-
     m_XSettingsDconfig = QSharedPointer<DConfig>(DconfigSettings::ConfigPtr(STARTCDDEAPPID,XSETTINGSNAME));
     if (!m_XSettingsDconfig) {
         qWarning() << "XSettingsDconfig is NULL";
+        exit(-1);
     }
 
     m_fontsManager->xSetting = m_XSettingsDconfig;
@@ -159,11 +152,6 @@ bool AppearanceManager::init()
     connect(&m_settingDconfig, SIGNAL(valueChanged(const QString &)), this, SLOT(handleSettingDConfigChange(QString)));
 
     connect(m_XSettingsDconfig.data(),SIGNAL(valueChanged(const QString &)),this,SLOT(handleXsettingDConfigChange(QString)));
-
-    connect(m_wrapBgSetting.data(), SIGNAL(changed(const QString)), this, SLOT(handleWrapBgDConfigChange(QString)));
-
-    connect(m_gnomeBgSetting.data(), SIGNAL(changed(const QString)), this, SLOT(handleGnomeBgDConfigChange(QString)));
-
     connect(&m_detectSysClockTimer, SIGNAL(timeout()), this, SLOT(handleDetectSysClockTimeOut()));
     connect(&m_themeAutoTimer, SIGNAL(timeout()), this, SLOT(handleGlobalThemeChangeTimeOut()));
     m_themeAutoTimer.start(60000); // 每分钟检查一次是否要切换主题
@@ -426,40 +414,6 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
 
     if (!type.isEmpty()) {
         Q_EMIT Changed(type, value);
-    }
-}
-
-void AppearanceManager::handleWrapBgDConfigChange(QString key)
-{
-    if (key != GSKEYBACKGROUND) {
-        return;
-    }
-
-    QString value = m_wrapBgSetting->get(key).toString();
-    bool bSuccess = doSetBackground(value);
-    if (!bSuccess) {
-        return;
-    }
-
-    if (m_wsLoopMap.count(m_curMonitorSpace) != 0) {
-        m_wsLoopMap[m_curMonitorSpace]->addToShow(value);
-    }
-}
-
-void AppearanceManager::handleGnomeBgDConfigChange(QString key)
-{
-    if (key != GSKEYBACKGROUND) {
-        return;
-    }
-
-    QString value = m_gnomeBgSetting->get(key).toString();
-    bool bSuccess = doSetBackground(value);
-    if (!bSuccess) {
-        return;
-    }
-
-    if (m_wsLoopMap.count(m_curMonitorSpace) != 0) {
-        m_wsLoopMap[m_curMonitorSpace]->addToShow(value);
     }
 }
 
