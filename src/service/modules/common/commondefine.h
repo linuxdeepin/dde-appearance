@@ -66,8 +66,8 @@ extern QDBusConnection *pluginDbus;
 #define QTKEYICON               "IconThemeName"
 #define QTKEYFONTSIZE           "FontSize"
 #define QTKEYMONOFONT           "MonoFont"
-#define DEFAULTGLOBALTHEME      "flow"
-#define DEFAULTICONTHEME        "bloom"
+#define DEFAULTGLOBALTHEME      "nirvana"
+#define DEFAULTICONTHEME        "nirvana"
 #define	DEFAULTGTKTHEME         "deepin"
 #define	DEFAULTCURSORTHEME      "bloom"
 
