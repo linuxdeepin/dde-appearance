@@ -10,6 +10,9 @@
 #include <QGSettings>
 #include <fontconfig/fontconfig.h>
 #include <QSharedPointer>
+#include <DConfig>
+
+using Dtk::Core::DConfig;
 
 class FontsManager
 {
@@ -43,6 +46,7 @@ public:
     QVector<QSharedPointer<Family>> getFamilies(QStringList ids);
     double getFontSize();
     bool checkFontConfVersion();
+    QSharedPointer<DConfig> xSetting;
 
 private:
     QString fcFontMatch(QString family);
@@ -64,7 +68,6 @@ private:
     QStringList                             virtualFonts;
     QString                                 filePath;
     QMap<QString,QSharedPointer<Family>>    familyMap;
-    QSharedPointer<QGSettings>              xSetting;
     QStringList                             familyBlacklist;
     QString                                 fileName;
 };

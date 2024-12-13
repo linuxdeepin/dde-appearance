@@ -14,6 +14,7 @@
 #include "modules/common/commondefine.h"
 #include "modules/dconfig/phasewallpaper.h"
 #include "modules/subthemes/customtheme.h"
+#include "modules/dconfig/dconfigsettings.h"
 
 #include <dguiapplicationhelper.h>
 #include <xcb/randr.h>
@@ -60,18 +61,12 @@ AppearanceManager::AppearanceManager(AppearanceProperty *prop, QObject *parent)
     , m_opacityTriggerTimer(new QTimer(this))
     , m_setDefaulting(false)
 {
-    if (QGSettings::isSchemaInstalled(XSETTINGSSCHEMA)) {
-        m_xSetting = QSharedPointer<QGSettings>(new QGSettings(XSETTINGSSCHEMA));
+    m_XSettingsDconfig = QSharedPointer<DConfig>(DconfigSettings::ConfigPtr(STARTCDDEAPPID,XSETTINGSNAME));
+    if (!m_XSettingsDconfig) {
+        qWarning() << "XSettingsDconfig is NULL";
     }
 
-    if (QGSettings::isSchemaInstalled(WRAPBGSCHEMA)) {
-        m_wrapBgSetting = QSharedPointer<QGSettings>(new QGSettings(WRAPBGSCHEMA));
-    }
-
-    if (QGSettings::isSchemaInstalled(XSETTINGSSCHEMA)) {
-        m_gnomeBgSetting = QSharedPointer<QGSettings>(new QGSettings(GNOMEBGSCHEMA));
-    }
-
+    m_fontsManager->xSetting = m_XSettingsDconfig;
     init();
 }
 
@@ -152,14 +147,11 @@ bool AppearanceManager::init()
 
     connect(m_fsnotify.data(), SIGNAL(themeFileChange(QString)), this, SLOT(handlethemeFileChange(QString)), Qt::QueuedConnection);
 
-    connect(m_xSetting.data(), SIGNAL(changed(const QString &)), this, SLOT(handleXsettingDConfigChange(QString)));
+    // connect(m_xSetting.data(), SIGNAL(changed(const QString &)), this, SLOT(handleXsettingDConfigChange(QString)));
 
     connect(&m_settingDconfig, SIGNAL(valueChanged(const QString &)), this, SLOT(handleSettingDConfigChange(QString)));
 
-    connect(m_wrapBgSetting.data(), SIGNAL(changed(const QString)), this, SLOT(handleWrapBgDConfigChange(QString)));
-
-    connect(m_gnomeBgSetting.data(), SIGNAL(changed(const QString)), this, SLOT(handleGnomeBgDConfigChange(QString)));
-
+    connect(m_XSettingsDconfig.data(),SIGNAL(valueChanged(const QString &)),this,SLOT(handleXsettingDConfigChange(QString)));
     connect(&m_detectSysClockTimer, SIGNAL(timeout()), this, SLOT(handleDetectSysClockTimeOut()));
     connect(&m_themeAutoTimer, SIGNAL(timeout()), this, SLOT(handleGlobalThemeChangeTimeOut()));
     m_themeAutoTimer.start(60000); // 每分钟检查一次是否要切换主题
@@ -289,15 +281,15 @@ void AppearanceManager::handlethemeFileChange(QString theme)
 
 void AppearanceManager::handleXsettingDConfigChange(QString key)
 {
-    if (key == GSKEYQTACTIVECOLOR || key == GSKEYQTACTIVECOLOR_DARK) {
+    if (key == DCKEYQTDARKACTIVECOLOR || key == DCKEYQTACTIVECOLOR) {
         QString result = m_settingDconfig.value(GSKEYGLOBALTHEME).toString().endsWith("dark") ?
-            m_xSetting->get(GSKEYQTACTIVECOLOR_DARK).toString() : m_xSetting->get(GSKEYQTACTIVECOLOR).toString();
+            m_XSettingsDconfig->value(DCKEYQTDARKACTIVECOLOR).toString() : m_XSettingsDconfig->value(DCKEYQTACTIVECOLOR).toString();
         QString value = qtActiveColorToHexColor(result);
 
         m_property->qtActiveColor = value;
         Q_EMIT Changed("QtActiveColor", value);
-    } else if (key == GSKEYDTKWINDOWRADIUS) {
-        m_property->windowRadius = m_xSetting->get(GSKEYDTKWINDOWRADIUS).toInt();
+    } else if (key == DCKEYDTKWINDOWRADIUS) {
+        m_property->windowRadius = m_XSettingsDconfig->value(DCKEYDTKWINDOWRADIUS).toInt();
         Q_EMIT Changed("WindowRadius", QString::number(m_property->windowRadius));
     }
 }
@@ -422,40 +414,6 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
 
     if (!type.isEmpty()) {
         Q_EMIT Changed(type, value);
-    }
-}
-
-void AppearanceManager::handleWrapBgDConfigChange(QString key)
-{
-    if (key != GSKEYBACKGROUND) {
-        return;
-    }
-
-    QString value = m_wrapBgSetting->get(key).toString();
-    bool bSuccess = doSetBackground(value);
-    if (!bSuccess) {
-        return;
-    }
-
-    if (m_wsLoopMap.count(m_curMonitorSpace) != 0) {
-        m_wsLoopMap[m_curMonitorSpace]->addToShow(value);
-    }
-}
-
-void AppearanceManager::handleGnomeBgDConfigChange(QString key)
-{
-    if (key != GSKEYBACKGROUND) {
-        return;
-    }
-
-    QString value = m_gnomeBgSetting->get(key).toString();
-    bool bSuccess = doSetBackground(value);
-    if (!bSuccess) {
-        return;
-    }
-
-    if (m_wsLoopMap.count(m_curMonitorSpace) != 0) {
-        m_wsLoopMap[m_curMonitorSpace]->addToShow(value);
     }
 }
 
@@ -599,14 +557,14 @@ void AppearanceManager::setActiveColors(const QString &value)
     if (colors.isEmpty()) {
         return;
     }
-    m_xSetting->set(GSKEYQTACTIVECOLOR, hexColorToQtActiveColor(colors.value(0)));
-    m_xSetting->set(GSKEYQTACTIVECOLOR_DARK, hexColorToQtActiveColor(colors.value(1)));
+    m_XSettingsDconfig->setValue(DCKEYQTACTIVECOLOR, hexColorToQtActiveColor(colors.value(0)));
+    m_XSettingsDconfig->setValue(DCKEYQTDARKACTIVECOLOR, hexColorToQtActiveColor(colors.value(1)));
 }
 
 void AppearanceManager::setWindowRadius(int value)
 {
-    if (value != m_property->windowRadius && m_xSetting) {
-        m_xSetting->set(GSKEYDTKWINDOWRADIUS, value);
+    if (value != m_property->windowRadius && m_XSettingsDconfig) {
+        m_XSettingsDconfig->setValue(DCKEYDTKWINDOWRADIUS, value);
         m_property->windowRadius = value;
         updateCustomTheme(TYPWINDOWRADIUS, QString::number(value));
     }
@@ -635,7 +593,7 @@ void AppearanceManager::setQtActiveColor(const QString &value)
     QString activeColors = m_settingDconfig.value(DACTIVECOLORS).toString();
     QStringList colors = activeColors.split(',');
     QString result = m_currentGlobalTheme.endsWith("dark") ? colors.value(1) : colors.value(0);
-    if (result != m_property->qtActiveColor && m_xSetting) {
+    if (result != m_property->qtActiveColor && m_XSettingsDconfig) {
         m_property->qtActiveColor = result;
         updateCustomTheme(TYPEACTIVECOLOR, activeColors);
     }
@@ -1356,9 +1314,8 @@ QString AppearanceManager::doGetWallpaperSlideShow(QString monitorName)
 double AppearanceManager::getScaleFactor()
 {
     double scaleFactor = 0.0;
-    if (QGSettings::isSchemaInstalled(XSETTINGSSCHEMA)) {
-        QGSettings xSetting(XSETTINGSSCHEMA);
-        scaleFactor = xSetting.get("scale-factor").toDouble();
+    if (m_XSettingsDconfig) {
+        scaleFactor = m_XSettingsDconfig->value("scale-factor").toDouble();
     } else {
         scaleFactor = m_dbusProxy->GetScaleFactor();
     }

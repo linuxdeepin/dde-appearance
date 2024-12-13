@@ -11,11 +11,12 @@
 #include <QObject>
 #include <QMutex>
 #include <QSharedPointer>
-#include <QGSettings>
+#include <DConfig>
 
 class AppearanceManager;
 class AppearanceDBusProxy;
 
+using Dtk::Core::DConfig;
 class ThemesApi : public QObject
 {
     Q_OBJECT
@@ -32,7 +33,6 @@ public:
     QVector<QString> doListTheme(QVector<QString> local, QVector<QString> sys, QString type);
     QVector<QString> scanThemeDirs(QVector<QString> dirs, QString type);
     QVector<QString> mergeThemeList(QVector<QString> src, QVector<QString> target);
-    bool setWMTheme(QString name);
     bool setGlobalTheme(QString name);
     bool setGtkTheme(QString name);
     QString getGtkTheme();
@@ -58,7 +58,6 @@ public:
     bool setDefaultCursor(QString name);
     void setGtkCursor(QString name);
     void setQtCursor(QString name);
-    void setWMCursor(QString name);
 
 private:
     QString getGtk2ConfFile();
@@ -69,10 +68,7 @@ private:
     QMutex                                          gtk3Mutex;
     QMap<QString, QString>                          gtk2ConfInfos;
     QSharedPointer<AppearanceDBusProxy>             dbusProxy;
-    QSharedPointer<QGSettings>                      xSetting;
-    QSharedPointer<QGSettings>                      metacitySetting;
-    QSharedPointer<QGSettings>                      wmSetting;
-    QSharedPointer<QGSettings>                      interfaceSetting;
+    QSharedPointer<DConfig>                         xSetting;
 };
 
 #endif // THEMESApi_H

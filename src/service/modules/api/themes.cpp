@@ -7,6 +7,7 @@
 #include "../common/commondefine.h"
 #include "impl/appearancemanager.h"
 #include "dbus/appearancedbusproxy.h"
+#include "modules/dconfig/dconfigsettings.h"
 
 #include <gtk/gtk.h>
 #include <xcb/xcb_cursor.h>
@@ -24,21 +25,7 @@ ThemesApi::ThemesApi(AppearanceManager *parent)
     , gtk3Mutex(QMutex())
     , dbusProxy(parent->getDBusProxy())
 {
-    if (QGSettings::isSchemaInstalled(XSETTINGSSCHEMA)) {
-        xSetting = QSharedPointer<QGSettings>(new QGSettings(XSETTINGSSCHEMA));
-    }
-
-    if (QGSettings::isSchemaInstalled(METACITYSCHEMA)) {
-        metacitySetting = QSharedPointer<QGSettings>(new QGSettings(METACITYSCHEMA));
-    }
-
-    if (QGSettings::isSchemaInstalled(WMSCHEMA)) {
-        wmSetting = QSharedPointer<QGSettings>(new QGSettings(WMSCHEMA));
-    }
-
-    if (QGSettings::isSchemaInstalled(INTERFACESCHEMA)) {
-        interfaceSetting = QSharedPointer<QGSettings>(new QGSettings(INTERFACESCHEMA));
-    }
+    xSetting = QSharedPointer<DConfig>(DconfigSettings::ConfigPtr(STARTCDDEAPPID,XSETTINGSNAME));
 }
 
 ThemesApi::~ThemesApi()
@@ -184,21 +171,6 @@ QVector<QString> ThemesApi::mergeThemeList(QVector<QString> src, QVector<QString
     return src;
 }
 
-bool ThemesApi::setWMTheme(QString name)
-{
-    if (metacitySetting) {
-        metacitySetting->set("theme", name);
-    }
-
-    if (!wmSetting) {
-        return false;
-    }
-
-    wmSetting->set("theme", name);
-
-    return true;
-}
-
 bool ThemesApi::setGlobalTheme(QString name)
 {
     if (!scanner->isGlobalTheme(getThemePath(name, TYPEGLOBALTHEME, "deepin-theme"))) {
@@ -214,7 +186,7 @@ QString ThemesApi::getGtkTheme()
     if (!xSetting) {
         return QString();
     }
-    return xSetting->get(XSKEYTHEME).toString();
+    return xSetting->value(DCKEYTHEME).toString();
 }
 
 bool ThemesApi::setGtkTheme(QString name)
@@ -231,23 +203,15 @@ bool ThemesApi::setGtkTheme(QString name)
     if (!xSetting) {
         return false;
     }
-    QString old = xSetting->get(XSKEYTHEME).toString();
+    QString old = xSetting->value(DCKEYTHEME).toString();
     if (old == name) {
         qWarning() << "getXSettingsValue failed";
         return false;
     }
 
-    xSetting->set(XSKEYTHEME, name);
-
-    if (!setWMTheme(name)) {
-        xSetting->set(XSKEYTHEME, old);
-        qWarning() << "setWMTheme failed";
-        return false;
-    }
-
+    xSetting->setValue(DCKEYTHEME, name);
     if (!setQTTheme()) {
-        xSetting->set(XSKEYTHEME, old);
-        setWMTheme(old);
+        xSetting->setValue(DCKEYTHEME, old);
         qWarning() << "setQTTheme failed";
         return false;
     }
@@ -269,12 +233,12 @@ bool ThemesApi::setIconTheme(QString name)
     if (!xSetting) {
         return false;
     }
-    QString old = xSetting->get(XSKEYICONTHEME).toString();
+    QString old = xSetting->value(DCKEYICONTHEME).toString();
     if (old == name) {
         return false;
     }
 
-    xSetting->set(XSKEYICONTHEME, name);
+    xSetting->setValue(DCKEYICONTHEME, name);
 
     return true;
 }
@@ -296,13 +260,12 @@ bool ThemesApi::setCursorTheme(QString name)
         return false;
     }
 
-    QString old = xSetting->get(XSKEYCURSORNAME).toString();
+    QString old = xSetting->value(DCKEYCURSORNAME).toString();
 
-    xSetting->set(XSKEYCURSORNAME, name);
+    xSetting->setValue(DCKEYCURSORNAME, name);
 
     setQtCursor(name);
     setGtkCursor(name);
-    setWMCursor(name);
 
     return true;
 }
@@ -730,14 +693,6 @@ void ThemesApi::setQtCursor(QString name)
 #endif
 }
 
-void ThemesApi::setWMCursor(QString name)
-{
-    if (interfaceSetting) {
-        interfaceSetting->set("cursorTheme", name);
-    }
-
-    dbusProxy->setcursorTheme(name);
-}
 
 QString ThemesApi::getGtk2ConfFile()
 {

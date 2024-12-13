@@ -17,12 +17,8 @@ extern QDBusConnection *pluginDbus;
 
 #define APPEARANCEAPPID     "org.deepin.dde.appearance"
 #define APPEARANCESCHEMA    "org.deepin.dde.appearance"
-#define XSETTINGSSCHEMA     "com.deepin.xsettings"
-#define WRAPBGSCHEMA        "com.deepin.wrap.gnome.desktop.background"
-#define GNOMEBGSCHEMA       "org.gnome.desktop.background"
-#define WMSCHEMA            "com.deepin.wrap.gnome.desktop.wm.preferences"
-#define METACITYSCHEMA      "com.deepin.wrap.gnome.metacity"
-#define INTERFACESCHEMA     "com.deepin.wrap.gnome.desktop.interface"
+#define STARTCDDEAPPID      "org.deepin.startdde"
+#define XSETTINGSNAME       "org.deepin.XSettings"
 
 #define ZONEPATH                 "/usr/share/zoneinfo/zone1970.tab"
 #define GSKEYBACKGROUND          "pictureUri"
@@ -45,6 +41,14 @@ extern QDBusConnection *pluginDbus;
 #define DDTKSIZEMODE             "Dtk_Size_Mode"
 #define DQTSCROLLBARPOLICY        "Qt_Scrollbar_Policy"
 #define DACTIVECOLORS            "Active_Colors"
+
+#define DCKEYQTACTIVECOLOR        "qt-active-color"
+#define DCKEYQTDARKACTIVECOLOR    "qt-dark-active-color"
+#define DCKEYDTKWINDOWRADIUS      "dtk-window-radius"
+#define DCKEYFONTNAME             "gtk-font-name"
+#define DCKEYTHEME                "theme-name"
+#define DCKEYICONTHEME            "icon-theme-name"
+#define DCKEYCURSORNAME           "gtk-cursor-theme-name"
 
 #define GTK2CONFDELIM            "="
 #define GTK3GROUPSETTINGS        "Settings"
