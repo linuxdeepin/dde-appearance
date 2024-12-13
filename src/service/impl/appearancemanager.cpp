@@ -33,6 +33,9 @@
 #include <pwd.h>
 #include <QThread>
 
+#include <DGuiApplicationHelper>
+#include <DPlatformTheme>
+
 #define NAN_ANGLE (-200.0)          // 异常经纬度
 #define DEFAULT_WORKSPACE_COUNT (2) // 默认工作区数量
 
@@ -536,6 +539,11 @@ void AppearanceManager::setGtkTheme(QString value)
 
 void AppearanceManager::setIconTheme(QString value)
 {
+    if (DGuiApplicationHelper::testAttribute(DGuiApplicationHelper::IsTreelandPlatform)) {
+        DGuiApplicationHelper::instance()->systemTheme()->setIconThemeName(value.toUtf8());
+        return;
+    }
+
     if (m_settingDconfig.isValid() && value != m_property->iconTheme) {
         m_settingDconfig.setValue(GSKEYICONTHEM, value);
         m_property->iconTheme = value;
@@ -544,6 +552,11 @@ void AppearanceManager::setIconTheme(QString value)
 
 void AppearanceManager::setCursorTheme(QString value)
 {
+    if (DGuiApplicationHelper::testAttribute(DGuiApplicationHelper::IsTreelandPlatform)) {
+        DGuiApplicationHelper::instance()->systemTheme()->setCursorThemeName(value.toUtf8());
+        return;
+    }
+
     if (m_settingDconfig.isValid() && value != m_property->cursorTheme) {
         m_settingDconfig.setValue(GSKEYCURSORTHEME, value);
         m_property->cursorTheme = value;
@@ -552,6 +565,11 @@ void AppearanceManager::setCursorTheme(QString value)
 
 void AppearanceManager::setStandardFont(QString value)
 {
+    if (DGuiApplicationHelper::testAttribute(DGuiApplicationHelper::IsTreelandPlatform)) {
+        DGuiApplicationHelper::instance()->systemTheme()->setFontName(value.toUtf8());
+        return;
+    }
+
     if (!m_fontsManager->isFontFamily(value)) {
         qWarning() << "set standard font error:invalid font " << value;
         return;
@@ -565,6 +583,11 @@ void AppearanceManager::setStandardFont(QString value)
 
 void AppearanceManager::setMonospaceFont(QString value)
 {
+    if (DGuiApplicationHelper::testAttribute(DGuiApplicationHelper::IsTreelandPlatform)) {
+        DGuiApplicationHelper::instance()->systemTheme()->setMonoFontName(value.toUtf8());
+        return;
+    }
+
     if (!m_fontsManager->isFontFamily(value)) {
         qWarning() << "set monospace font error:invalid font " << value;
         return;
@@ -605,6 +628,11 @@ void AppearanceManager::setActiveColors(const QString &value)
 
 void AppearanceManager::setWindowRadius(int value)
 {
+    if (DGuiApplicationHelper::testAttribute(DGuiApplicationHelper::IsTreelandPlatform)) {
+        DGuiApplicationHelper::instance()->systemTheme()->setWindowRadius(value);
+        return;
+    }
+
     if (value != m_property->windowRadius && m_xSetting) {
         m_xSetting->set(GSKEYDTKWINDOWRADIUS, value);
         m_property->windowRadius = value;
