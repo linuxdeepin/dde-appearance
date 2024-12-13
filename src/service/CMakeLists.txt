@@ -14,9 +14,6 @@ find_package(Qt5 REQUIRED COMPONENTS Core DBus Concurrent Gui)
 find_package(DtkCore REQUIRED)
 find_package(DtkGui REQUIRED)
 find_package(PkgConfig REQUIRED)
-find_package(KF5Config REQUIRED)
-find_package(KF5WindowSystem REQUIRED)
-find_package(KF5GlobalAccel REQUIRED)
 
 pkg_check_modules(QGSettings REQUIRED IMPORTED_TARGET gsettings-qt)
 pkg_check_modules(Gio-2.0 REQUIRED IMPORTED_TARGET gio-2.0)
@@ -112,8 +109,8 @@ target_link_libraries(${BIN_NAME} PRIVATE
     PkgConfig::XCB
     PkgConfig::OPENSSL
     PkgConfig::FONTCONFIG
-    ${DtkCore_LIBRARIES}
-    ${DtkGui_LIBRARIES}
+    Dtk::Core
+    Dtk::Gui
 )
 include(GNUInstallDirs)
 install(TARGETS ${BIN_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}/deepin-service-manager/)
