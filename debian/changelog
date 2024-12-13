@@ -1,3 +1,11 @@
+dde-appearance (1.1.42) unstable; urgency=medium
+
+  * chore: update default global theme
+  * fix: active color are invalid in different global theme
+  * fix: 修复系统安装完成后无法进入桌面。输入密码后一直处于加载状态
+
+ -- fuleyi <fuleyi@uniontech.com>  Fri, 13 Dec 2024 15:22:11 +0800
+
 dde-appearance (1.1.41) unstable; urgency=medium
 
   * fix: solve the problem of slow entry to the desktop
