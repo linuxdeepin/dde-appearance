@@ -57,7 +57,6 @@ AppearanceManager::AppearanceManager(AppearanceProperty *prop, QObject *parent)
     , m_customTheme(new CustomTheme())
     , m_globalThemeUpdating(false)
     , m_wallpaperConfig({})
-    , m_opacityTriggerTimer(new QTimer(this))
     , m_setDefaulting(false)
 {
     if (QGSettings::isSchemaInstalled(XSETTINGSSCHEMA)) {
@@ -91,11 +90,6 @@ bool AppearanceManager::init()
     initCoordinate();
     initUserObj();
     initCurrentBgs();
-
-    m_opacityTriggerTimer->setSingleShot(true);
-    m_opacityTriggerTimer->setInterval(100);
-
-    connect(m_opacityTriggerTimer, &QTimer::timeout, this, &AppearanceManager::onOpacityTriggerTimeout);
 
     connect(m_dbusProxy.get(), &AppearanceDBusProxy::workspaceCountChanged, this, &AppearanceManager::handleWmWorkspaceCountChanged);
     connect(m_dbusProxy.get(), &AppearanceDBusProxy::SetScaleFactorStarted, this, &AppearanceManager::handleSetScaleFactorStarted);
@@ -614,18 +608,10 @@ void AppearanceManager::setWindowRadius(int value)
 
 void AppearanceManager::setOpacity(double value)
 {
-    m_tmpOpacity = value;
-    if (!m_opacityTriggerTimer->isActive()) {
-        m_opacityTriggerTimer->start();
-    }
-}
-
-void AppearanceManager::onOpacityTriggerTimeout()
-{
-    if (m_settingDconfig.isValid() && !qFuzzyCompare(m_tmpOpacity, m_property->opacity)) {
-        m_settingDconfig.setValue(GSKEYOPACITY, m_tmpOpacity);
-        m_property->opacity = m_tmpOpacity;
-        updateCustomTheme(TYPEWINDOWOPACITY, QString::number(m_tmpOpacity));
+    if (m_settingDconfig.isValid() && !qFuzzyCompare(value, m_property->opacity)) {
+        m_settingDconfig.setValue(GSKEYOPACITY, value);
+        m_property->opacity = value;
+        updateCustomTheme(TYPEWINDOWOPACITY, QString::number(value));
     }
 }
 
