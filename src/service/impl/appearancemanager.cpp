@@ -1689,6 +1689,7 @@ void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeNam
     // 如果是用户自定义主题, 切换外观时只单独更新外观选项
     if (themePath.endsWith("custom")) {
         setGlobalItem("AppTheme", TYPEGTK);
+        setGlobalItem("ActiveColor", TYPEACTIVECOLOR);
         m_globalThemeUpdating = false;
         return;
     }
