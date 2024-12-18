@@ -622,7 +622,7 @@ void AppearanceManager::setQtActiveColor(const QString &value)
     QString activeColors = m_settingDconfig.value(DACTIVECOLORS).toString();
     QStringList colors = activeColors.split(',');
     QString result = m_currentGlobalTheme.endsWith("dark") ? colors.value(1) : colors.value(0);
-    if (result != m_property->qtActiveColor && m_xSetting) {
+    if (QColor(result) != QColor(m_property->qtActiveColor) && m_xSetting) {
         m_property->qtActiveColor = result;
         updateCustomTheme(TYPEACTIVECOLOR, activeColors);
     }
