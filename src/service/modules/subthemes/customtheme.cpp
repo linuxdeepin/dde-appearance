@@ -96,7 +96,7 @@ void CustomTheme::openCustomTheme()
     m_customTheme->setKey("Deepin Theme", "Name", "Custom");
     m_customTheme->setKey("Deepin Theme", "DefaultTheme", "DefaultTheme");
     m_customTheme->setKey("Deepin Theme", "DarkTheme", "DarkTheme");
-    m_customTheme->setKey("Deepin Theme", "Example", "/usr/share/dde-appearance/custom.svg");
+    m_customTheme->setKey("Deepin Theme", "Example", "/usr/share/dde-appearance/custom.png");
 }
 
 void CustomTheme::saveCustomTheme()
