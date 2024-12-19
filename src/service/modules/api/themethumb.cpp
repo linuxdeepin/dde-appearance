@@ -21,12 +21,12 @@
 #undef True
 #undef False
 
-const int width = 320;
-const int height = 70;
+const int width = 220;
+const int height = 36;
 const int baseCursorSize = 24;
-const int baseCursorPadding = 12;
-const int baseIconPadding  = 4;
-const int baseIconSize = 48;
+const int baseCursorPadding = 7;
+const int baseIconPadding  = 10;
+const int baseIconSize = 36;
 
 static QVector<QStringList> presentCursors {
    {"left_ptr"},
@@ -36,8 +36,6 @@ static QVector<QStringList> presentCursors {
    {"grab", "grabbing", "closedhand"},
    {"fleur", "move"},
    {"sb_v_double_arrow"},
-   {"sb_h_double_arrow"},
-   {"watch", "wait"}
 };
 
 static QVector<QStringList> presentIcons {
@@ -47,12 +45,10 @@ static QVector<QStringList> presentIcons {
     {"deepin-music", "banshee", "amarok", "deadbeef", "clementine", "rhythmbox"},
     // image viewer:
     {"deepin-image-viewer", "eog", "gthumb", "gwenview", "gpicview", "showfoto", "phototonic"},
-    // media/video player:
-    {"deepin-movie", "media-player", "totem", "smplayer", "vlc", "dragonplayer", "kmplayer"},
     // web browser:
-    {"google-chrome", "firefox", "chromium", "opera", "internet-web-browser", "browser"},
+    {"org.deepin.browser", "google-chrome", "firefox", "chromium", "opera", "internet-web-browser", "browser"},
     // system settings:
-    {"preferences-system"},
+    {"user-trash"},
     // text editor:
 //    {"accessories-text-editor", "text-editor", "gedit", "kedit", "xfce-edit"},
     // terminal:
