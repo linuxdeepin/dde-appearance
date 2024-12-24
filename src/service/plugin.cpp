@@ -15,14 +15,14 @@ extern "C" int DSMRegister(const char *name, void *data)
     // TODO: deepin-service-manager 传递进来的dbus在后面使用会无效，因此暂时采用QDBusConnection::sessionBus()
     // (void)data;
     // pluginDbus = static_cast<QDBusConnection*>(data);
-    QTranslator translator;
+    appearance = new Appearance1();
+
+    auto *translator = new QTranslator(appearance);
     QString languagePath = QStandardPaths::locate(QStandardPaths::GenericDataLocation,
                                                   QString("dde-appearance/translations"),
                                                   QStandardPaths::LocateDirectory);
-    translator.load(languagePath+"/dde-appearance_" + QLocale::system().name());
-    qApp->installTranslator(&translator);
-
-    appearance = new Appearance1();
+    int res = translator->load(languagePath+"/dde-appearance_" + QLocale::system().name());
+    qApp->installTranslator(translator);
 
     new Appearance1Adaptor(appearance);
     bool appearanceRegister = APPEARANCEDBUS.registerService(APPEARANCE_SERVICE);
