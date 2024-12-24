@@ -1,3 +1,11 @@
+dde-appearance (1.1.43) unstable; urgency=medium
+
+  * Revert "fix: Quickly adjusting transparency may cause it to get stuck"
+  * chore: update custom theme and themethumb
+  * fix: translation not effective
+
+ -- zhangkun <zhangkun2@uniontech.com>  Tue, 24 Dec 2024 19:47:18 +0800
+
 dde-appearance (1.1.42) unstable; urgency=medium
 
   * chore: update default global theme
