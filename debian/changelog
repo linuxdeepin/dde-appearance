@@ -1,3 +1,10 @@
+dde-appearance (1.1.44) unstable; urgency=medium
+
+  * feat: 去掉gnome的gsetting的调用
+  * feat: 将xsetting的通过gsetting读取配置改成dconfig读取
+
+ -- fuleyi <fuleyi@uniontech.com>  Thu, 02 Jan 2025 10:55:59 +0800
+
 dde-appearance (1.1.43) unstable; urgency=medium
 
   * Revert "fix: Quickly adjusting transparency may cause it to get stuck"
