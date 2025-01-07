@@ -83,7 +83,7 @@
             "visibility": "private"
         },
         "Global_Theme": {
-            "value": "nirvana",
+            "value": "nirvana.light",
             "serial": 0,
             "flags": [],
             "name": "Global_Theme",
