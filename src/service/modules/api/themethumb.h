@@ -6,7 +6,6 @@
 #define THEMETHUMB_H
 
 #include <QDir>
-#include <QGSettings>
 #include <QImage>
 #include <QObject>
 #include <QPainter>

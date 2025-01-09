@@ -9,12 +9,15 @@
 #include <QObject>
 #include <QDBusContext>
 #include <QDBusMessage>
+#include <DConfig>
 
 class KWindowSystem;
 class KConfig;
 class KConfigGroup;
 class KGlobalAccel;
 class Appearance1;
+
+using Dtk::Core::DConfig;
 
 class DeepinWMFaker : public QObject, protected QDBusContext
 {
@@ -66,6 +69,8 @@ public:
 
     QString cursorTheme() const;
     int cursorSize() const;
+    QString getWorkspaceBackgroundOfDeepinWM(const int index) const;
+    void setWorkspaceBackgroundForDeepinWM(const int index, const QString &uri) const;
 
 private Q_SLOTS:
     void handleThemeChanged(const QString &key, const QString& value);
@@ -216,6 +221,7 @@ private:
     bool m_isPlatformX11 = true;
     bool m_isShowDesktop = false;
     int m_workspaceount = 0;
+    QSharedPointer<DConfig>   m_appearance;
 };
 
 #endif // DEEPINWMFAKER_H
