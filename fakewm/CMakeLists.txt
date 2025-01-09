@@ -17,8 +17,6 @@ find_package(KF5WindowSystem REQUIRED)
 find_package(KF5GlobalAccel REQUIRED)
 find_package(Dtk REQUIRED COMPONENTS Core)
 
-pkg_check_modules(QGSettings REQUIRED IMPORTED_TARGET gsettings-qt)
-
 set(SRCS
   ./dbus/deepinwmfaker.h
   ./dbus/deepinwmfaker.cpp
@@ -45,7 +43,6 @@ target_link_libraries(dde-fakewm
     KF5::ConfigCore
     KF5::WindowSystem
     KF5::GlobalAccel
-    PkgConfig::QGSettings
     Dtk::Core
 )
 

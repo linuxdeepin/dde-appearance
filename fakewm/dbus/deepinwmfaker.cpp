@@ -26,9 +26,7 @@
 #include <KF5/KGlobalAccel/KGlobalAccel>
 
 #ifndef DISABLE_DEEPIN_WM
-#include <QGSettings>
-Q_GLOBAL_STATIC_WITH_ARGS(QGSettings, _gsettings_dde_appearance, ("com.deepin.dde.appearance"))
-#define GsettingsBackgroundUri "backgroundUris"
+#define DconfigBackgroundUri "Background_Uris"
 #define GsettingsZoneRightUp "rightUp"
 #define GsettingsZoneRightDown "rightDown"
 #define GsettingsZoneLeftDown "leftDown"
@@ -321,6 +319,11 @@ DeepinWMFaker::DeepinWMFaker(QObject* appearance)
 {
     m_workspaceount =  QDBusInterface(KWinDBusService, "/VirtualDesktopManager", "org.kde.KWin.VirtualDesktopManager").property("count").value<int>();
     m_isPlatformX11 = isX11Platform();
+    m_appearance = QSharedPointer<DConfig>(DConfig::create("org.deepin.dde.appearance", "org.deepin.dde.appearance"));
+    if (!m_appearance || !m_appearance->isValid()) {
+        qWarning() << "appearance dconfig is not vaild";
+        exit(-1);
+    }
 #ifndef DISABLE_DEEPIN_WM
     m_currentDesktop = m_kwinConfig->group("Workspace").readEntry<int>("CurrentDesktop", 1);
 
@@ -329,7 +332,7 @@ DeepinWMFaker::DeepinWMFaker(QObject* appearance)
         m_currentDesktop = to;
     });
     connect(m_windowSystem, &KWindowSystem::numberOfDesktopsChanged, this, &DeepinWMFaker::workspaceCountChanged);
-    connect(_gsettings_dde_appearance, &QGSettings::changed, this, &DeepinWMFaker::onGsettingsDDEAppearanceChanged);
+    connect(m_appearance.data(), SIGNAL(valueChanged(const QString &)),this,SLOT(DeepinWMFaker::onGsettingsDDEAppearanceChanged));
 #endif // DISABLE_DEEPIN_WM
 
     QDBusConnection::sessionBus().connect(KWinDBusService, KWinDBusCompositorPath, KWinDBusCompositorInterface,
@@ -457,14 +460,14 @@ int DeepinWMFaker::cursorSize() const
 }
 
 #ifndef DISABLE_DEEPIN_WM
-static QString getWorkspaceBackgroundOfDeepinWM(const int index)
+QString DeepinWMFaker::getWorkspaceBackgroundOfDeepinWM(const int index) const
 {
-    return _gsettings_dde_appearance->get(GsettingsBackgroundUri).toStringList().value(index - 1);
+    return m_appearance->value(DconfigBackgroundUri).toStringList().value(index - 1);
 }
 
-static void setWorkspaceBackgroundForDeepinWM(const int index, const QString &uri)
+void DeepinWMFaker::setWorkspaceBackgroundForDeepinWM(const int index, const QString &uri) const
 {
-    QStringList all_wallpaper = _gsettings_dde_appearance->get(GsettingsBackgroundUri).toStringList();
+    QStringList all_wallpaper = m_appearance->value(DconfigBackgroundUri).toStringList();
 
     // 当设置的工作区编号大于列表长度时，先填充数据
     if (index > all_wallpaper.size()) {
@@ -477,7 +480,7 @@ static void setWorkspaceBackgroundForDeepinWM(const int index, const QString &ur
 
     all_wallpaper[index - 1] = uri;
     // 将壁纸设置同步到 deepin-wm
-    _gsettings_dde_appearance->set(GsettingsBackgroundUri, all_wallpaper);
+    m_appearance->setValue(DconfigBackgroundUri, all_wallpaper);
 }
 #endif // DISABLE_DEEPIN_WM
 
@@ -1265,7 +1268,7 @@ void DeepinWMFaker::setWorkspaceBackgroundForMonitor(const int index, const QStr
     m_deepinWMConfig->sync();
 
 #ifndef DISABLE_DEEPIN_WM
-    QStringList allWallpaper = _gsettings_dde_appearance->get(GsettingsBackgroundUri).toStringList();
+    QStringList allWallpaper = m_appearance->value(DconfigBackgroundUri).toStringList();
 
     if (index > allWallpaper.size()) {
         allWallpaper.reserve(index);
@@ -1276,7 +1279,7 @@ void DeepinWMFaker::setWorkspaceBackgroundForMonitor(const int index, const QStr
     }
 
     allWallpaper[index - 1] = uri;
-    _gsettings_dde_appearance->set(GsettingsBackgroundUri, allWallpaper);
+    m_appearance->setValue(DconfigBackgroundUri, allWallpaper);
 #endif // DISABLE_DEEPIN_WM
 }
 
@@ -1305,7 +1308,7 @@ void DeepinWMFaker::quitTransientBackground()
 #ifndef DISABLE_DEEPIN_WM
     if (!m_deepinWMBackgroundUri.isEmpty()) {
         // 在退出预览时不同步deepin-wm的设置
-        QSignalBlocker blocker(_gsettings_dde_appearance);
+        QSignalBlocker blocker(m_appearance.data());
         Q_UNUSED(blocker)
         setWorkspaceBackgroundForDeepinWM(GetCurrentWorkspaceInner(), m_deepinWMBackgroundUri);
         m_deepinWMBackgroundUri.clear();
@@ -1316,8 +1319,8 @@ void DeepinWMFaker::quitTransientBackground()
 #ifndef DISABLE_DEEPIN_WM
 void DeepinWMFaker::onGsettingsDDEAppearanceChanged(const QString &key)
 {
-    if (QLatin1String(GsettingsBackgroundUri) == key) {
-        const QStringList &uris = _gsettings_dde_appearance->get(GsettingsBackgroundUri).toStringList();
+    if (QLatin1String(DconfigBackgroundUri) == key) {
+        const QStringList &uris = m_appearance->value(DconfigBackgroundUri).toStringList();
 
         for (int i = 0; i < uris.count(); ++i) {
             const QString &uri = uris.at(i);
