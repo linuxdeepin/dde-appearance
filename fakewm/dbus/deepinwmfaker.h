@@ -186,7 +186,6 @@ private:
     bool isX11Platform();
 #ifndef DISABLE_DEEPIN_WM
     void onGsettingsDDEAppearanceChanged(const QString &key);
-    void onGsettingsDDEZoneChanged(const QString &key);
 #endif
 
 private:

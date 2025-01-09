@@ -28,7 +28,6 @@
 #ifndef DISABLE_DEEPIN_WM
 #include <QGSettings>
 Q_GLOBAL_STATIC_WITH_ARGS(QGSettings, _gsettings_dde_appearance, ("com.deepin.dde.appearance"))
-Q_GLOBAL_STATIC_WITH_ARGS(QGSettings, _gsettings_dde_zone, ("com.deepin.dde.zone"))
 #define GsettingsBackgroundUri "backgroundUris"
 #define GsettingsZoneRightUp "rightUp"
 #define GsettingsZoneRightDown "rightDown"
@@ -331,20 +330,6 @@ DeepinWMFaker::DeepinWMFaker(QObject* appearance)
     });
     connect(m_windowSystem, &KWindowSystem::numberOfDesktopsChanged, this, &DeepinWMFaker::workspaceCountChanged);
     connect(_gsettings_dde_appearance, &QGSettings::changed, this, &DeepinWMFaker::onGsettingsDDEAppearanceChanged);
-    connect(_gsettings_dde_zone, &QGSettings::changed, this, &DeepinWMFaker::onGsettingsDDEZoneChanged);
-
-    // 启动后先将所有热区设置同步一遍
-    const QStringList zoneKeyList = {GsettingsZoneRightUp, GsettingsZoneRightDown,
-                                    GsettingsZoneLeftUp, GsettingsZoneLeftDown};
-
-    // 清理旧数据
-    m_kwinCloseWindowGroup->deleteGroup();
-    m_kwinRunCommandGroup->deleteGroup();
-
-    // 设置新数据
-    for (const QString &key : zoneKeyList) {
-        onGsettingsDDEZoneChanged(key);
-    }
 #endif // DISABLE_DEEPIN_WM
 
     QDBusConnection::sessionBus().connect(KWinDBusService, KWinDBusCompositorPath, KWinDBusCompositorInterface,
@@ -1365,43 +1350,6 @@ static void setBorderActivate(KConfigGroup *group, int value, bool remove)
     }
 
     group->writeEntry(activate, list.join(","));
-}
-
-void DeepinWMFaker::onGsettingsDDEZoneChanged(const QString &key)
-{
-    ElectricBorder pos = ElectricNone;
-
-    if (key == GsettingsZoneRightUp) {
-        pos = ElectricTopRight;
-    } else if (key == GsettingsZoneRightDown) {
-        pos = ElectricBottomRight;
-    } else if (key == GsettingsZoneLeftDown) {
-        pos = ElectricBottomLeft;
-    } else if (key == GsettingsZoneLeftUp) {
-        pos = ElectricTopLeft;
-    }
-
-    const QString &value = _gsettings_dde_zone->get(key).toString();
-
-    if (value.isEmpty()) {
-        setBorderActivate(m_kwinCloseWindowGroup, pos, true);
-        setBorderActivate(m_kwinRunCommandGroup, pos, true);
-    } else {
-        if (value == "!wm:close") {
-            // 移除这个区域设置的其它命令
-            setBorderActivate(m_kwinRunCommandGroup, pos, true);
-            setBorderActivate(m_kwinCloseWindowGroup, pos, false);
-        } else {
-            // 移除这个区域设置的关闭窗口命令
-            setBorderActivate(m_kwinCloseWindowGroup, pos, true);
-            setBorderActivate(m_kwinRunCommandGroup, pos, false);
-
-            const QString &program = QString("Border%1Program").arg(pos);
-            m_kwinRunCommandGroup->writeEntry(program, value);
-        }
-    }
-
-    syncConfigForKWin();
 }
 
 void DeepinWMFaker::syncConfigForKWin()
