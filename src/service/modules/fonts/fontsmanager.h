@@ -7,7 +7,6 @@
 #include <QString>
 #include <QStringList>
 #include <QMap>
-#include <QGSettings>
 #include <fontconfig/fontconfig.h>
 #include <QSharedPointer>
 #include <DConfig>

@@ -18,7 +18,6 @@ find_package(KF5Config REQUIRED)
 find_package(KF5WindowSystem REQUIRED)
 find_package(KF5GlobalAccel REQUIRED)
 
-pkg_check_modules(QGSettings REQUIRED IMPORTED_TARGET gsettings-qt)
 pkg_check_modules(Gio-2.0 REQUIRED IMPORTED_TARGET gio-2.0)
 pkg_check_modules(X11 REQUIRED IMPORTED_TARGET xcursor xfixes x11)
 pkg_check_modules(GTK3 REQUIRED IMPORTED_TARGET gtk+-3.0 gdk-3.0)
@@ -105,7 +104,6 @@ target_link_libraries(${BIN_NAME} PRIVATE
     Qt5::DBus
     Qt5::Concurrent
     Qt5::Gui
-    PkgConfig::QGSettings
     PkgConfig::Gio-2.0
     PkgConfig::GTK3
     PkgConfig::X11
