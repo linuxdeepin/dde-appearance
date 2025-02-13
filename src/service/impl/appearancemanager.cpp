@@ -30,6 +30,7 @@
 #include <QTimer>
 #include <QMetaObject>
 #include <QCoreApplication>
+#include <DDBusSender>
 
 #include <pwd.h>
 #include <QThread>
@@ -1845,6 +1846,19 @@ void AppearanceManager::doSetCurrentWorkspaceBackgroundForMonitor(const QString 
     if (auto value = PhaseWallPaper::setWallpaperUri(strIndex, strMonitorName, uri); value.has_value()) {
         m_wallpaperConfig = value.value();
     }
+
+    // TODO delete, 临时适配Treeland
+    if (DGuiApplicationHelper::testAttribute(DGuiApplicationHelper::IsWaylandPlatform)) {
+        QString arg = QString("personalization/wallpaper?url=%1").arg(uri);
+        DDBusSender()
+                .service("org.deepin.dde.ControlCenter1")
+                .interface("org.deepin.dde.ControlCenter1")
+                .path("/org/deepin/dde/ControlCenter1")
+                .method("ShowPage")
+                .arg(arg)
+                .call();
+    }
+
     doUpdateWallpaperURIs();
     return;
 }
@@ -1864,6 +1878,17 @@ void AppearanceManager::doSetWorkspaceBackgroundForMonitor(const int &index, con
 {
     if (auto value = PhaseWallPaper::setWallpaperUri(QString::number(index), strMonitorName, uri); value.has_value()) {
         m_wallpaperConfig = value.value();
+    }
+        // TODO delete, 临时适配Treeland
+    if (DGuiApplicationHelper::testAttribute(DGuiApplicationHelper::IsWaylandPlatform)) {
+        QString arg = QString("personalization/wallpaper?url=%1").arg(uri);
+        DDBusSender()
+                .service("org.deepin.dde.ControlCenter1")
+                .interface("org.deepin.dde.ControlCenter1")
+                .path("/org/deepin/dde/ControlCenter1")
+                .method("ShowPage")
+                .arg(arg)
+                .call();
     }
     doUpdateWallpaperURIs();
 }
