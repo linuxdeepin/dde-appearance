@@ -4,6 +4,7 @@
 
 #include "locale.h"
 
+#include <QRegularExpression>
 #include <stdlib.h>
 #include <pthread.h>
 #include <QFile>
@@ -36,15 +37,15 @@ Locale::Locale()
             line = file.readLine();
 
             // 移除行首空行
-            line.replace(QRegExp("^ +"),"");
+            line.replace(QRegularExpression("^ +"),"");
             if(line.front()=='#')
             {
                 continue;
             }
 
-            line.replace(QRegExp("\\t$"),"");
-            line.replace(QRegExp("\\r$"),"");
-            line.replace(QRegExp("\\n$"),"");
+            line.replace(QRegularExpression("\\t$"),"");
+            line.replace(QRegularExpression("\\r$"),"");
+            line.replace(QRegularExpression("\\n$"),"");
 
             parts = line.split(" ");
 
