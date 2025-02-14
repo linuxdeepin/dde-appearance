@@ -1,3 +1,9 @@
+dde-appearance (1.1.47) unstable; urgency=medium
+
+  * feat: Adapt wallpaper settings for treeland environment
+
+ -- zhangkun <zhangkun2@uniontech.com>  Fri, 14 Feb 2025 10:52:31 +0800
+
 dde-appearance (1.1.46) unstable; urgency=medium
 
   * feat: 去掉热区的gsetting调用 (#177)
