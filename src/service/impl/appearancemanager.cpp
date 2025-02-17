@@ -1259,6 +1259,10 @@ bool AppearanceManager::doSetMonospaceFont(QString value)
 
 bool AppearanceManager::doSetBackground(QString value)
 {
+    if (checkWallpaperLockedStatus()) {
+        return false;
+    }
+
     if (!m_backgrounds->isBackgroundFile(value)) {
         return false;
     }
@@ -1277,6 +1281,9 @@ bool AppearanceManager::doSetBackground(QString value)
 
 bool AppearanceManager::doSetGreeterBackground(QString value)
 {
+    if (checkWallpaperLockedStatus()) {
+        return false;
+    }
     value = utils::enCodeURI(value, SCHEME_FILE);
     m_greeterBg = value;
     m_dbusProxy->SetGreeterBackground(value);
@@ -1694,6 +1701,22 @@ bool AppearanceManager::isSkipSetWallpaper(const QString &themePath)
     return false;
 }
 
+bool AppearanceManager::checkWallpaperLockedStatus()
+{
+    if (QFileInfo::exists("/var/lib/deepin/permission-manager/wallpaper_locked")) {
+        QDBusInterface notify("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications");
+        notify.asyncCall(QString("Notify"),
+                         QString("org.deepin.dde.control-center"),   // title
+                         static_cast<uint>(0),
+                         QString("preferences-system"),   // icon
+                         QObject::tr("This system wallpaper is locked. Please contact your admin."),
+                         QString(), QStringList(), QVariantMap(), 5000);
+        qInfo() << "wallpaper is locked..";
+        return true;
+    }
+    return false;
+}
+
 void AppearanceManager::updateCustomTheme(const QString &type, const QString &value)
 {
     if (!m_globalThemeUpdating) {
@@ -1826,6 +1849,9 @@ QString AppearanceManager::doGetCurrentWorkspaceBackground()
 
 void AppearanceManager::doSetCurrentWorkspaceBackgroundForMonitor(const QString &uri, const QString &strMonitorName)
 {
+    if (checkWallpaperLockedStatus()) {
+        return;
+    }
     QString strIndex = QString::number(getCurrentDesktopIndex());
     if (strIndex == "") {
         qWarning() << "error getting current desktop index through wm";
@@ -1865,6 +1891,10 @@ QString AppearanceManager::doGetCurrentWorkspaceBackgroundForMonitor(const QStri
 
 void AppearanceManager::doSetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QString &uri)
 {
+    if (checkWallpaperLockedStatus()) {
+        return;
+    }
+ 
     if (auto value = PhaseWallPaper::setWallpaperUri(QString::number(index), strMonitorName, uri); value.has_value()) {
         m_wallpaperConfig = value.value();
     }

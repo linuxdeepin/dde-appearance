@@ -25,5 +25,9 @@
         <source>Start setting display scaling, please wait patiently</source>
         <translation>开始设置屏幕缩放，请耐心等待</translation>
     </message>
+    <message>
+        <source>This system wallpaper is locked. Please contact your admin.</source>
+        <translation>当前系统壁纸已被锁定，请联系管理员</translation>
+    </message>
 </context>
 </TS>
