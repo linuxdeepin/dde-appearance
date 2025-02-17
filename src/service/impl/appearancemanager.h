@@ -173,6 +173,7 @@ private:
     QString getWallpaperUri(const QString &index, const QString &monitorName);
     void initGlobalTheme();
     bool isSkipSetWallpaper(const QString &themePath);
+    bool checkWallpaperLockedStatus();
 
 Q_SIGNALS:
     void Changed(const QString &ty, const QString &value);
