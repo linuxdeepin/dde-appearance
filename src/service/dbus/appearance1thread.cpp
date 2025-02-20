@@ -273,10 +273,6 @@ void Appearance1Thread::SetMonitorBackground(const QString &monitorName, const Q
     Q_UNUSED(message);
     QMutexLocker locker(&mutex);
     QString file = appearanceManager->doSetMonitorBackground(monitorName, imageGile);
-
-    if (!file.isEmpty()) {
-        appearanceManager->doSetWsLoop(monitorName, file);
-    }
 }
 
 void Appearance1Thread::SetScaleFactor(double scale, const QDBusMessage &message)

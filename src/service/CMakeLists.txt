@@ -51,8 +51,6 @@ set(SRCS
     ./impl/fsnotify.cpp
     ./impl/appearancesyncconfig.h
     ./impl/appearancesyncconfig.cpp
-    ./impl/wallpaperscheduler.h
-    ./impl/wallpaperscheduler.cpp
     ./modules/background/background.h
     ./modules/background/background.cpp
     ./modules/fonts/fontsmanager.h

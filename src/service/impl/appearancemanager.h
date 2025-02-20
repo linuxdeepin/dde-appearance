@@ -9,7 +9,6 @@
 #include "modules/subthemes/subthemes.h"
 #include "modules/fonts/fontsmanager.h"
 #include "dbus/scaleFactors.h"
-#include "wallpaperscheduler.h"
 
 #include <QObject>
 #include <QDebug>
@@ -90,7 +89,6 @@ public:
     void doSetByType(const QString& type,const QString& value);
     QString doSetMonitorBackground(const QString& monitorName,const QString& imageGile);
     bool doSetWallpaperSlideShow(const QString &monitorName,const QString &wallpaperSlideShow);
-    bool doSetWsLoop(const QString& monitorName,const QString& file);
     QString doThumbnail(const QString &type, const QString &name);
     void doSetCurrentWorkspaceBackground(const QString &uri);
     QString doGetCurrentWorkspaceBackground();
@@ -136,13 +134,11 @@ public Q_SLOTS:
     void handleUpdateToCustom(const QString &mode);
     void handleGlobalThemeChangeTimeOut();
     void updateMonitorMap();
-    void handlePrepareForSleep(bool sleep);
 
 private:
     void initCoordinate();
     void initUserObj();
     void initCurrentBgs();
-    void initWallpaperSlideshow();
     void initDtkSizeMode();
     void iso6709Parsing(QString city, QString coordinates);
     void doUpdateWallpaperURIs();
@@ -152,14 +148,9 @@ private:
     void resetThemeAutoTimer();
     void updateThemeAuto(bool enable);
     void enableDetectSysClock(bool enable);
-    void updateWSPolicy(QString policy);
-    void loadWSConfig();
     QDateTime getThemeAutoChangeTime(QDateTime date, double latitude, double longitude);
 
-    void autoChangeBg(QString monitorSpace, QDateTime date);
-    bool changeBgAfterLogin(QString monitorSpace);
     bool setDQtTheme(QStringList key,QStringList value);
-    bool saveWSConfig(QString monitorSpace, QDateTime date);
     QString marshal(const QVector<QSharedPointer<Theme>>& themes);
     QString marshal(const QVector<Background>& backgrounds);
     QString marshal(const QStringList& strs);
@@ -206,8 +197,6 @@ private:
     QTimer                                           m_themeAutoTimer;     // 自动切换深浅主题定时器
     qint64                                           m_detectSysClockStartTime;
     QString                                          m_zone;
-    QMap<QString,QSharedPointer<WallpaperScheduler>> m_wsSchedulerMap;
-    QMap<QString,QSharedPointer<WallpaperLoop>>      m_wsLoopMap;
     CustomTheme                                      *m_customTheme;
     bool                                             m_globalThemeUpdating;
     QString                                          m_currentGlobalTheme; // 当前主题，globalTheme+.light/.dark
