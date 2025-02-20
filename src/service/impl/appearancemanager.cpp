@@ -1643,10 +1643,6 @@ void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeNam
     };
     auto setGlobalFile = [&theme, &themeName, &defTheme, &themePath, this](const QString &key, const QString &type) {
         QString themeValue = theme.getStr(themeName, key);
-        // 如果是用户自定义的桌面壁纸, 切换主题的外观时, 不重新设置壁纸
-        if (isSkipSetWallpaper(themePath) && type == TYPEWALLPAPER) {
-            return;
-        }
         if (themeValue.isEmpty() && !defTheme.isEmpty())
             themeValue = theme.getStr(defTheme, key);
         if (!themeValue.isEmpty()) {
@@ -1658,13 +1654,6 @@ void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeNam
             doSetByType(type, themeValue);
         }
     };
-
-    // 如果是用户自定义主题, 切换外观时只单独更新外观选项
-    if (themePath.endsWith("custom")) {
-        setGlobalItem("AppTheme", TYPEGTK);
-        m_globalThemeUpdating = false;
-        return;
-    }
 
     setGlobalFile("Wallpaper", TYPEWALLPAPER);
     setGlobalFile("LockBackground", TYPEGREETERBACKGROUND);
