@@ -31,6 +31,7 @@
 #include <QMetaObject>
 #include <QCoreApplication>
 #include <DDBusSender>
+#include <QRandomGenerator>
 
 #include <pwd.h>
 #include <QThread>
@@ -103,13 +104,11 @@ bool AppearanceManager::init()
     if (m_property->wallpaperURls->isEmpty()) {
         updateNewVersionData();
     }
-    initWallpaperSlideshow();
     m_zone = m_dbusProxy->timezone();
 
     connect(m_dbusProxy.get(), &AppearanceDBusProxy::TimezoneChanged, this, &AppearanceManager::handleTimezoneChanged);
     connect(m_dbusProxy.get(), &AppearanceDBusProxy::NTPChanged, this, &AppearanceManager::handleTimeUpdate);
     connect(m_dbusProxy.get(), &AppearanceDBusProxy::TimeUpdate, this, &AppearanceManager::handleTimeUpdate);
-    connect(m_dbusProxy.get(), &AppearanceDBusProxy::HandleForSleep, this, &AppearanceManager::handlePrepareForSleep);
 
     QVector<QSharedPointer<Theme>> iconList = m_subthemes->listIconThemes();
     bool bFound = false;
@@ -259,9 +258,6 @@ void AppearanceManager::handlethemeFileChange(QString theme)
         Q_EMIT Refreshed(TYPEGLOBALTHEME);
     } else if (theme == TYPEBACKGROUND) {
         m_backgrounds->notifyChanged();
-        for (auto iter : m_wsLoopMap) {
-            iter->notifyFileChange();
-        }
     } else if (theme == TYPEGTK) {
         // todo <-time.After(time.Millisecond * 700)
         m_subthemes->refreshGtkThemes();
@@ -364,7 +360,7 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
         } else if (key == GSKEYWALLPAPERSLIDESHOW) {
             type = TYPEWALLPAPERSLIDESHOW;
             value = m_settingDconfig.value(key).toString();
-            updateWSPolicy(value);
+            // noting to do, move to deepin-service-manager
         } else if (key == GSKEYOPACITY) {
             type = TYPEWINDOWOPACITY;
             bool ok = false;
@@ -709,49 +705,6 @@ void AppearanceManager::initCurrentBgs()
     m_greeterBg = m_dbusProxy->greeterBackground();
 }
 
-void AppearanceManager::initWallpaperSlideshow()
-{
-    loadWSConfig();
-
-    QJsonParseError err;
-    QJsonDocument doc = QJsonDocument::fromJson(m_property->wallpaperSlideShow->toLatin1(), &err);
-    if (err.error != QJsonParseError::NoError) {
-        qWarning() << "parse wallpaperSlideShow: " << m_property->wallpaperSlideShow << ",fail";
-        return;
-    }
-
-    QVariantMap tempMap = doc.object().toVariantMap();
-    for (auto iter : tempMap.toStdMap()) {
-        if (m_wsSchedulerMap.count(iter.first) != 1) {
-            QSharedPointer<WallpaperScheduler> wallpaperScheduler(
-                    new WallpaperScheduler(std::bind(&AppearanceManager::autoChangeBg, this, std::placeholders::_1, std::placeholders::_2)));
-            m_wsSchedulerMap[iter.first] = wallpaperScheduler;
-        }
-
-        if (!m_wsLoopMap.contains(iter.first)) {
-            m_wsLoopMap[iter.first] = QSharedPointer<WallpaperLoop>(new WallpaperLoop());
-        }
-
-        if (WallpaperLoopConfigManger::isValidWSPolicy(iter.second.toString())) {
-            if (iter.second.toString() == WSPOLICYLOGIN) {
-                bool bSuccess = changeBgAfterLogin(iter.first);
-                if (!bSuccess) {
-                    qWarning() << "failed to change background after login";
-                }
-            } else {
-                bool ok;
-                uint sec = iter.second.toString().toUInt(&ok);
-                if (m_wsSchedulerMap.count(iter.first) == 1) {
-                    if (ok) {
-                        m_wsSchedulerMap[iter.first]->setInterval(iter.first, sec);
-                    } else {
-                        m_wsSchedulerMap[iter.first]->stop();
-                    }
-                }
-            }
-        }
-    }
-}
 
 void AppearanceManager::updateMonitorMap()
 {
@@ -763,20 +716,6 @@ void AppearanceManager::updateMonitorMap()
         } else {
             m_monitorMap[monitorList[i]] = "Subsidiary" + QString::number(i);
         }
-    }
-}
-
-void AppearanceManager::handlePrepareForSleep(bool sleep)
-{
-    if (sleep)
-        return;
-
-    QJsonDocument doc = QJsonDocument::fromJson(m_property->wallpaperSlideShow->toLatin1());
-    QVariantMap tempMap = doc.object().toVariantMap();
-
-    for (auto it = tempMap.begin(); it != tempMap.end(); ++it) {
-        if (it.value().toString() == WSPOLICYWAKEUP)
-            autoChangeBg(it.key(), QDateTime::currentDateTimeUtc());
     }
 }
 
@@ -964,71 +903,6 @@ void AppearanceManager::enableDetectSysClock(bool enable)
     }
 }
 
-void AppearanceManager::updateWSPolicy(QString policy)
-{
-    QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson(policy.toLatin1(), &error);
-    if (error.error != QJsonParseError::NoError) {
-        qWarning() << "json error:" << policy << error.errorString();
-        return;
-    }
-    loadWSConfig();
-
-    QVariantMap config = doc.object().toVariantMap();
-    for (auto iter : config.toStdMap()) {
-        if (m_wsSchedulerMap.count(iter.first) == 0) {
-            QSharedPointer<WallpaperScheduler> wallpaperScheduler(
-                    new WallpaperScheduler(std::bind(&AppearanceManager::autoChangeBg, this, std::placeholders::_1, std::placeholders::_2)));
-            m_wsSchedulerMap[iter.first] = wallpaperScheduler;
-        }
-
-        if (m_wsLoopMap.count(iter.first) == 0) {
-            m_wsLoopMap[iter.first] = QSharedPointer<WallpaperLoop>(new WallpaperLoop());
-        }
-
-        if (m_curMonitorSpace == iter.first && WallpaperLoopConfigManger::isValidWSPolicy(iter.second.toString())) {
-            bool bOk;
-            int nSec = iter.second.toString().toInt(&bOk);
-            if (bOk) {
-                QDateTime curr = QDateTime::currentDateTimeUtc();
-                QMetaObject::invokeMethod(qApp, [this, iter, curr](){ 
-                       m_wsSchedulerMap[iter.first]->setLastChangeTime(curr);
-                    }, Qt::QueuedConnection);
-                QMetaObject::invokeMethod(qApp, [this, iter, nSec](){ 
-                       m_wsSchedulerMap[iter.first]->setInterval(iter.first, nSec);
-                    }, Qt::QueuedConnection);
-                saveWSConfig(iter.first, curr);
-            } else {
-                m_wsSchedulerMap[iter.first]->stop();
-            }
-        }
-    }
-}
-
-void AppearanceManager::loadWSConfig()
-{
-    WallpaperLoopConfigManger wallConfig;
-    QString fileName = utils::GetUserConfigDir() + "/deepin/dde-daemon/appearance/wallpaper-slideshow.json";
-    WallpaperLoopConfigManger::WallpaperLoopConfigMap cfg = wallConfig.loadWSConfig(fileName);
-
-    for (auto monitorSpace : cfg.keys()) {
-        if (m_wsSchedulerMap.count(monitorSpace) == 0) {
-            QSharedPointer<WallpaperScheduler> wallpaperScheduler(
-                    new WallpaperScheduler(std::bind(&AppearanceManager::autoChangeBg, this, std::placeholders::_1, std::placeholders::_2)));
-            m_wsSchedulerMap[monitorSpace] = wallpaperScheduler;
-        }
-
-        m_wsSchedulerMap[monitorSpace]->setLastChangeTime(cfg[monitorSpace].lastChange);
-
-        if (m_wsLoopMap.count(monitorSpace) == 0) {
-            m_wsLoopMap[monitorSpace] = QSharedPointer<WallpaperLoop>(new WallpaperLoop());
-        }
-
-        for (auto file : cfg[monitorSpace].showedList) {
-            m_wsLoopMap[monitorSpace]->addToShow(file);
-        }
-    }
-}
 
 QDateTime AppearanceManager::getThemeAutoChangeTime(QDateTime date, double latitude, double longitude)
 {
@@ -1501,8 +1375,7 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
         }
     } else if (type == TYPEBACKGROUND) {
         bool bSuccess = doSetBackground(value);
-        if (bSuccess && m_wsLoopMap.count(m_curMonitorSpace) == 1) {
-            m_wsLoopMap[m_curMonitorSpace]->addToShow(value);
+        if (bSuccess) {
             updateValut = true;
         }
     } else if (type == TYPEGREETERBACKGROUND) {
@@ -1616,17 +1489,6 @@ bool AppearanceManager::doSetWallpaperSlideShow(const QString &monitorName, cons
     setWallpaperSlideShow(value);
 
     m_curMonitorSpace = key;
-
-    return true;
-}
-
-bool AppearanceManager::doSetWsLoop(const QString &monitorName, const QString &file)
-{
-    int index = m_dbusProxy->GetCurrentWorkspace();
-    QString monitor = QString("%1&&%2").arg(monitorName).arg(index);
-    if (m_wsLoopMap.count(monitor) == 1) {
-        m_wsLoopMap[monitor]->addToShow(file);
-    }
 
     return true;
 }
@@ -1937,74 +1799,6 @@ QString AppearanceManager::getActiveColors()
     return m_settingDconfig.value(DACTIVECOLORS).toString();
 }
 
-void AppearanceManager::autoChangeBg(QString monitorSpace, QDateTime date)
-{
-    qDebug() << "autoChangeBg: " << monitorSpace << ", " << date;
-
-    if (m_wsLoopMap.count(monitorSpace) == 0) {
-        return;
-    }
-
-    QString file = m_wsLoopMap[monitorSpace]->getNext();
-    if (file.isEmpty()) {
-        qDebug() << "file is empty";
-        return;
-    }
-
-    QString strIndex = QString::number(getCurrentDesktopIndex());
-
-    QStringList monitorlist = monitorSpace.split("&&");
-    if (monitorlist.size() != 2) {
-        qWarning() << "monitorSpace format error";
-        return;
-    }
-
-    if (strIndex == monitorlist.at(1)) {
-        doSetMonitorBackground(monitorlist.at(0), file);
-    }
-
-    saveWSConfig(monitorSpace, date);
-}
-
-bool AppearanceManager::changeBgAfterLogin(QString monitorSpace)
-{
-    QString runDir = utils::GetUserRuntimeDir();
-
-    QFile file("/proc/self/sessionid");
-    if (!file.open(QIODevice::ReadOnly)) {
-        qWarning() << "open /proc/self/sessionid fail";
-        return false;
-    }
-
-    QString currentSessionId = file.readAll();
-    currentSessionId = currentSessionId.simplified();
-
-    bool needChangeBg = false;
-    runDir = runDir + "/dde-daemon-wallpaper-slideshow-login" + "/" + monitorSpace;
-    QFile fileTemp(runDir);
-
-    if (!file.exists()) {
-        needChangeBg = true;
-    } else if (!fileTemp.open(QIODevice::ReadOnly)) {
-        qWarning() << "open " << runDir << " fail";
-        return false;
-    } else {
-        if (currentSessionId != fileTemp.readAll().simplified()) {
-            needChangeBg = true;
-        }
-    }
-
-    if (needChangeBg) {
-        autoChangeBg(monitorSpace, QDateTime::currentDateTimeUtc());
-        fileTemp.write(currentSessionId.toLatin1());
-    }
-
-    file.close();
-    fileTemp.close();
-
-    return true;
-}
-
 bool AppearanceManager::setDQtTheme(QStringList key, QStringList value)
 {
     if (key.length() != value.length()) {
@@ -2024,21 +1818,6 @@ bool AppearanceManager::setDQtTheme(QStringList key, QStringList value)
     }
 
     return true;
-}
-
-bool AppearanceManager::saveWSConfig(QString monitorSpace, QDateTime date)
-{
-    WallpaperLoopConfigManger configManger;
-
-    QString fileName = utils::GetUserConfigDir() + "/deepin/dde-daemon/appearance/wallpaper-slideshow.json";
-    configManger.loadWSConfig(fileName);
-
-    if (m_wsLoopMap.count(monitorSpace) != 0) {
-        configManger.setShowed(monitorSpace, m_wsLoopMap[monitorSpace]->getShowed());
-    }
-    configManger.setLastChange(monitorSpace, date);
-
-    return configManger.save(fileName);
 }
 
 QString AppearanceManager::marshal(const QVector<QSharedPointer<Theme>> &themes)

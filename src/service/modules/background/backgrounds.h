@@ -11,7 +11,6 @@
 #include <QMutex>
 #include <QVector>
 
-#include "../subthemes/scanner.h"
 #include "format.h"
 #include "background.h"
 
