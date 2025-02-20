@@ -49,15 +49,12 @@ void CustomTheme::updateValue(const QString &type, const QString &value, const Q
     };
 
     QString themeId = oldTheme;
-    GolbalThemeMode mode = Auto;
     QString modeStr;
     if (themeId.endsWith(".light")) {
         themeId.chop(6);
-        mode = Light;
         modeStr = ".light";
     } else if (oldTheme.endsWith(".dark")) {
         themeId.chop(5);
-        mode = Dark;
         modeStr = ".dark";
     }
     if (themeId != "custom") {
@@ -80,10 +77,9 @@ void CustomTheme::updateValue(const QString &type, const QString &value, const Q
         return;
     }
 
-    if (mode & Light)
-        m_customTheme->setKey("DefaultTheme", typekeyMap.value(type), value);
-    if (mode & Dark)
-        m_customTheme->setKey("DarkTheme", typekeyMap.value(type), value);
+    // 自定义主题深浅色配置统一
+    m_customTheme->setKey("DefaultTheme", typekeyMap.value(type), value);
+    m_customTheme->setKey("DarkTheme", typekeyMap.value(type), value);
     saveCustomTheme();
 }
 
