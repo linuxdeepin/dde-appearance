@@ -1,3 +1,11 @@
+dde-appearance (1.1.48) unstable; urgency=medium
+
+  * feat: remove wallpaper slideshow
+  * feat: adapt wallpaper lock
+  * fix: invalid custom theme setting
+
+ -- zhangkun <zhangkun2@uniontech.com>  Fri, 21 Feb 2025 16:03:41 +0800
+
 dde-appearance (1.1.47) unstable; urgency=medium
 
   * feat: Adapt wallpaper settings for treeland environment
