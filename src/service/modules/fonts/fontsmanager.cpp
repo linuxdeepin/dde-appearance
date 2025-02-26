@@ -23,7 +23,9 @@ FontsManager::FontsManager()
     ,filePath(utils::GetUserConfigDir()+"/fontconfig"+"/conf.d"+"/99-deepin.conf")
     ,familyBlacklist{"Symbol","webdings","MT Extra",
                      "Wingdings","Wingdings 2","Wingdings 3"}
+    , appearanceConfig(DConfig::create(APPEARANCESCHEMA, APPEARANCESCHEMA, ""))
 {
+    loadIrregularFontOverrideMap();
     initFamily();
 }
 
@@ -535,6 +537,11 @@ QSharedPointer<FontsManager::Family> FontsManager::fcInfoToFamily(FcInfo* info)
     }
 
     QStringList langs = QString(info->lang).split(DEFAULTLANGDELIM);
+    if (irregularFontOverrideMap.contains(family)) {
+        IrregularFontOverride override = irregularFontOverrideMap[family];
+        langs.append(override.AppendLang);
+    }
+
     QString curLang = getCurLang();
 
     QSharedPointer<FontsManager::Family> familyObj(new FontsManager::Family);
@@ -711,4 +718,26 @@ bool FontsManager::saveToFile()
 
     file.write(text);
     return true;
+}
+
+void FontsManager::loadIrregularFontOverrideMap()
+{
+    const QString overrideJson = appearanceConfig->value("irregularFontOverride").toString();
+    QJsonDocument doc = QJsonDocument::fromJson(overrideJson.toUtf8());
+    if (doc.isArray()) {
+        QJsonArray ovrrideFamilyArray = doc.array();
+        for (int i = 0; i < ovrrideFamilyArray.size(); i++) {
+            QJsonObject obj = ovrrideFamilyArray.at(i).toObject();
+            IrregularFontOverride override;
+            QJsonArray appendLangJsonArr = obj.value("AppendLang").toArray();
+            for (int j = 0; j < appendLangJsonArr.size(); j++) {
+                override.AppendLang.push_back(appendLangJsonArr.at(j).toString());
+            }
+            irregularFontOverrideMap[obj.value("family").toString()] = override;
+        }
+    }
+
+    for (auto it = irregularFontOverrideMap.begin(); it != irregularFontOverrideMap.end(); it++) {
+        qDebug() << "irregularFontOverrideMap: " << it.key() << " " << it.value().AppendLang;
+    }
 }
