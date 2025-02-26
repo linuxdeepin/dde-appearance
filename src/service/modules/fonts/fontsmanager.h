@@ -10,6 +10,8 @@
 #include <fontconfig/fontconfig.h>
 #include <QSharedPointer>
 #include <DConfig>
+#include <QScopedPointer>
+#include <QMap>
 
 using Dtk::Core::DConfig;
 
@@ -32,6 +34,12 @@ public:
         char *lang;
         char *spacing;
     };
+
+    struct IrregularFontOverride {
+        QStringList AppendLang;
+    };
+
+    using IrregularFontOverrideMap = QMap<QString, IrregularFontOverride>;
 public:
     FontsManager();
     void initFamily();
@@ -63,12 +71,15 @@ private:
     void fcInfosToFamilyTable();
     bool loadCacheFromFile(QString fileName);
     bool saveToFile();
+    void loadIrregularFontOverrideMap();
 private:
     QStringList                             virtualFonts;
     QString                                 filePath;
     QMap<QString,QSharedPointer<Family>>    familyMap;
     QStringList                             familyBlacklist;
     QString                                 fileName;
+    IrregularFontOverrideMap                irregularFontOverrideMap;
+    QScopedArrayPointer<DConfig>            appearanceConfig;
 };
 
 #endif // FONTSMANAGER_H
