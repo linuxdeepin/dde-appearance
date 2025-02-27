@@ -42,7 +42,7 @@ public:
     using IrregularFontOverrideMap = QMap<QString, IrregularFontOverride>;
 public:
     FontsManager();
-    void initFamily();
+    void refreshFamilyList();
     bool isFontFamily(QString value);
     bool isFontSizeValid(double size);
     bool setFamily(QString standard, QString monospace, double size);
@@ -77,7 +77,6 @@ private:
     QString                                 filePath;
     QMap<QString,QSharedPointer<Family>>    familyMap;
     QStringList                             familyBlacklist;
-    QString                                 fileName;
     IrregularFontOverrideMap                irregularFontOverrideMap;
     QScopedArrayPointer<DConfig>            appearanceConfig;
 };

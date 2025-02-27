@@ -1234,8 +1234,10 @@ QString AppearanceManager::doList(QString type)
     } else if (type == TYPEBACKGROUND) {
         return marshal(backgroundListVerify(m_backgrounds->listBackground()));
     } else if (type == TYPESTANDARDFONT) {
+        m_fontsManager->refreshFamilyList();
         return marshal(m_fontsManager->listStandard());
     } else if (type == TYPEMONOSPACEFONT) {
+        m_fontsManager->refreshFamilyList();
         return marshal(m_fontsManager->listMonospace());
     } else if (type == TYPEGLOBALTHEME) {
         return marshal(m_subthemes->listGlobalThemes());

@@ -26,15 +26,14 @@ FontsManager::FontsManager()
     , appearanceConfig(DConfig::create(APPEARANCESCHEMA, APPEARANCESCHEMA, ""))
 {
     loadIrregularFontOverrideMap();
-    initFamily();
+    refreshFamilyList();
 }
 
-void FontsManager::initFamily()
+void FontsManager::refreshFamilyList()
 {
-    fileName = utils::GetUserHomeDir()+"/.cache/deepin/dde-daemon/fonts/family_table";
     if(!isFcCacheUpdate())
     { 
-        bool bSuccess = loadCacheFromFile(fileName);
+        bool bSuccess = loadCacheFromFile(FONTCACHEDIR + QDir::separator() + FONTCACHEFILE);
         if(bSuccess)
         {
             return;
@@ -610,6 +609,7 @@ QString FontsManager::getLangFromLocale(QString locale)
 
 void FontsManager::fcInfosToFamilyTable()
 {
+    QMap<QString,QSharedPointer<Family>> table;
     int num;
     FontsManager::FcInfo* infos = listFontInfo(&num);
     if(num<1)
@@ -626,11 +626,12 @@ void FontsManager::fcInfosToFamilyTable()
         }
 
         QString key = md5(family->id);
-        if(familyMap.count(key) == 0)
+        if(table.count(key) == 0)
         {
-            familyMap[key] = family;
+            table[key] = family;
         }
     }
+    familyMap = table;
 }
 
 bool FontsManager::loadCacheFromFile(QString fileName)
@@ -710,7 +711,11 @@ bool FontsManager::saveToFile()
     doc.setObject(obj);
     QByteArray text = doc.toJson();
 
-    QFile file(fileName);
+    if (!QDir(FONTCACHEDIR).exists()) {
+        QDir().mkpath(FONTCACHEDIR);
+    }
+
+    QFile file(FONTCACHEDIR + QDir::separator() + FONTCACHEFILE);
     if(!file.open(QIODevice::WriteOnly|QIODevice::Truncate))
     {
         return false;
