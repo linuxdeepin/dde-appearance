@@ -116,6 +116,9 @@ extern QDBusConnection *pluginDbus;
 #define WSPOLICYLOGIN           "login"
 #define	WSPOLICYWAKEUP          "wakeup"
 
+#define FONTCACHEDIR            utils::GetUserHomeDir() + "/.cache/deepin/dde-daemon/fonts"
+#define FONTCACHEFILE           "family_table"
+
 #define HOME "HOME"
 
 #define MAX_FILEPATH_LEN 256
