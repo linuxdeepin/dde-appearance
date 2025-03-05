@@ -1,7 +1,7 @@
 configure_file(
   dde-fakewm.service.in
   dde-fakewm.service
-  ONLY
+  @ONLY
 )
 
 set(SYSTEMD_SERVICE_FILES

@@ -17,16 +17,13 @@
 #include "modules/dconfig/dconfigsettings.h"
 
 #include <dguiapplicationhelper.h>
-#include <xcb/randr.h>
 #include <xcb/xcb.h>
 
 #include <QColor>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QRegExp>
 #include <QSettings>
-#include <QTimeZone>
 #include <QTimer>
 #include <QMetaObject>
 #include <QCoreApplication>
@@ -34,7 +31,6 @@
 #include <QRandomGenerator>
 
 #include <pwd.h>
-#include <QThread>
 
 #define NAN_ANGLE (-200.0)          // 异常经纬度
 #define DEFAULT_WORKSPACE_COUNT (2) // 默认工作区数量
@@ -721,14 +717,14 @@ void AppearanceManager::updateMonitorMap()
 
 void AppearanceManager::iso6709Parsing(QString city, QString coordinates)
 {
-    QRegExp pattern("(\\+|-)\\d+\\.?\\d*");
+    QRegularExpression pattern(R"((\+|-)\d+\.?\d*)");
 
     QVector<QString> resultVet;
 
-    int pos = 0;
-    while ((pos = pattern.indexIn(coordinates, pos)) != -1 && resultVet.size() <= 2) {
-        resultVet.push_back(coordinates.mid(pos, pattern.matchedLength()));
-        pos += pattern.matchedLength();
+    QRegularExpressionMatchIterator it = pattern.globalMatch(coordinates);
+    while (it.hasNext() && resultVet.size() <= 2) {
+        QRegularExpressionMatch match = it.next();
+        resultVet.push_back(match.captured(0));
     }
 
     if (resultVet.size() < 2) {
