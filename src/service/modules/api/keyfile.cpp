@@ -5,8 +5,7 @@
 #include "keyfile.h"
 #include "locale.h"
 
-#include <cstring>
-#include <string>
+#include <QRegularExpression>
 #include <iostream>
 
 KeyFile::KeyFile(char separtor)
@@ -152,15 +151,13 @@ bool KeyFile::loadFile(const QString &filePath)
     while (!fp.atEnd()) {
         line=fp.readLine();
         // 移除行首空行
-        line.replace(QRegExp("^ +"),"");
-        if(line.front()=='#')
+        line.remove(QRegularExpression("^ +"));
+        if(!line.isEmpty() && line.front()=='#')
         {
             continue;
         }
 
-        line.replace(QRegExp("\\t$"),"");
-        line.replace(QRegExp("\\r$"),"");
-        line.replace(QRegExp("\\n$"),"");
+        line.remove(QRegularExpression("[\\t\\r\\n]+$"));
 
         int lPos = line.indexOf('[');
         int rPos = line.indexOf(']');

@@ -92,8 +92,8 @@ void Backgrounds::refreshBackground()
 
 void Backgrounds::sortByTime(QFileInfoList listFileInfo)
 {
-    std::sort(listFileInfo.begin(), listFileInfo.end(), [=](const QFileInfo &f1, QFileInfo &f2) {
-        return f1.lastModified().toTime_t() < f2.lastModified().toTime_t();
+    std::sort(listFileInfo.begin(), listFileInfo.end(), [=](const QFileInfo &f1, const QFileInfo &f2) {
+        return f1.lastModified().toSecsSinceEpoch() < f2.lastModified().toSecsSinceEpoch();
     });
 }
 

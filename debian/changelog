@@ -1,3 +1,9 @@
+dde-appearance (1.1.51) unstable; urgency=medium
+
+  * fix: Some source files did not participate in compilation
+
+ -- zhangkun <zhangkun2@uniontech.com>  Fri, 07 Mar 2025 16:59:52 +0800
+
 dde-appearance (1.1.50) unstable; urgency=medium
 
   * chore: adapt to qt6

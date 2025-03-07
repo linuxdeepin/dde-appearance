@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <QFile>
+#include <QRegularExpression>
 
 #define ComponentCodeset 1
 #define ComponentTerritory 2
@@ -36,15 +37,13 @@ Locale::Locale()
             line = file.readLine();
 
             // 移除行首空行
-            line.replace(QRegExp("^ +"),"");
+            line.remove(QRegularExpression("^\\s+"));
             if(line.front()=='#')
             {
                 continue;
             }
 
-            line.replace(QRegExp("\\t$"),"");
-            line.replace(QRegExp("\\r$"),"");
-            line.replace(QRegExp("\\n$"),"");
+            line.remove(QRegularExpression("[\\t\\r\\n]+$"));
 
             parts = line.split(" ");
 
