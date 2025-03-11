@@ -182,51 +182,51 @@ void Appearance1Thread::Delete(const QString &ty, const QString &name, const QDB
 
 QString Appearance1Thread::GetCurrentWorkspaceBackground(const QDBusMessage &message)
 {
+    Q_UNUSED(message);
     QMutexLocker locker(&mutex);
-    APPEARANCEDBUS.send(message.createReply(appearanceManager->doGetCurrentWorkspaceBackground()));
-    return QString();
+    return appearanceManager->doGetCurrentWorkspaceBackground();
 }
 
 QString Appearance1Thread::GetCurrentWorkspaceBackgroundForMonitor(const QString &strMonitorName, const QDBusMessage &message)
 {
+    Q_UNUSED(message);
     QMutexLocker locker(&mutex);
-    APPEARANCEDBUS.send(message.createReply(appearanceManager->doGetCurrentWorkspaceBackgroundForMonitor(strMonitorName)));
-    return QString();
+    return appearanceManager->doGetCurrentWorkspaceBackgroundForMonitor(strMonitorName);
 }
 
 double Appearance1Thread::GetScaleFactor(const QDBusMessage &message)
 {
+    Q_UNUSED(message);
     QMutexLocker locker(&mutex);
-    APPEARANCEDBUS.send(message.createReply(appearanceManager->getScaleFactor()));
-    return 0.0;
+    return appearanceManager->getScaleFactor();
 }
 
 ScaleFactors Appearance1Thread::GetScreenScaleFactors(const QDBusMessage &message)
 {
+    Q_UNUSED(message);
     QMutexLocker locker(&mutex);
-    APPEARANCEDBUS.send(message.createReply(QVariant::fromValue(appearanceManager->getScreenScaleFactors())));
-    return ScaleFactors();
+    return appearanceManager->getScreenScaleFactors();
 }
 
 QString Appearance1Thread::GetActiveColors(const QDBusMessage &message)
 {
+    Q_UNUSED(message);
     QMutexLocker locker(&mutex);
-    APPEARANCEDBUS.send(message.createReply(QVariant::fromValue(appearanceManager->getActiveColors())));
-    return QString();
+    return appearanceManager->getActiveColors();
 }
 
 QString Appearance1Thread::GetWallpaperSlideShow(const QString &monitorName, const QDBusMessage &message)
 {
+    Q_UNUSED(message);
     QMutexLocker locker(&mutex);
-    APPEARANCEDBUS.send(message.createReply(appearanceManager->doGetWallpaperSlideShow(monitorName)));
-    return QString();
+    return appearanceManager->doGetWallpaperSlideShow(monitorName);
 }
 
 QString Appearance1Thread::GetWorkspaceBackgroundForMonitor(const int &index, const QString &strMonitorName, const QDBusMessage &message)
 {
+    Q_UNUSED(message);
     QMutexLocker locker(&mutex);
-    APPEARANCEDBUS.send(message.createReply(appearanceManager->doGetWorkspaceBackgroundForMonitor(index, strMonitorName)));
-    return QString();
+    return appearanceManager->doGetWorkspaceBackgroundForMonitor(index, strMonitorName);
 }
 
 QString Appearance1Thread::List(const QString &ty, const QDBusMessage &message)
