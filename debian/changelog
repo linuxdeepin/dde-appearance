@@ -1,3 +1,10 @@
+dde-appearance (1.1.52) unstable; urgency=medium
+
+  * fix: DBus local mutual call failed
+  * fix: The prompt information is not internationalized(Bug: 307525)
+
+ -- Lv Peilong <lvpeilong@uniontech.com>  Wed, 12 Mar 2025 11:05:38 +0800
+
 dde-appearance (1.1.51) unstable; urgency=medium
 
   * fix: Some source files did not participate in compilation
