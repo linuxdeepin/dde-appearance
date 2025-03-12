@@ -14,19 +14,15 @@ set(TRANSLATION_LANGUAGES
 )
 
 set(TRANSLATION_FILES "")
-list(APPEND TRANSLATION_FILES "${PROJECT_SOURCE_DIR}/translations/dde-appearance.ts")
-
 foreach(LANG ${TRANSLATION_LANGUAGES})
-    list(APPEND TRANSLATION_FILES "${PROJECT_SOURCE_DIR}/translations/dde-appearance_${LANG}.ts")
+    list(APPEND TRANSLATION_FILES "${CMAKE_CURRENT_SOURCE_DIR}/translations/dde-appearance_${LANG}.ts")
 endforeach()
-
-set_source_files_properties(app_en.ts app_de.ts
-    PROPERTIES OUTPUT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/translations")
 
 # can generate ts and qm file
 qt_add_translations(${PLUGIN_NAME}
     TS_FILES ${TRANSLATION_FILES}
     SOURCES ${TRANS_FILE_SOURCE}
+    LUPDATE_OPTIONS -no-obsolete -no-ui-lines -locations none
     QM_FILES_OUTPUT_VARIABLE TR_QM_FILES
 )
 
