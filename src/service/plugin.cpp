@@ -19,7 +19,7 @@ extern "C" int DSMRegister(const char *name, void *data)
 
     auto *translator = new QTranslator(appearance);
     QString languagePath = QStandardPaths::locate(QStandardPaths::GenericDataLocation,
-                                                  QString("dde-appearance/translations"),
+                                                  QString("plugin-dde-appearance/translations"),
                                                   QStandardPaths::LocateDirectory);
     int res = translator->load(languagePath+"/dde-appearance_" + QLocale::system().name());
     qApp->installTranslator(translator);

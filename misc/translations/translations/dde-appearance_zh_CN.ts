@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_CN">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="zh_CN">
 <context>
     <name>AppearanceManager</name>
     <message>
@@ -25,6 +27,9 @@
         <source>Start setting display scaling, please wait patiently</source>
         <translation>开始设置屏幕缩放，请耐心等待</translation>
     </message>
+</context>
+<context>
+    <name>QObject</name>
     <message>
         <source>This system wallpaper is locked. Please contact your admin.</source>
         <translation>当前系统壁纸已被锁定，请联系管理员</translation>
