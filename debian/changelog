@@ -1,3 +1,9 @@
+dde-appearance (1.1.53) unstable; urgency=medium
+
+  * fix: no serif font config was generated when setting font
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 13 Mar 2025 13:33:56 +0800
+
 dde-appearance (1.1.52) unstable; urgency=medium
 
   * fix: DBus local mutual call failed
