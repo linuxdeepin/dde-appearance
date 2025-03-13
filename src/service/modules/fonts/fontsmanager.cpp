@@ -375,6 +375,15 @@ QString FontsManager::configContent(QString standard, QString monospace)
 <fontconfig>
     <match target="pattern">
         <test qual="any" name="family">
+            <string>serif</string>
+        </test>
+        <edit name="family" mode="prepend" binding="strong">
+            <string>%s</string>
+        </edit>
+    </match>
+
+    <match target="pattern">
+        <test qual="any" name="family">
             <string>sans-serif</string>
         </test>
         <edit name="family" mode="prepend" binding="strong">
@@ -395,6 +404,7 @@ QString FontsManager::configContent(QString standard, QString monospace)
         <edit name="rgba"><const>rgb</const></edit>
     </match>
  </fontconfig>)",
+    standard.toLatin1().data(),
     standard.toLatin1().data(),
     monospace.toLatin1().data());
     return retString;
