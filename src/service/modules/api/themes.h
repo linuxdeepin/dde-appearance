@@ -58,6 +58,7 @@ public:
     bool setDefaultCursor(QString name);
     void setGtkCursor(QString name);
     void setQtCursor(QString name);
+    void setWMCursor(QString name);
 
 private:
     QString getGtk2ConfFile();
