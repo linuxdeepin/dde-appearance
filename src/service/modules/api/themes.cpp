@@ -266,6 +266,7 @@ bool ThemesApi::setCursorTheme(QString name)
 
     setQtCursor(name);
     setGtkCursor(name);
+    setWMCursor(name);
 
     return true;
 }
@@ -693,6 +694,10 @@ void ThemesApi::setQtCursor(QString name)
 #endif
 }
 
+void ThemesApi::setWMCursor(QString name)
+{
+    dbusProxy->setcursorTheme(name);
+}
 
 QString ThemesApi::getGtk2ConfFile()
 {
