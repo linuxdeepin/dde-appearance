@@ -78,9 +78,16 @@ void Subthemes::refreshCursorThemes()
     cursorThemes = getThemes(themeApi->listCursorTheme());
     for(auto &&info:cursorThemes) {
         KeyFile keyFile(',');
-        keyFile.loadFile(info->getPath()+"/cursor.theme");
-        info->setName(keyFile.getLocaleStr("Icon Theme","Name"));
-        info->setComment(keyFile.getLocaleStr("Icon Theme","Comment"));
+        const QString configFilePath = info->getPath()+"/cursor.theme";
+        if (QFile::exists(configFilePath)) {
+            keyFile.loadFile(configFilePath);
+            info->setName(keyFile.getLocaleStr("Icon Theme","Name"));
+            info->setComment(keyFile.getLocaleStr("Icon Theme","Comment"));
+        }
+
+        if (info->name().isEmpty()) {
+            info->setName(info->getId());
+        }
     }
 }
 
