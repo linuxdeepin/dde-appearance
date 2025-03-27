@@ -16,8 +16,8 @@
 #include "modules/subthemes/customtheme.h"
 #include "modules/dconfig/dconfigsettings.h"
 
-#include <dguiapplicationhelper.h>
 #include <xcb/xcb.h>
+#include <KX11Extras>
 
 #include <QColor>
 #include <QJsonArray>
@@ -36,7 +36,6 @@
 #define DEFAULT_WORKSPACE_COUNT (2) // 默认工作区数量
 
 DCORE_USE_NAMESPACE
-DGUI_USE_NAMESPACE
 
 AppearanceManager::AppearanceManager(AppearanceProperty *prop, QObject *parent)
     : QObject(parent)
@@ -1493,7 +1492,12 @@ bool AppearanceManager::doSetWallpaperSlideShow(const QString &monitorName, cons
 
 int AppearanceManager::getCurrentDesktopIndex()
 {
-    return m_dbusProxy->GetCurrentWorkspace();
+    if (utils::isTreeland()) {
+        // TODO: Need to implement
+        return 0;
+    } else {
+        return KX11Extras::currentDesktop();
+    }
 }
 
 void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeName, const QString &defaultTheme, const QString &themePath)
@@ -1723,7 +1727,7 @@ void AppearanceManager::doSetCurrentWorkspaceBackgroundForMonitor(const QString 
     }
 
     // TODO delete, 临时适配Treeland
-    if (DGuiApplicationHelper::testAttribute(DGuiApplicationHelper::IsWaylandPlatform)) {
+    if (utils::isTreeland()) {
         QString arg = QString("personalization/wallpaper?url=%1").arg(uri);
         DDBusSender()
                 .service("org.deepin.dde.ControlCenter1")
@@ -1759,7 +1763,7 @@ void AppearanceManager::doSetWorkspaceBackgroundForMonitor(const int &index, con
         m_wallpaperConfig = value.value();
     }
         // TODO delete, 临时适配Treeland
-    if (DGuiApplicationHelper::testAttribute(DGuiApplicationHelper::IsWaylandPlatform)) {
+    if (utils::isTreeland()) {
         QString arg = QString("personalization/wallpaper?url=%1").arg(uri);
         DDBusSender()
                 .service("org.deepin.dde.ControlCenter1")

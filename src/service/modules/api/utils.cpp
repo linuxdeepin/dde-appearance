@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "utils.h"
-#include "../common/commondefine.h"
 
 #include <QFile>
 #include <QDir>
@@ -154,4 +153,10 @@ QString utils::GetUserCacheDir()
 QString utils::GetUserRuntimeDir()
 {
     return QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation);
+}
+
+bool utils::isTreeland()
+{
+    static bool isTreeland = QString(qgetenv("XDG_SESSION_TYPE")).contains("wayland",  Qt::CaseInsensitive);
+    return isTreeland;
 }

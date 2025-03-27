@@ -12,9 +12,7 @@ set(PROJECT_NAME dde-appearance)
 find_package(PkgConfig REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core DBus Concurrent Gui)
 find_package(Dtk${DTK_VERSION_MAJOR} REQUIRED Core Gui)
-find_package(KF6Config REQUIRED)
 find_package(KF6WindowSystem REQUIRED)
-find_package(KF6GlobalAccel REQUIRED)
 
 pkg_check_modules(Gio-2.0 REQUIRED IMPORTED_TARGET gio-2.0)
 pkg_check_modules(X11 REQUIRED IMPORTED_TARGET xcursor xfixes x11)
@@ -105,6 +103,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
     PkgConfig::XCB
     PkgConfig::OPENSSL
     PkgConfig::FONTCONFIG
+    KF6::WindowSystem
 )
 include(GNUInstallDirs)
 install(TARGETS ${PLUGIN_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}/deepin-service-manager/)
