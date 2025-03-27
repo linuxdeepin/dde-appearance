@@ -38,10 +38,8 @@ Locale::Locale()
 
             // 移除行首空行
             line.remove(QRegularExpression("^\\s+"));
-            if(line.front()=='#')
-            {
+            if(line.isEmpty() || line.front() == '#')
                 continue;
-            }
 
             line.remove(QRegularExpression("[\\t\\r\\n]+$"));
 
