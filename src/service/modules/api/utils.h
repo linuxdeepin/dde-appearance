@@ -25,6 +25,7 @@ public:
     static QString GetUserCacheDir();
     static QString GetUserRuntimeDir();
     static void writeWallpaperConfig(const QVariant &wallpaper);
+    static bool isTreeland();
 };
 
 #endif // UTILS_H
