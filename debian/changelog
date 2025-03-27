@@ -1,3 +1,11 @@
+dde-appearance (1.1.55) unstable; urgency=medium
+
+  * feat: replace using KX11Extras to get the current workspace
+  * fix: when QString is empty, call QString::front() will assert
+  * feat(cursor): when name is not read, fallback to id
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 27 Mar 2025 17:36:41 +0800
+
 dde-appearance (1.1.54) unstable; urgency=medium
 
   * fix: no cursor theme given to kwin
