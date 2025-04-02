@@ -53,6 +53,9 @@ public:
     QString getBasePath(QString filename);
     QMap<QString,QString>& getGtkThumbnailMap();
 
+private:
+    void initGlobalOverrideConfig();
+
 private Q_SLOTS:
     void init();
 
@@ -66,6 +69,7 @@ private:
     int                                initStatus;
     QTimer                             *timer;
     QStringList                        thumbnailThemes;
+    AppearanceManager                  *manager;
 };
 
 #endif

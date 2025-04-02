@@ -7,6 +7,7 @@
 #include "../api/themethumb.h"
 #include "../api/utils.h"
 #include "../common/commondefine.h"
+#include <qlogging.h>
 #include <QDir>
 #include <QThread>
 #include <QDebug>
@@ -31,6 +32,7 @@ Subthemes::Subthemes(AppearanceManager *parent)
     , themeApi(new ThemesApi(parent))
     , initStatus(initBegin)
     , timer(new QTimer(this))
+    , manager(parent)
 {
     connect(timer, &QTimer::timeout, this, &Subthemes::init);
     timer->start(500);
@@ -102,16 +104,31 @@ void Subthemes::refreshGlobalThemes()
         info->setName(keyFile.getLocaleStr("Deepin Theme","Name"));
         info->setComment(keyFile.getLocaleStr("Deepin Theme","Comment"));
         QStringList example =keyFile.getStrList("Deepin Theme","Example");
+        QString exampleStr;
 
-        for (QList<QString>::iterator i = example.begin(); i != example.end(); ++i) {
-            QFileInfo file(*i);
-            if (file.isRelative()) {
-                QDir themefile(info->getPath());
-                file.setFile(themefile, *i);
-                *i = file.absoluteFilePath();
+        if (manager) {
+            auto overrideMap = manager->getGlobalOverride();
+            for (auto &&override : overrideMap.value(info->getId())) {
+                if (override.section == "Deepin Theme" && override.key == "Example") {
+                    exampleStr = override.value;
+                    break;
+                }
             }
         }
-        info->setExample(example.join(','));
+
+        if (exampleStr.isEmpty()) {
+            for (QList<QString>::iterator i = example.begin(); i != example.end(); ++i) {
+                QFileInfo file(*i);
+                if (file.isRelative()) {
+                    QDir themefile(info->getPath());
+                    file.setFile(themefile, *i);
+                    *i = file.absoluteFilePath();
+                }
+            }
+            exampleStr = example.join(",");
+        }
+
+        info->setExample(exampleStr);
         info->setHasDark(keyFile.containKey("Deepin Theme","DarkTheme"));
         globalThemes.push_back(info);
     }
@@ -287,8 +304,7 @@ QString Subthemes::getGlobalThumbnail(QString id)
         return "";
     }
     QString gtkTheme = themeApi->getGtkTheme();
-    QString path = theme->getPath()+"/index.theme";
-    return getGlobal(id,path,gtkTheme);
+    return getGlobal(id,theme,gtkTheme);
 }
 
 QString Subthemes::getGtkThumbnail(QString id)
