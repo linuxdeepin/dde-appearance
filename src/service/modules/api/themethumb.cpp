@@ -9,6 +9,7 @@
 #include "../api/utils.h"
 #include "compatibleengine.h"
 #include "keyfile.h"
+#include "modules/subthemes/theme.h"
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gtk/gtk.h>
@@ -363,22 +364,19 @@ QImage* loadXCursor(QString fileName, int size)
     return image;
 }
 
-QString getGlobal(QString id, QString descFile, QString gtkTheme)
+QString getGlobal(QString id, QSharedPointer<Theme> theme, QString gtkTheme)
 {
     if (!checkScaleFactor()) {
         qInfo() << "scaleFactor <= 0";
         return "";
     }
-    KeyFile keyFile(',');
-    keyFile.loadFile(descFile);
-    QStringList example = keyFile.getStrList("Deepin Theme", "Example");
+    QStringList example = theme.get()->example().split(',');
     if (!example.isEmpty()) {
         bool isdark = (gtkTheme == "deepin-dark") ;
         QString path = isdark ? example.last() : example.first();
         QFileInfo file(path);
         if (file.isRelative()) {
-            QFileInfo themefile(descFile);
-            file.setFile(themefile.absoluteDir(), path);
+            file.setFile(theme->getPath(), path);
             path = file.absoluteFilePath();
         }
         return path;

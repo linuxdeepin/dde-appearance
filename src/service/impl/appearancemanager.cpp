@@ -77,6 +77,7 @@ bool AppearanceManager::init()
 {
     qInfo() << "init";
     getScaleFactor();
+    initGlobalOverrideConfig();
     // subthemes需要在获取ScaleFactor后再初始化
     m_subthemes.reset(new Subthemes(this));
 
@@ -1012,12 +1013,12 @@ bool AppearanceManager::doSetGlobalTheme(QString value)
     m_currentGlobalTheme = value;
     switch (mode) {
     case Light:
-        applyGlobalTheme(theme, defaultTheme, defaultTheme, themePath);
+        applyGlobalTheme(theme, defaultTheme, defaultTheme, themePath, themeId);
         break;
     case Dark: {
         if (darkTheme.isEmpty())
             return false;
-        applyGlobalTheme(theme, darkTheme, defaultTheme, themePath);
+        applyGlobalTheme(theme, darkTheme, defaultTheme, themePath, themeId);
     } break;
     case Auto: {
         setGlobalTheme(value);
@@ -1500,22 +1501,32 @@ int AppearanceManager::getCurrentDesktopIndex()
     }
 }
 
-void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeName, const QString &defaultTheme, const QString &themePath)
+void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeName, const QString &defaultTheme, const QString &themePath, const QString &themeId)
 {
     m_globalThemeUpdating = true;
     QString defTheme = (defaultTheme.isEmpty() || defaultTheme == themeName) ? QString() : defaultTheme;
+    auto getValue = [&theme, &themeId, this](const QString &section, const QString &key) -> QString{
+        QString ret = theme.getStr(section, key);
+        for (auto &overrideItem : this->m_globalThemeOverrideMap.value(themeId)) {
+            if (overrideItem.section == section && overrideItem.key == key) {
+                ret = overrideItem.value;
+                break;
+            }
+        }
+        return ret;
+    };
     // 设置globlaTheme的一项，先从themeName中找对应项，若没有则从defTheme中找对应项，最后调用doSetByType实现功能
-    auto setGlobalItem = [&theme, &themeName, &defTheme, this](const QString &key, const QString &type) {
-        QString themeValue = theme.getStr(themeName, key);
+    auto setGlobalItem = [&theme, &themeName, &defTheme, getValue, this](const QString &key, const QString &type) {
+        QString themeValue = getValue(themeName, key);
         if (themeValue.isEmpty() && !defTheme.isEmpty())
-            themeValue = theme.getStr(defTheme, key);
+            themeValue = getValue(defTheme, key);
         if (!themeValue.isEmpty())
             doSetByType(type, themeValue);
     };
-    auto setGlobalFile = [&theme, &themeName, &defTheme, &themePath, this](const QString &key, const QString &type) {
-        QString themeValue = theme.getStr(themeName, key);
+    auto setGlobalFile = [&theme, &themeName, &defTheme, getValue, &themePath, this](const QString &key, const QString &type) {
+        QString themeValue = getValue(themeName, key);
         if (themeValue.isEmpty() && !defTheme.isEmpty())
-            themeValue = theme.getStr(defTheme, key);
+            themeValue = getValue(defTheme, key);
         if (!themeValue.isEmpty()) {
             themeValue = utils::deCodeURI(themeValue);
             QFileInfo fileInfo(themeValue);
@@ -1888,4 +1899,29 @@ QString AppearanceManager::marshal(const QVector<QSharedPointer<FontsManager::Fa
 
     doc.setArray(arr);
     return doc.toJson(QJsonDocument::Compact);
+}
+
+void AppearanceManager::initGlobalOverrideConfig()
+{
+    m_globalThemeOverrideMap.clear();
+    const QString &jsonRaw = m_settingDconfig.value("globalThemeOverride").toString();
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonRaw.toUtf8());
+    if (jsonDoc.isArray()) {
+        QJsonArray array = jsonDoc.array();
+        for (auto iter : array) {
+            QJsonObject obj = iter.toObject();
+            QString id = obj["id"].toString();
+            QJsonArray overrideArray = obj["override"].toArray();
+            QVector<GlobalThemeOverride> overrideVec;
+            for (auto iter : overrideArray) {
+                QJsonObject overrideObj = iter.toObject();
+                GlobalThemeOverride override;
+                override.section = overrideObj["section"].toString();
+                override.key = overrideObj["key"].toString();
+                override.value = overrideObj["value"].toString();
+                overrideVec.append(override);
+            }
+            m_globalThemeOverrideMap.insert(id, overrideVec);
+        }
+    }
 }

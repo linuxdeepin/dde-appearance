@@ -40,6 +40,12 @@ class AppearanceManager : public QObject
         QString Monospace;
     };
 
+    struct GlobalThemeOverride{
+        QString section;
+        QString key;
+        QString value;
+    };
+
 public:
     explicit AppearanceManager(AppearanceProperty *prop, QObject *parent = nullptr);
     ~AppearanceManager();
@@ -119,6 +125,8 @@ public:
     int getWorkspaceCount();
     void timerEvent(QTimerEvent *event) override;
 
+    inline QHash<QString, QVector<GlobalThemeOverride>> getGlobalOverride() const { return m_globalThemeOverrideMap; }
+
 public Q_SLOTS:
     void handleWmWorkspaceCountChanged(int count);
     void handleWmWorkspaceSwithched(int from,int to);
@@ -156,7 +164,7 @@ private:
     QString marshal(const QStringList& strs);
     QString marshal(const QVector<QSharedPointer<FontsManager::Family>>& strs);
     int getCurrentDesktopIndex();
-    void applyGlobalTheme(KeyFile &theme, const QString &themeName, const QString &defaultTheme, const QString &themePath);
+    void applyGlobalTheme(KeyFile &theme, const QString &themeName, const QString &defaultTheme, const QString &themePath, const QString &themeId);
 
     void updateCustomTheme(const QString &type, const QString &value);
     bool isBgInUse(const QString &file);
@@ -165,6 +173,7 @@ private:
     void initGlobalTheme();
     bool isSkipSetWallpaper(const QString &themePath);
     bool checkWallpaperLockedStatus();
+    void initGlobalOverrideConfig();
 
 Q_SIGNALS:
     void Changed(const QString &ty, const QString &value);
@@ -202,6 +211,7 @@ private:
     QString                                          m_currentGlobalTheme; // 当前主题，globalTheme+.light/.dark
     QJsonArray                                       m_wallpaperConfig; // store the config
     bool                                             m_setDefaulting;
+    QHash<QString, QVector<GlobalThemeOverride>>     m_globalThemeOverrideMap;
 };
 
 #endif // APPEARANCEMANAGER_H

@@ -18,6 +18,8 @@
 const int gtkVersion = 0;
 const int iconVersion = 1;
 const int cursorVersion = 1;
+class Theme;
+
 QString getScaleDir();
 QString getTypeDir(QString type0, int version);
 void init(double scalFactor0);
@@ -34,7 +36,7 @@ QImage CompositeImages(QVector<QImage *>, int width, int height, int inconSize, 
 QImage *loadXCursor(QString fileName, int size);
 QList<QIcon> getIcons(QString theme, int size);
 QVector<QImage *> getCursors(QString dir, int size);
-QString getGlobal(QString id, QString descFile,QString gtkTheme);
+QString getGlobal(QString id, QSharedPointer<Theme> theme, QString gtkTheme);
 QString getGtk(QString id, QString descFile);
 QString getIcon(QString id, QString descFile);
 bool shouldGenerateNew(QString descFile, QString out);
