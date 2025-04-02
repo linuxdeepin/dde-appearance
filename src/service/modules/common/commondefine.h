@@ -17,7 +17,7 @@ extern QDBusConnection *pluginDbus;
 
 #define APPEARANCEAPPID     "org.deepin.dde.appearance"
 #define APPEARANCESCHEMA    "org.deepin.dde.appearance"
-#define STARTCDDEAPPID      "org.deepin.startdde"
+#define DDEDAEMONAPPID      "org.deepin.dde.daemon"
 #define XSETTINGSNAME       "org.deepin.XSettings"
 
 #define ZONEPATH                 "/usr/share/zoneinfo/zone1970.tab"

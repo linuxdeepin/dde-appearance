@@ -1,3 +1,9 @@
+dde-appearance (1.1.57) unstable; urgency=medium
+
+  * remove startdde dependency
+
+ -- fuleyi <fuleyi@uniontech.com>  Wed, 02 Apr 2025 11:20:50 +0800
+
 dde-appearance (1.1.56) unstable; urgency=medium
 
   * chore(deb): unconflict with dde-kwin

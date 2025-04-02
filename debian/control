@@ -28,7 +28,7 @@ Homepage: http://www.deepin.org
 Package: dde-appearance
 Architecture: any
 Depends:
-   startdde (>= 6.1.1),
+   dde-daemon (>= 6.1.26),
    ${misc:Depends},
    ${shlibs:Depends},
    deepin-service-manager,
