@@ -25,7 +25,7 @@ ThemesApi::ThemesApi(AppearanceManager *parent)
     , gtk3Mutex(QMutex())
     , dbusProxy(parent->getDBusProxy())
 {
-    xSetting = QSharedPointer<DConfig>(DconfigSettings::ConfigPtr(STARTCDDEAPPID,XSETTINGSNAME));
+    xSetting = QSharedPointer<DConfig>(DconfigSettings::ConfigPtr(DDEDAEMONAPPID,XSETTINGSNAME));
 }
 
 ThemesApi::~ThemesApi()

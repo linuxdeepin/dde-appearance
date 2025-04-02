@@ -57,7 +57,7 @@ AppearanceManager::AppearanceManager(AppearanceProperty *prop, QObject *parent)
     , m_wallpaperConfig({})
     , m_setDefaulting(false)
 {
-    m_XSettingsDconfig = QSharedPointer<DConfig>(DconfigSettings::ConfigPtr(STARTCDDEAPPID,XSETTINGSNAME));
+    m_XSettingsDconfig = QSharedPointer<DConfig>(DconfigSettings::ConfigPtr(DDEDAEMONAPPID,XSETTINGSNAME));
     if (!m_XSettingsDconfig) {
         qWarning() << "XSettingsDconfig is NULL";
         exit(-1);

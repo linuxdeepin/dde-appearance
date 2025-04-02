@@ -35,9 +35,9 @@ Appearance1Thread::Appearance1Thread()
     property->opacity.init(settingDconfig.value(GSKEYOPACITY).toDouble());
     property->wallpaperSlideShow.init(settingDconfig.value(GSKEYWALLPAPERSLIDESHOW).toString());
     property->wallpaperURls.init(settingDconfig.value(GSKEYWALLPAPERURIS).toString());
-    QString qtActivecolor =  DconfigSettings::ConfigValue(STARTCDDEAPPID,XSETTINGSNAME,GSKEYQTACTIVECOLOR,"").toString();
-    QString qtDarkActivecolor =  DconfigSettings::ConfigValue(STARTCDDEAPPID,XSETTINGSNAME,GSKEYQTACTIVECOLOR_DARK,"").toString();
-    int radius = DconfigSettings::ConfigValue(STARTCDDEAPPID,XSETTINGSNAME,DCKEYDTKWINDOWRADIUS,"").toInt();
+    QString qtActivecolor =  DconfigSettings::ConfigValue(DDEDAEMONAPPID,XSETTINGSNAME,GSKEYQTACTIVECOLOR,"").toString();
+    QString qtDarkActivecolor =  DconfigSettings::ConfigValue(DDEDAEMONAPPID,XSETTINGSNAME,GSKEYQTACTIVECOLOR_DARK,"").toString();
+    int radius = DconfigSettings::ConfigValue(DDEDAEMONAPPID,XSETTINGSNAME,DCKEYDTKWINDOWRADIUS,"").toInt();
     property->windowRadius.init(radius);
     QString activeColor = settingDconfig.value(GSKEYGLOBALTHEME).toString().endsWith("dark") ? qtDarkActivecolor : qtActivecolor;
     property->qtActiveColor.init(AppearanceManager::qtActiveColorToHexColor(activeColor));
