@@ -39,11 +39,11 @@
 #define DeepinWMGeneralGroupName "General"
 #define DeepinWMWorkspaceBackgroundGroupName "WorkspaceBackground"
 
-#define KWinConfigName "deepin-kwinrc"
+#define KWinConfigName "kwinrc"
 #define KWinCloseWindowGroupName "Script-closewindowaction"
 #define KWinRunCommandGroupName "Script-runcommandaction"
 
-#define GlobalAccelComponentName "deepin-kwin"
+#define GlobalAccelComponentName "kwin"
 #define GlobalAccelComponentDisplayName "KWin"
 
 // kwin dbus
