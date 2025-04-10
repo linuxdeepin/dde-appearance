@@ -1904,24 +1904,20 @@ QString AppearanceManager::marshal(const QVector<QSharedPointer<FontsManager::Fa
 void AppearanceManager::initGlobalOverrideConfig()
 {
     m_globalThemeOverrideMap.clear();
-    const QString &jsonRaw = m_settingDconfig.value("globalThemeOverride").toString();
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonRaw.toUtf8());
-    if (jsonDoc.isArray()) {
-        QJsonArray array = jsonDoc.array();
-        for (auto iter : array) {
-            QJsonObject obj = iter.toObject();
-            QString id = obj["id"].toString();
-            QJsonArray overrideArray = obj["override"].toArray();
-            QVector<GlobalThemeOverride> overrideVec;
-            for (auto iter : overrideArray) {
-                QJsonObject overrideObj = iter.toObject();
-                GlobalThemeOverride override;
-                override.section = overrideObj["section"].toString();
-                override.key = overrideObj["key"].toString();
-                override.value = overrideObj["value"].toString();
-                overrideVec.append(override);
-            }
-            m_globalThemeOverrideMap.insert(id, overrideVec);
+    const auto &overrideList = m_settingDconfig.value("globalThemeOverride").value<QVariantList>();
+    for (const auto &overrideItem : overrideList) {
+        const auto &overrideMap = overrideItem.toMap();
+        auto id = overrideMap.value("id").toString();
+        auto overrideVecMap = overrideMap.value("override").value<QVariantList>();
+        for (const auto &overrideValue : overrideVecMap) {
+            const auto &overrideMap = overrideValue.toMap();
+            GlobalThemeOverride itemOverride;
+            itemOverride.section = overrideMap.value("section").toString();
+            itemOverride.key = overrideMap.value("key").toString();
+            itemOverride.value = overrideMap.value("value").toString();
+            m_globalThemeOverrideMap[id].append(itemOverride);
+
+            qDebug() << "add global theme override:" << id << itemOverride.section << itemOverride.key << itemOverride.value;
         }
     }
 }
