@@ -1,3 +1,9 @@
+dde-appearance (1.1.59) UNRELEASED; urgency=medium
+
+  * feat: The configuration of GlobalThemeOverride uses JSON format
+
+ -- zhangkun <zhangkun2@uniontech.com>  Fri, 11 Apr 2025 11:31:54 +0800
+
 dde-appearance (1.1.58) unstable; urgency=medium
 
   * fix: rename deepin-kwin to kwin (need deepin-kwin >= 6.0.0)
