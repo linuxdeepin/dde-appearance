@@ -1,10 +1,12 @@
 [Unit]
 Description=dde window manager
 
-Requisite=plasma-kglobalaccel.service
+Requires=plasma-kglobalaccel.service
+After=plasma-kglobalaccel.service
 
 [Service]
-Type=simple
+Type=dbus
+BusName=com.deepin.wm
 ExecCondition=/bin/sh -c 'test "$XDG_SESSION_TYPE" != "wayland" || exit 2'
 ExecStart=@CMAKE_INSTALL_FULL_BINDIR@/dde-fakewm
 Slice=session.slice
