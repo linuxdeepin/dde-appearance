@@ -1,4 +1,10 @@
-dde-appearance (1.1.59) UNRELEASED; urgency=medium
+dde-appearance (1.1.60) unstable; urgency=medium
+
+  * fix: mark dde-fakewm requires plasma-kglobalaccel
+
+ -- rewine <luhongxu@deepin.org>  Thu, 17 Apr 2025 11:01:26 +0800
+
+dde-appearance (1.1.59) unstable; urgency=medium
 
   * feat: The configuration of GlobalThemeOverride uses JSON format
 
