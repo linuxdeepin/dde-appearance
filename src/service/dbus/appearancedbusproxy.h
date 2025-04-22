@@ -123,10 +123,13 @@ public:
 Q_SIGNALS:
     void HandleForSleep(bool sleep);
 
+private Q_SLOTS:
+    void onDisplayPropertiesChanged(const QDBusMessage &message);
+
 private:
     DDBusInterface *m_wmInterface;
-    DDBusInterface *m_displayInterface;
-    DDBusInterface *m_xSettingsInterface;
+    QDBusInterface *m_displayInterface;
+    QDBusInterface *m_xSettingsInterface;
     DDBusInterface *m_timeDateInterface;
     QSharedPointer<DDBusInterface> m_userInterface;
     uint m_nid;

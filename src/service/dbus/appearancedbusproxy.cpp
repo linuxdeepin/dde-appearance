@@ -4,6 +4,7 @@
 
 #include "appearancedbusproxy.h"
 
+#include <QDBusInterface>
 #include <QDBusPendingReply>
 
 const QString DaemonService = QStringLiteral("org.deepin.dde.Daemon1");
@@ -12,8 +13,8 @@ const QString DaemonInterface = QStringLiteral("org.deepin.dde.Daemon1");
 
 AppearanceDBusProxy::AppearanceDBusProxy(QObject *parent)
     : QObject(parent)
-    , m_displayInterface(new DDBusInterface("org.deepin.dde.Display1", "/org/deepin/dde/Display1", "org.deepin.dde.Display1", QDBusConnection::sessionBus(), this))
-    , m_xSettingsInterface(new DDBusInterface("org.deepin.dde.XSettings1", "/org/deepin/dde/XSettings1", "org.deepin.dde.XSettings1", QDBusConnection::sessionBus(), this))
+    , m_displayInterface(new QDBusInterface("org.deepin.dde.Display1", "/org/deepin/dde/Display1", "org.deepin.dde.Display1", QDBusConnection::sessionBus(), this))
+    , m_xSettingsInterface(new QDBusInterface("org.deepin.dde.XSettings1", "/org/deepin/dde/XSettings1", "org.deepin.dde.XSettings1", QDBusConnection::sessionBus(),this))
     , m_timeDateInterface(new DDBusInterface("org.freedesktop.timedate1", "/org/freedesktop/timedate1", "org.freedesktop.timedate1", QDBusConnection::systemBus(), this))
     , m_nid(0)
 {
@@ -26,6 +27,11 @@ AppearanceDBusProxy::AppearanceDBusProxy(QObject *parent)
     registerScaleFactorsMetaType();
     QDBusConnection::systemBus().connect(DaemonService, DaemonPath, DaemonInterface, "HandleForSleep", this, SIGNAL(HandleForSleep(bool)));
     QDBusConnection::sessionBus().connect(QStringLiteral("org.deepin.dde.Timedate1"), QStringLiteral("/org/deepin/dde/Timedate1"), QStringLiteral("org.deepin.dde.Timedate1"), "TimeUpdate", this, SIGNAL(TimeUpdate()));
+
+    QDBusConnection::sessionBus().connect("org.deepin.dde.XSettings1","/org/deepin/dde/XSettings1","org.deepin.dde.XSettings1","SetScaleFactorStarted",this,SIGNAL(SetScaleFactorStarted()));
+    QDBusConnection::sessionBus().connect("org.deepin.dde.XSettings1","/org/deepin/dde/XSettings1","org.deepin.dde.XSettings1","SetScaleFactorDone",this,SIGNAL(SetScaleFactorDone()));
+
+    QDBusConnection::sessionBus().connect("org.deepin.dde.Display1", "/org/deepin/dde/Display1", "org.freedesktop.DBus.Properties","PropertiesChanged", this, SLOT(onDisplayPropertiesChanged(QDBusMessage)));
 }
 
 void AppearanceDBusProxy::setUserInterface(const QString &userPath)
@@ -258,4 +264,17 @@ QString AppearanceDBusProxy::SaveCustomWallPaper(const QString &username, const 
     QDBusMessage daemonMessage = QDBusMessage::createMethodCall(DaemonService, DaemonPath, DaemonInterface, "SaveCustomWallPaper");
     daemonMessage << username << file;
     return QDBusPendingReply<QString>(QDBusConnection::systemBus().asyncCall(daemonMessage));
+}
+
+void AppearanceDBusProxy::onDisplayPropertiesChanged(const QDBusMessage &message)
+{
+    if (message.arguments().length() > 1) {
+        QVariantMap changedProps = qdbus_cast<QVariantMap>(message.arguments().at(1).value<QDBusArgument>());
+        for (QVariantMap::const_iterator it = changedProps.cbegin(); it != changedProps.cend(); ++it) {
+            auto prop = it.key().toLatin1() + "Changed";
+            if (prop == "PrimaryChanged" || prop == "MonitorsChanged") {
+                QMetaObject::invokeMethod(this, prop, Qt::DirectConnection, QGenericArgument(it.value().typeName(), it.value().data()));
+            }
+        }
+    }
 }
