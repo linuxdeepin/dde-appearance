@@ -96,10 +96,6 @@ bool AppearanceManager::init()
 
     new ThemeFontSyncConfig("org.deepin.dde.Appearance1", "/org/deepin/dde/Appearance1/sync", QSharedPointer<AppearanceManager>(this));
     new BackgroundSyncConfig("org.deepin.dde.Appearance1", "/org/deepin/dde/Appearance1/Background", QSharedPointer<AppearanceManager>(this));
-
-    if (m_property->wallpaperURls->isEmpty()) {
-        updateNewVersionData();
-    }
     m_zone = m_dbusProxy->timezone();
 
     connect(m_dbusProxy.get(), &AppearanceDBusProxy::TimezoneChanged, this, &AppearanceManager::handleTimezoneChanged);
