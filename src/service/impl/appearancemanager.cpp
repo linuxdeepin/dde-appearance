@@ -776,11 +776,6 @@ void AppearanceManager::doUpdateWallpaperURIs()
     if (monitorWallpaperUris.isEmpty()) {
         return;
     }
-
-    // 如果是用户自己设置的桌面壁纸, 需要将主题更新为自定义
-    if (!monitorWallpaperUris.first().startsWith("/usr/share/wallpapers/deepin")) {
-        updateCustomTheme(TYPEWALLPAPER, monitorWallpaperUris.first());
-    }
 }
 
 void AppearanceManager::setPropertyWallpaperURIs(QMap<QString, QString> monitorWallpaperUris)
@@ -1377,7 +1372,7 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
             updateValut = true;
         }
     } else if (type == TYPEGREETERBACKGROUND) {
-        updateValut = doSetGreeterBackground(value);
+        doSetGreeterBackground(value);
     } else if (type == TYPESTANDARDFONT) {
         if (!m_setDefaulting &&m_property->standardFont == value) {
             return;
@@ -1416,7 +1411,6 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
         }
     } else if (type == TYPEWALLPAPER) {
         doSetCurrentWorkspaceBackground(value);
-        updateValut = true;
     } else if (type == TYPEDTKSIZEMODE) {
         bool ok = false;
         int mode = value.toInt(&ok);
@@ -1537,7 +1531,9 @@ void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeNam
         }
     };
 
-    setGlobalFile("Wallpaper", TYPEWALLPAPER);
+    if (!m_setDefaulting || m_property->wallpaperURls->isEmpty())
+        setGlobalFile("Wallpaper", TYPEWALLPAPER);
+    
     setGlobalFile("LockBackground", TYPEGREETERBACKGROUND);
     setGlobalItem("IconTheme", TYPEICON);
     setGlobalItem("CursorTheme", TYPECURSOR);
