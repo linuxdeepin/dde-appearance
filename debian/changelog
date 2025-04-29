@@ -1,3 +1,12 @@
+dde-appearance (1.1.61) unstable; urgency=medium
+
+  * feat: Starting no longer initializes' Wallpaper-Uris' and
+    'Wallpaper_Slideshow'
+  * feat: Decoupling themes and wallpapers
+  * fix: 解决缩放设置失效的问题
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Tue, 29 Apr 2025 13:45:49 +0800
+
 dde-appearance (1.1.60) unstable; urgency=medium
 
   * fix: mark dde-fakewm requires plasma-kglobalaccel
