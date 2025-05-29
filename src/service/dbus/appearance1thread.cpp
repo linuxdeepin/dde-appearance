@@ -52,7 +52,7 @@ Appearance1Thread::~Appearance1Thread()
 {
     thread->quit();
     thread->wait();
-    delete appearanceManager.take();
+    appearanceManager.reset();
     delete property;
 }
 
