@@ -13,6 +13,7 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gtk/gtk.h>
+#include <utility>
 
 #include <X11/Xcursor/Xcursor.h>
 
@@ -272,7 +273,7 @@ QList<QIcon> getIcons(QString theme, int size)
 {
     QList<QIcon> images;
     QIcon::setThemeName(theme);
-    for(const auto &icons : qAsConst(presentIcons)) {
+    for(const auto &icons : std::as_const(presentIcons)) {
         for (auto &&iconName:icons) {
             QIcon icon(new CompatibleEngine(iconName)); // QIcon::fromTheme(iconName); DTK中DCI支持不完整，暂用CompatibleEngine处理兼容
             if (!icon.isNull()) {

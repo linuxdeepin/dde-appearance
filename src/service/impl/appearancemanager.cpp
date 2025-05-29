@@ -618,7 +618,7 @@ QString AppearanceManager::qtActiveColorToHexColor(const QString &activeColor)
 
 QString AppearanceManager::hexColorToQtActiveColor(const QString &hexColor)
 {
-    if (!QColor::isValidColor(hexColor))
+    if (!QColor::isValidColorName(hexColor))
         return QString();
     QColor clr(hexColor);
     QStringList rgbaList;
