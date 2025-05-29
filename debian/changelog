@@ -1,3 +1,9 @@
+dde-appearance (1.1.62) unstable; urgency=medium
+
+  * refactor: improve memory management and code quality
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 29 May 2025 14:46:17 +0800
+
 dde-appearance (1.1.61) unstable; urgency=medium
 
   * feat: Starting no longer initializes' Wallpaper-Uris' and
