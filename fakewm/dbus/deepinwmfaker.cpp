@@ -334,7 +334,8 @@ DeepinWMFaker::DeepinWMFaker(QObject* appearance)
         m_currentDesktop = to;
     });
     connect(KX11Extras::self(), &KX11Extras::numberOfDesktopsChanged, this, &DeepinWMFaker::workspaceCountChanged);
-    connect(m_appearance.data(), SIGNAL(valueChanged(const QString &)),this,SLOT(DeepinWMFaker::onGsettingsDDEAppearanceChanged));
+//    connect(m_appearance.data(), SIGNAL(valueChanged(const QString &)),this,SLOT(DeepinWMFaker::onGsettingsDDEAppearanceChanged));
+    connect(m_appearance.data(), SIGNAL(valueChanged(const QString &)), this, SLOT(onGsettingsDDEAppearanceChanged(const QString &)));
 #endif // DISABLE_DEEPIN_WM
 
     QDBusConnection::sessionBus().connect(KWinDBusService, KWinDBusCompositorPath, KWinDBusCompositorInterface,
