@@ -39,9 +39,9 @@ private:
     QStringList gtkDirs;
     QStringList iconDirs;
     QStringList bgDirs;
-    qint64 prevTimestamp;
     QSharedPointer<QFileSystemWatcher> fileWatcher;
     QSharedPointer<Backgrounds> backgrounds;
+    qint64 prevTimestamp;
     QTimer *timer;
     QSet<QString> changedThemes;
 };

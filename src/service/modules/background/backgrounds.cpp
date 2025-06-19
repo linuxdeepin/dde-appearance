@@ -204,8 +204,9 @@ void Backgrounds::notifyChanged()
 
 QString Backgrounds::resizeImage(QString fileName, QString cacheDir)
 {
-    const int stdWidth = 3840;
-    const int stdHeight = 2400;
+    Q_UNUSED(cacheDir);
+    // const int stdWidth = 3840;
+    // const int stdHeight = 2400;
     // TODO: 对图片过大的做处理
     return fileName;
 }

@@ -35,7 +35,6 @@ QString DFile::base(QString file)
 {
     QString ret =file;
     if (file.indexOf("/")!=-1) {    // 包含路径
-        int pos = file.lastIndexOf("/");
         ret = file.mid(file.lastIndexOf("/")+1);
     }
     // 去除后缀
