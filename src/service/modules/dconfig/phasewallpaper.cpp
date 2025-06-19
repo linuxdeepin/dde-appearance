@@ -35,7 +35,7 @@ QString phaseWPType(const QString &index, const QString &strMonitorName)
     return shouldGetWPType;
 }
 
-std::optional<QJsonArray> PhaseWallPaper::setWallpaperUri(const QString &index, const QString &strMonitorName, const QString &uri)
+std::optional<QJsonArray> PhaseWallPaper::setWallpaperUri(const QString &index, const QString &strMonitorName, const QString &uri, bool toCustom)
 {
     QString wpIndexKey = generateWpIndexKey(index, strMonitorName);
     QString shouldGetWPType = phaseWPType(index, strMonitorName);
@@ -83,6 +83,7 @@ std::optional<QJsonArray> PhaseWallPaper::setWallpaperUri(const QString &index, 
 
             if (wpInfoObj["wpIndex"] == wpIndexKey) {
                 wpInfoObj["uri"] = url;
+                wpInfoObj["custom"] = toCustom;
                 shouldAddWPInfo = false;
                 shouldAddWPTypeInfo = false;
                 if (url.isEmpty()) {
@@ -101,7 +102,7 @@ std::optional<QJsonArray> PhaseWallPaper::setWallpaperUri(const QString &index, 
 
         wpTypeObj["wallpaperInfo"] = wpInfoArray;
         if (shouldAddWPInfo) {
-            QJsonObject obj = { { "uri", url }, { "wpIndex", wpIndexKey } };
+            QJsonObject obj = { { "uri", url }, { "wpIndex", wpIndexKey }, { "custom", toCustom } };
             QJsonArray array = wpTypeObj["wallpaperInfo"].toArray();
             array.append(obj);
             wpTypeObj["wallpaperInfo"] = array;
@@ -110,7 +111,7 @@ std::optional<QJsonArray> PhaseWallPaper::setWallpaperUri(const QString &index, 
     }
 
     if (shouldAddWPTypeInfo) {
-        QJsonObject obj1 = { { "uri", url }, { "wpIndex", wpIndexKey } };
+        QJsonObject obj1 = { { "uri", url }, { "wpIndex", wpIndexKey }, { "custom", toCustom } };
         QJsonArray array = { obj1 };
         QJsonObject obj2 = { { "type", shouldGetWPType }, { "wallpaperInfo", array } };
 
@@ -210,4 +211,26 @@ void PhaseWallPaper::resizeWorkspaceCount(int size)
     if (bSave) {
         DconfigSettings::ConfigSaveValue(appearanceProcessId, appearanceDconfJson, allWallpaperUrisKey, allWallpaperUri.toVariantList());
     }
+}
+
+bool PhaseWallPaper::isCustomWallpaper(const QString &index, const QString &strMonitorName)
+{
+    QVariant v = DconfigSettings::ConfigValue(appearanceProcessId, appearanceDconfJson, allWallpaperUrisKey, "");
+    if (!v.isValid()) {
+        return false;
+    }
+
+    QString wpIndexKey = generateWpIndexKey(index, strMonitorName);
+    QJsonArray allWallpaperUri = v.toJsonArray();
+    for (auto wallpaper : allWallpaperUri) {
+        QJsonObject wpObj = wallpaper.toObject();
+        QJsonArray wpInfoArray = wpObj["wallpaperInfo"].toArray();
+        for (auto wpInfo : wpInfoArray) {
+            QJsonObject obj = wpInfo.toObject();
+            if (obj["wpIndex"] == wpIndexKey && obj["custom"].toBool()) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
