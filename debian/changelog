@@ -1,3 +1,9 @@
+dde-appearance (1.1.63) unstable; urgency=medium
+
+  * fix: correct SLOT syntax to avoid QObject::connect warning
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 19 Jun 2025 10:29:09 +0800
+
 dde-appearance (1.1.62) unstable; urgency=medium
 
   * refactor: improve memory management and code quality
