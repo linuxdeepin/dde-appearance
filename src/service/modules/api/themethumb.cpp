@@ -271,6 +271,7 @@ QVector<QImage*> getCursors(QString dir, int size)
 
 QList<QIcon> getIcons(QString theme, int size)
 {
+    Q_UNUSED(size); // Suppress unused parameter warning
     QList<QIcon> images;
     QIcon::setThemeName(theme);
     for(const auto &icons : std::as_const(presentIcons)) {
@@ -367,6 +368,7 @@ QImage* loadXCursor(QString fileName, int size)
 
 QString getGlobal(QString id, QSharedPointer<Theme> theme, QString gtkTheme)
 {
+    Q_UNUSED(id); // Suppress unused parameter warning
     if (!checkScaleFactor()) {
         qInfo() << "scaleFactor <= 0";
         return "";

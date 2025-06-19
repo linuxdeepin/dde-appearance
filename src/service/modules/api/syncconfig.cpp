@@ -42,6 +42,7 @@ void SyncConfig::registerConfig()
 
 void SyncConfig::handleNameOwnerChanged(QString name, QString oldOwner, QString newOwner)
 {
+    Q_UNUSED(oldOwner);
     if (name == SYNCSERVICENAME && !newOwner.isEmpty()) {
         registerConfig();
     }

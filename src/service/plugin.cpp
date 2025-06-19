@@ -12,6 +12,9 @@ static Appearance1 *appearance = nullptr;
 
 extern "C" int DSMRegister(const char *name, void *data)
 {
+    Q_UNUSED(name);
+    Q_UNUSED(data);
+    
     // TODO: deepin-service-manager 传递进来的dbus在后面使用会无效，因此暂时采用QDBusConnection::sessionBus()
     // (void)data;
     // pluginDbus = static_cast<QDBusConnection*>(data);
@@ -21,7 +24,10 @@ extern "C" int DSMRegister(const char *name, void *data)
     QString languagePath = QStandardPaths::locate(QStandardPaths::GenericDataLocation,
                                                   QString("plugin-dde-appearance/translations"),
                                                   QStandardPaths::LocateDirectory);
-    int res = translator->load(languagePath+"/dde-appearance_" + QLocale::system().name());
+    bool translatorLoaded = translator->load(languagePath+"/dde-appearance_" + QLocale::system().name());
+    if (!translatorLoaded) {
+        qWarning() << "Failed to load translator for locale:" << QLocale::system().name();
+    }
     qApp->installTranslator(translator);
 
     new Appearance1Adaptor(appearance);
@@ -39,6 +45,9 @@ extern "C" int DSMRegister(const char *name, void *data)
 // 非常驻插件必须实现该函数，以防内存泄漏
 extern "C" int DSMUnRegister(const char *name, void *data)
 {
+    Q_UNUSED(name);
+    Q_UNUSED(data);
+    
     if (appearance) {
         appearance->deleteLater();
     }
