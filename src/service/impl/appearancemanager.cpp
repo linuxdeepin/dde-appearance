@@ -1506,14 +1506,14 @@ void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeNam
         return ret;
     };
     // 设置globlaTheme的一项，先从themeName中找对应项，若没有则从defTheme中找对应项，最后调用doSetByType实现功能
-    auto setGlobalItem = [&theme, &themeName, &defTheme, getValue, this](const QString &key, const QString &type) {
+    auto setGlobalItem = [&themeName, &defTheme, getValue, this](const QString &key, const QString &type) {
         QString themeValue = getValue(themeName, key);
         if (themeValue.isEmpty() && !defTheme.isEmpty())
             themeValue = getValue(defTheme, key);
         if (!themeValue.isEmpty())
             doSetByType(type, themeValue);
     };
-    auto setGlobalFile = [&theme, &themeName, &defTheme, getValue, &themePath, this](const QString &key, const QString &type) {
+    auto setGlobalFile = [&themeName, &defTheme, getValue, &themePath, this](const QString &key, const QString &type) {
         QString themeValue = getValue(themeName, key);
         if (themeValue.isEmpty() && !defTheme.isEmpty())
             themeValue = getValue(defTheme, key);
@@ -1527,7 +1527,11 @@ void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeNam
         }
     };
 
-    if (!m_setDefaulting || m_property->wallpaperURls->isEmpty())
+    bool configEmpty = m_property->wallpaperURls->isEmpty();
+    bool onlySetThemeType = m_property->globalTheme->startsWith(themeId);
+    bool isCustom = PhaseWallPaper::isCustomWallpaper(QString::number(getCurrentDesktopIndex()), m_dbusProxy->primary());
+
+    if (configEmpty || !(onlySetThemeType && isCustom))
         setGlobalFile("Wallpaper", TYPEWALLPAPER);
     
     setGlobalFile("LockBackground", TYPEGREETERBACKGROUND);
@@ -1541,31 +1545,6 @@ void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeNam
     setGlobalItem("WindowRadius", TYPWINDOWRADIUS);
     setGlobalItem("WindowOpacity", TYPEWINDOWOPACITY);
     m_globalThemeUpdating = false;
-}
-
-// 自定义主题在切换主题外观时跳过设置桌面壁纸
-bool AppearanceManager::isSkipSetWallpaper(const QString &themePath)
-{
-    if (!themePath.endsWith("custom")) {
-        return false;
-    }
-
-    KeyFile theme(',');
-    theme.loadFile(themePath + "/index.theme");
-    QStringList themeNames{ "DefaultTheme", "DarkTheme" };
-    for (const auto &name : themeNames) {
-        QString themeName = theme.getStr("Deepin Theme", name);
-        if (themeName.isEmpty()) {
-            continue;
-        }
-
-        QString themeValue = theme.getStr(themeName, "Wallpaper");
-        if (!themeValue.startsWith("/usr/share/wallpapers/deepin")) {
-            return true;
-        }
-    }
-
-    return false;
 }
 
 bool AppearanceManager::checkWallpaperLockedStatus()
@@ -1725,7 +1704,7 @@ void AppearanceManager::doSetCurrentWorkspaceBackgroundForMonitor(const QString 
         return;
     }
 
-    if (auto value = PhaseWallPaper::setWallpaperUri(strIndex, strMonitorName, uri); value.has_value()) {
+    if (auto value = PhaseWallPaper::setWallpaperUri(strIndex, strMonitorName, uri, !m_globalThemeUpdating); value.has_value()) {
         m_wallpaperConfig = value.value();
     }
 
@@ -1762,7 +1741,7 @@ void AppearanceManager::doSetWorkspaceBackgroundForMonitor(const int &index, con
         return;
     }
  
-    if (auto value = PhaseWallPaper::setWallpaperUri(QString::number(index), strMonitorName, uri); value.has_value()) {
+    if (auto value = PhaseWallPaper::setWallpaperUri(QString::number(index), strMonitorName, uri, !m_globalThemeUpdating); value.has_value()) {
         m_wallpaperConfig = value.value();
     }
         // TODO delete, 临时适配Treeland

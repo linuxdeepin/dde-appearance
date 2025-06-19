@@ -30,9 +30,10 @@ public:
     ~PhaseWallPaper();
 
 public:
-    static std::optional<QJsonArray> setWallpaperUri(const QString &index, const QString &strMonitorName, const QString &uri);
+    static std::optional<QJsonArray> setWallpaperUri(const QString &index, const QString &strMonitorName, const QString &uri, bool toCustom = false);
     static QString getWallpaperUri(const QString &index, const QString &strMonitorName);
     static void resizeWorkspaceCount(int size);
+    static bool isCustomWallpaper(const QString &index, const QString &strMonitorName);
 };
 
 #endif // PHASEWALLPAPERDCONFIG

@@ -171,7 +171,6 @@ private:
     QVector<Background> backgroundListVerify(const QVector<Background>& backgrounds);
     QString getWallpaperUri(const QString &index, const QString &monitorName);
     void initGlobalTheme();
-    bool isSkipSetWallpaper(const QString &themePath);
     bool checkWallpaperLockedStatus();
     void initGlobalOverrideConfig();
 
