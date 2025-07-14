@@ -210,11 +210,6 @@ bool ThemesApi::setGtkTheme(QString name)
     }
 
     xSetting->setValue(DCKEYTHEME, name);
-    if (!setQTTheme()) {
-        xSetting->setValue(DCKEYTHEME, old);
-        qWarning() << "setQTTheme failed";
-        return false;
-    }
 
     return true;
 }
@@ -430,41 +425,6 @@ void ThemesApi::doSetGtk3Prop(QString key, QString value, QString file, KeyFile 
 {
     keyfile.setKey(GTK3GROUPSETTINGS, key, value);
     keyfile.saveToFile(file);
-}
-
-bool ThemesApi::setQTTheme()
-{
-    QString config = utils::GetUserConfigDir();
-    config += "/Trolltech.conf";
-    return setQt4Theme(config);
-}
-
-bool ThemesApi::setQt4Theme(QString config)
-{
-    if (!utils::isFileExists(config)) {
-        return false;
-    }
-
-    KeyFile keyfile;
-    keyfile.loadFile(config);
-
-    QString value = keyfile.getStr("Qt", "style");
-    if (value == "GTK+")
-        return true;
-
-    if (config.length() == 0)
-        return false;
-
-    QFile file(config);
-    if (file.exists()) {
-        QDir dir(config.left(config.lastIndexOf("/")));
-        if (!dir.mkpath(config.left(config.lastIndexOf("/"))))
-            return false;
-    }
-
-    keyfile.setKey("Qt", "style", "GTK+");
-
-    return keyfile.saveToFile(config);
 }
 
 bool ThemesApi::setDefaultCursor(QString name)
