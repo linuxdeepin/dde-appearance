@@ -53,8 +53,6 @@ public:
     void setGtk3Prop(QString key, QString value, QString file);
     bool isGtk3PropEqual(QString key, QString value,KeyFile& keyfile);
     void doSetGtk3Prop(QString key,QString value, QString file, KeyFile& keyfile);
-    bool setQTTheme();
-    bool setQt4Theme(QString config);
     bool setDefaultCursor(QString name);
     void setGtkCursor(QString name);
     void setQtCursor(QString name);
