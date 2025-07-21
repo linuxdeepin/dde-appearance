@@ -213,6 +213,16 @@
             "description": "全局主题参数的override",
             "permissions": "readonly",
             "visibility": "private"
+        },
+        "isCustomLockBackground": {
+            "value": false,
+            "serial": 0,
+            "flags": [],
+            "name": "isCustomLockBackground",
+            "name[zh_CN]": "是否自定义锁屏壁纸",
+            "description": "Whether to customize the lock screen wallpaper",
+            "permissions": "readwrite",
+            "visibility": "private"
         }
     }
 }
