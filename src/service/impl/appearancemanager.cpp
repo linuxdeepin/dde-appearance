@@ -1148,6 +1148,11 @@ bool AppearanceManager::doSetGreeterBackground(QString value)
     value = utils::enCodeURI(value, SCHEME_FILE);
     m_greeterBg = value;
     m_dbusProxy->SetGreeterBackground(value);
+
+    if (!m_globalThemeUpdating) {
+        m_settingDconfig.setValue(DCKEYISCUSTOMLOCKBACKGROUND, true);
+    }
+
     return true;
 }
 
@@ -1530,11 +1535,19 @@ void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeNam
     bool configEmpty = m_property->wallpaperURls->isEmpty();
     bool onlySetThemeType = m_property->globalTheme->startsWith(themeId);
     bool isCustom = PhaseWallPaper::isCustomWallpaper(QString::number(getCurrentDesktopIndex()), m_dbusProxy->primary());
+    bool isCustomLockBackground = m_settingDconfig.value(DCKEYISCUSTOMLOCKBACKGROUND).toBool();
 
+    // 1. 新装镜像，配置为空时设置一次初始化配置
+    // 2. 若自定义过壁纸(考虑不同屏幕不同工作区)，且当前仅在设置深浅色，则不设置壁纸
     if (configEmpty || !(onlySetThemeType && isCustom))
         setGlobalFile("Wallpaper", TYPEWALLPAPER);
-    
-    setGlobalFile("LockBackground", TYPEGREETERBACKGROUND);
+
+    // 同上，但锁屏壁纸不考虑屏幕和工作区
+    if (m_greeterBg.isEmpty() || !(isCustomLockBackground && onlySetThemeType)) {
+        setGlobalFile("LockBackground", TYPEGREETERBACKGROUND);
+        m_settingDconfig.setValue(DCKEYISCUSTOMLOCKBACKGROUND, false);
+    }
+
     setGlobalItem("IconTheme", TYPEICON);
     setGlobalItem("CursorTheme", TYPECURSOR);
     setGlobalItem("AppTheme", TYPEGTK);

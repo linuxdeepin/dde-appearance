@@ -41,7 +41,7 @@ extern QDBusConnection *pluginDbus;
 #define DDTKSIZEMODE             "Dtk_Size_Mode"
 #define DQTSCROLLBARPOLICY        "Qt_Scrollbar_Policy"
 #define DACTIVECOLORS            "Active_Colors"
-
+#define DCKEYISCUSTOMLOCKBACKGROUND "isCustomLockBackground"
 #define DCKEYQTACTIVECOLOR        "qt-active-color"
 #define DCKEYQTDARKACTIVECOLOR    "qt-dark-active-color"
 #define DCKEYDTKWINDOWRADIUS      "dtk-window-radius"
@@ -49,6 +49,7 @@ extern QDBusConnection *pluginDbus;
 #define DCKEYTHEME                "theme-name"
 #define DCKEYICONTHEME            "icon-theme-name"
 #define DCKEYCURSORNAME           "gtk-cursor-theme-name"
+
 
 #define GTK2CONFDELIM            "="
 #define GTK3GROUPSETTINGS        "Settings"
