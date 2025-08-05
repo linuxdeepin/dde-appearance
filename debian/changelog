@@ -1,3 +1,9 @@
+dde-appearance (1.1.69) unstable; urgency=medium
+
+  * Release 1.1.69
+
+ -- zhangkun <zhangkun2@uniontech.com>  Tue, 05 Aug 2025 20:27:33 +0800
+
 dde-appearance (1.1.68) unstable; urgency=medium
 
   * feat: add custom lock screen wallpaper flag
