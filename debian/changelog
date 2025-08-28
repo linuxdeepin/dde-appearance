@@ -1,3 +1,9 @@
+dde-appearance (1.1.69) unstable; urgency=medium
+
+  * refactor: update key names to camelCase in accelerator map
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 28 Aug 2025 14:36:24 +0200
+
 dde-appearance (1.1.68) unstable; urgency=medium
 
   * feat: add custom lock screen wallpaper flag
