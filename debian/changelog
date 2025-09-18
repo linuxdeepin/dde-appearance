@@ -1,3 +1,9 @@
+dde-appearance (1.1.70) unstable; urgency=medium
+
+  * docs: add GPLv3 license and update license references
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Thu, 18 Sep 2025 20:03:39 +0800
+
 dde-appearance (1.1.69) unstable; urgency=medium
 
   * refactor: update key names to camelCase in accelerator map
