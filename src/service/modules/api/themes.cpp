@@ -30,6 +30,7 @@ ThemesApi::ThemesApi(AppearanceManager *parent)
 
 ThemesApi::~ThemesApi()
 {
+    delete scanner;
 }
 
 bool ThemesApi::isThemeInList(QString theme, QVector<QString> list)
@@ -604,7 +605,6 @@ int set_qt_cursor(const char *name)
         }
 
         XFixesChangeCursorByName(disp, cursor, list[i]);
-        // FIXME: do we need to free the cursor?
         XFreeCursor(disp, cursor);
     }
     XCloseDisplay(disp);
@@ -649,6 +649,7 @@ void ThemesApi::setQtCursor(QString name)
     xcb_change_window_attributes(conn, screen->root, XCB_CW_CURSOR, static_cast<void *>(&cid));
     xcb_flush(conn);
 
+    xcb_free_cursor(conn, cid);
     xcb_cursor_context_free(ctx);
     xcb_disconnect(conn);
 #endif
