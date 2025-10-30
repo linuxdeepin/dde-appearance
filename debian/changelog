@@ -1,3 +1,9 @@
+dde-appearance (1.1.71) unstable; urgency=medium
+
+  * fix: add Hei_MSCS font for Traditional Chinese locales
+
+ -- lvpeilong <lvpeilong@uniontech.com>  Thu, 30 Oct 2025 20:17:54 +0800
+
 dde-appearance (1.1.70) unstable; urgency=medium
 
   * docs: add GPLv3 license and update license references
