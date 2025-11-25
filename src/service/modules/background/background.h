@@ -25,7 +25,7 @@ public:
 
 private:
     QString id;
-    bool deletable;
+    bool deletable = true;
 };
 
 #endif

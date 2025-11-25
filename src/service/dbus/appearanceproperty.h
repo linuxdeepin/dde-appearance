@@ -42,7 +42,7 @@ public:
     }
 
 private:
-    T m_data;
+    T m_data {};
     QString m_name;
 };
 
