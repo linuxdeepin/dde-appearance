@@ -1,3 +1,10 @@
+dde-appearance (1.1.72) unstable; urgency=medium
+
+  * fix: initialize member variables to prevent undefined behavior
+  * fix: remove de_CH resource
+
+ -- zhaoyingzhen <zhaoyingzhen@uniontech.com>  Thu, 27 Nov 2025 17:38:43 +0800
+
 dde-appearance (1.1.71) unstable; urgency=medium
 
   * fix: add Hei_MSCS font for Traditional Chinese locales
