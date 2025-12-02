@@ -39,6 +39,7 @@ AppearanceProperty::AppearanceProperty()
     , windowRadius("WindowRadius")
     , dtkSizeMode("DTKSizeMode")
     , qtScrollBarPolicy("QtScrollBarPolicy")
+    , cursorSize("CursorSize")
 {
     fontSize.init(0.0);
     opacity.init(0.0);

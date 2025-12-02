@@ -534,6 +534,14 @@ void AppearanceManager::setQtScrollBarPolicy(int value)
     }
 }
 
+void AppearanceManager::setCursorSize(int value)
+{
+    if (value != m_property->cursorSize && m_settingDconfig.isValid()) {
+        m_settingDconfig.setValue(TYPECURSORSIZE, value);
+        m_property->cursorSize = value;
+    }
+}
+
 void AppearanceManager::setActiveColors(const QString &value)
 {
     m_settingDconfig.setValue(DACTIVECOLORS, value);
@@ -1063,8 +1071,32 @@ bool AppearanceManager::doSetCursorTheme(QString value)
         return false;
     }
 
+    auto getSuitableCursorSize = [this, value]() {
+        int cursorSize = - 1;
+        for (auto iter : m_subthemes->listCursorThemes()) {
+            if (iter->getId() == value) {
+                auto availableSizes = utils::getAvailableCursorSizes(iter->getPath());
+                int len = INT_MAX;
+                int value = -1;
+                for (auto size : availableSizes) {
+                    if (std::abs(size - m_property->cursorSize) < len) {
+                        len = std::abs(size - m_property->cursorSize);
+                        value = size;
+                    }
+                }
+                break;
+            }
+        }
+        return cursorSize;
+    };
+
     setCursorTheme(value);
-    return m_subthemes->setCursorTheme(value);
+    if (m_subthemes->setCursorTheme(value)) {
+        doSetCursorSize(getSuitableCursorSize());
+        return true;
+    } else {
+        return false;
+    }
 }
 
 bool AppearanceManager::doSetStandardFont(QString value)
@@ -1424,6 +1456,12 @@ void AppearanceManager::doSetByType(const QString &type, const QString &value)
         int policy = value.toInt(&ok);
         if (ok) {
             doSetQtScrollBarPolicy(policy);
+        }
+    } else if (type == TYPECURSORSIZE) {
+        bool ok = false;
+        int size = value.toInt(&ok);
+        if (ok) {
+            doSetCursorSize(size);
         }
     }
 
@@ -1791,6 +1829,15 @@ void AppearanceManager::doSetQtScrollBarPolicy(int value)
     }
 }
 
+void AppearanceManager::doSetCursorSize(int value)
+{
+    if (value != m_property->cursorSize) {
+        setCursorSize(value);
+        m_subthemes->setCursorSize(value);
+        m_XSettingsDconfig->setValue(DCKEYCURSORSIZEBASE, value);
+    }
+}
+
 QString AppearanceManager::getActiveColors()
 {
     return m_settingDconfig.value(DACTIVECOLORS).toString();
@@ -1830,6 +1877,12 @@ QString AppearanceManager::marshal(const QVector<QSharedPointer<Theme>> &themes)
         obj.insert("Comment", iter->comment());
         obj.insert("hasDark", iter->hasDark());
         obj.insert("Example", iter->example());
+        QJsonArray availableSizes;
+        QList<int> sizes = utils::getAvailableCursorSizes(iter->getPath());
+        for (int size : sizes) {
+            availableSizes.append(size);
+        }
+        obj.insert("AvailableSize", availableSizes);
         array.append(obj);
     }
 

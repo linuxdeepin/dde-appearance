@@ -73,6 +73,10 @@ public: // PROPERTIES
     int qtScrollBarPolicy() const;
     void setQtScrollBarPolicy(int value);
 
+    Q_PROPERTY(int CursorSize READ cursorSize WRITE setCursorSize)
+    int cursorSize() const;
+    void setCursorSize(int value);
+
 public Q_SLOTS: // METHODS
     void Delete(const QString &ty, const QString &name);
     QString GetCurrentWorkspaceBackground();
