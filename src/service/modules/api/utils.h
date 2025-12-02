@@ -26,6 +26,7 @@ public:
     static QString GetUserRuntimeDir();
     static void writeWallpaperConfig(const QVariant &wallpaper);
     static bool isTreeland();
+    static QList<int> getAvailableCursorSizes(const QString &cursorThemePath);
 };
 
 #endif // UTILS_H

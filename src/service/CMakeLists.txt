@@ -20,6 +20,7 @@ pkg_check_modules(GTK3 REQUIRED IMPORTED_TARGET gtk+-3.0 gdk-3.0)
 pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb-render xcb xcb-randr xcb-cursor)
 pkg_check_modules(FONTCONFIG REQUIRED IMPORTED_TARGET fontconfig)
 pkg_check_modules(OPENSSL REQUIRED IMPORTED_TARGET openssl)
+pkg_check_modules(GSETTINGS_QT REQUIRED IMPORTED_TARGET gsettings-qt6)
 
 add_definitions(-DUSE_QT)
 
@@ -103,6 +104,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
     PkgConfig::XCB
     PkgConfig::OPENSSL
     PkgConfig::FONTCONFIG
+    PkgConfig::GSETTINGS_QT
     KF6::WindowSystem
 )
 include(GNUInstallDirs)

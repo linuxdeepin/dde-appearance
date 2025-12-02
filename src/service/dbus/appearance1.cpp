@@ -121,6 +121,16 @@ int Appearance1::qtScrollBarPolicy() const
     return appearance1Thread->qtScrollBarPolicy();
 }
 
+int Appearance1::cursorSize() const
+{
+    return appearance1Thread->cursorSize();
+}
+
+void Appearance1::setCursorSize(int value)
+{
+    QMetaObject::invokeMethod(appearance1Thread.get(), "setCursorSize", Qt::QueuedConnection, Q_ARG(int, value));
+}
+
 void Appearance1::setQtScrollBarPolicy(int value)
 {
     QMetaObject::invokeMethod(appearance1Thread.get(), "setQtScrollBarPolicy", Qt::QueuedConnection, Q_ARG(int, value));

@@ -74,6 +74,22 @@ void AppearanceDBusProxy::setcursorTheme(const QString &cursorTheme)
     m_wmInterface->setProperty("cursorTheme", cursorTheme);
 }
 
+int AppearanceDBusProxy::cursorSize()
+{
+    if (m_wmInterface == nullptr) {
+        return 0;
+    }
+    return qvariant_cast<int>(m_wmInterface->property("cursorSize"));
+}
+
+void AppearanceDBusProxy::setcursorSize(int cursorSize)
+{
+    if (m_wmInterface == nullptr) {
+        return;
+    }
+    m_wmInterface->setProperty("cursorSize", cursorSize);
+}
+
 int AppearanceDBusProxy::WorkspaceCount()
 {
     if (m_wmInterface == nullptr) {

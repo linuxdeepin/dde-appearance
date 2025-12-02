@@ -94,6 +94,7 @@
     <property access='readwrite' type='s' name='WallpaperSlideShow' />
     <property access='readwrite' type='i' name='DTKSizeMode' />
     <property access='readwrite' type='i' name='QtScrollBarPolicy' />
+    <property access='readwrite' type='i' name='CursorSize' />
     <property access='read' type='s' name='WallpaperURls' />
 
     <signal name='Changed'>

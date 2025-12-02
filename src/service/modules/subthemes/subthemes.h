@@ -43,6 +43,7 @@ public:
     bool setGtkTheme(QString id);
     bool setIconTheme(QString id);
     bool setCursorTheme(QString id);
+    bool setCursorSize(int size);
     QString getGlobalThumbnail(QString id);
     QString getGtkThumbnail(QString id);
     QString getIconThumbnail(QString id);
@@ -52,9 +53,6 @@ public:
     bool isItemInList(QString item, QVector<QString> lists);
     QString getBasePath(QString filename);
     QMap<QString,QString>& getGtkThumbnailMap();
-
-private:
-    void initGlobalOverrideConfig();
 
 private Q_SLOTS:
     void init();

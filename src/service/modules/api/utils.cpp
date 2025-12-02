@@ -11,6 +11,8 @@
 #include <QDebug>
 #include <QJsonDocument>
 
+#include <X11/Xcursor/Xcursor.h>
+#include <X11/Xlib.h>
 #include <pwd.h>
 #include <unistd.h>
 
@@ -159,4 +161,21 @@ bool utils::isTreeland()
 {
     static bool isTreeland = QString(qgetenv("XDG_SESSION_TYPE")).contains("wayland",  Qt::CaseInsensitive);
     return isTreeland;
+}
+
+QList<int> utils::getAvailableCursorSizes(const QString &cursorThemePath)
+{
+    QList<int> sizeList;
+    QString cursorFile = cursorThemePath + "/cursors/left_ptr";
+    XcursorImages *images = XcursorFilenameLoadAllImages(qPrintable(cursorFile));
+    if (images) {
+        for (int i = 0; i < images->nimage; ++i) {
+            if (!sizeList.contains(images->images[i]->size))
+                sizeList.append(images->images[i]->size);
+        };
+        XcursorImagesDestroy(images);
+        std::sort(sizeList.begin(), sizeList.end());
+        return sizeList;
+    }
+    return {};
 }

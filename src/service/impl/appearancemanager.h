@@ -70,6 +70,7 @@ public:
     bool setWallpaperURls(const QString &value);
     void setDTKSizeMode(int value);
     void setQtScrollBarPolicy(int value);
+    void setCursorSize(int value);
     void setActiveColors(const QString &value);
     bool doSetFonts(double size);
     bool doUpdateFonts(double size);
@@ -84,6 +85,7 @@ public:
     QString doGetWallpaperSlideShow(QString monitorName);
     void doSetDTKSizeMode(int value);
     void doSetQtScrollBarPolicy(int value);
+    void doSetCursorSize(int value);
     double getScaleFactor();
     ScaleFactors getScreenScaleFactors();
     bool setScaleFactor(double scale);

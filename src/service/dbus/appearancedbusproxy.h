@@ -30,6 +30,10 @@ public:
     QString cursorTheme();
     void setcursorTheme(const QString &cursorTheme);
 
+    Q_PROPERTY(int cursorSize READ cursorSize WRITE setcursorSize NOTIFY cursorSizeChanged)
+    int cursorSize();
+    void setcursorSize(int cursorSize);
+
 public Q_SLOTS:
     int WorkspaceCount();
     QString GetWorkspaceBackgroundForMonitor(int index, const QString &strMonitorName);
@@ -43,6 +47,7 @@ Q_SIGNALS:
     void workspaceCountChanged(int count);
     void WorkspaceSwitched(int from, int to);
     void cursorThemeChanged(const QString &cursorTheme);
+    void cursorSizeChanged(int cursorSize);
 
     // displayInterface
 public:

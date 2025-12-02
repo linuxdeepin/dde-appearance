@@ -35,6 +35,7 @@ Appearance1Thread::Appearance1Thread()
     property->opacity.init(settingDconfig.value(GSKEYOPACITY).toDouble());
     property->wallpaperSlideShow.init(settingDconfig.value(GSKEYWALLPAPERSLIDESHOW).toString());
     property->wallpaperURls.init(settingDconfig.value(GSKEYWALLPAPERURIS).toString());
+    property->cursorSize.init(settingDconfig.value(DCKEYCURSORSIZE).toInt());
     QString qtActivecolor =  DconfigSettings::ConfigValue(DDEDAEMONAPPID,XSETTINGSNAME,GSKEYQTACTIVECOLOR,"").toString();
     QString qtDarkActivecolor =  DconfigSettings::ConfigValue(DDEDAEMONAPPID,XSETTINGSNAME,GSKEYQTACTIVECOLOR_DARK,"").toString();
     int radius = DconfigSettings::ConfigValue(DDEDAEMONAPPID,XSETTINGSNAME,DCKEYDTKWINDOWRADIUS,"").toInt();
@@ -154,6 +155,17 @@ void Appearance1Thread::setDTKSizeMode(int value)
 int Appearance1Thread::qtScrollBarPolicy() const
 {
     return property->qtScrollBarPolicy;
+}
+
+int Appearance1Thread::cursorSize() const
+{
+    return property->cursorSize;
+}
+
+void Appearance1Thread::setCursorSize(int value)
+{
+    QMutexLocker locker(&mutex);
+    appearanceManager->doSetCursorSize(value);
 }
 
 void Appearance1Thread::setQtScrollBarPolicy(int value)

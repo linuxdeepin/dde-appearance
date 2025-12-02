@@ -17,6 +17,9 @@
 #include <X11/extensions/Xfixes.h>
 
 #include <QStandardPaths>
+#include <QGSettings/QGSettings>
+#include <QGuiApplication>
+#include <QProcess>
 
 ThemesApi::ThemesApi(AppearanceManager *parent)
     : QObject(parent)
@@ -612,6 +615,18 @@ int set_qt_cursor(const char *name)
     return 0;
 }
 
+void set_xcursor_size(int size)
+{
+    Display *disp = XOpenDisplay(0);
+    if (!disp) {
+        qWarning() << "Open display failed";
+        return;
+    }
+
+    XcursorSetDefaultSize(disp, size);
+    XCloseDisplay(disp);
+}
+
 void ThemesApi::setQtCursor(QString name)
 {
 #ifndef USE_XCB_CURSOR
@@ -654,9 +669,60 @@ void ThemesApi::setQtCursor(QString name)
 #endif
 }
 
+bool ThemesApi::setCursorSize(int size)
+{
+    // Set XCursor size
+    set_xcursor_size(size);
+    // Set Window Manager cursor size
+    setWMCursorSize(size);
+    // X resources，大多数应用的兜底光标大小
+    QFile file(utils::GetUserHomeDir() + "/.Xresources");
+    QString content;
+    if (file.exists() && file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        content = QString::fromUtf8(file.readAll());
+        file.close();
+    }
+
+    QRegularExpression re("^Xcursor\\.size:\\s*\\d+\\s*$", QRegularExpression::MultilineOption);
+
+    if (re.match(content).hasMatch()) {
+        content.replace(re, QString("Xcursor.size: %1").arg(size));
+    } else {
+        if (!content.endsWith("\n")) {
+            content += "\n";
+        }
+        content += QString("Xcursor.size: %1\n").arg(size);
+    }
+
+    // 写回
+    file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
+    file.write(content.toUtf8());
+    file.close();
+    // 立即应用
+    QProcess::execute("xrdb", {"-merge", utils::GetUserHomeDir() + "/.Xresources"});
+
+    // GTK cursor size
+    setGtk2Prop("gtk-cursor-theme-size", QString::number(size), getGtk2ConfFile());
+    setGtk3Prop("gtk-cursor-theme-size", QString::number(size), getGtk3ConfFile());
+
+    if (QGSettings::isSchemaInstalled("org.gnome.desktop.interface")) {
+        QGSettings gtkSettings("org.gnome.desktop.interface", QByteArray(), this);
+        if (gtkSettings.keys().contains("cursor-size")) {
+            gtkSettings.set("cursor-size", size);
+        }
+    }
+
+    return true;
+}                     
+
 void ThemesApi::setWMCursor(QString name)
 {
     dbusProxy->setcursorTheme(name);
+}
+
+void ThemesApi::setWMCursorSize(int size)
+{
+    dbusProxy->setcursorSize(size);
 }
 
 QString ThemesApi::getGtk2ConfFile()

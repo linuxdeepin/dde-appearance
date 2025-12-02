@@ -49,7 +49,8 @@ extern QDBusConnection *pluginDbus;
 #define DCKEYTHEME                "theme-name"
 #define DCKEYICONTHEME            "icon-theme-name"
 #define DCKEYCURSORNAME           "gtk-cursor-theme-name"
-
+#define DCKEYCURSORSIZE           "cursorSize"
+#define DCKEYCURSORSIZEBASE       "gtk-cursor-theme-size-base"
 
 #define GTK2CONFDELIM            "="
 #define GTK3GROUPSETTINGS        "Settings"
@@ -82,6 +83,7 @@ extern QDBusConnection *pluginDbus;
 #define SPACETYPEMONO           "100"
 
 #define TYPEGTK                 "gtk"
+#define TYPECURSORSIZE          "cursorSize"
 #define TYPEICON                "icon"
 #define TYPECURSOR              "cursor"
 #define TYPEBACKGROUND          "background"

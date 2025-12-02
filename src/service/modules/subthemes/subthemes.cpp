@@ -288,6 +288,11 @@ bool Subthemes::setCursorTheme(QString id)
     return  themeApi->setCursorTheme(id);
 }
 
+bool Subthemes::setCursorSize(int size)
+{
+    return themeApi->setCursorSize(size);
+}
+
 QString Subthemes::getGlobalThumbnail(QString id)
 {
     QSharedPointer<Theme> theme;

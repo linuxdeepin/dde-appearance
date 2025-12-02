@@ -67,6 +67,7 @@ public:
     DBusProperty<int> windowRadius;
     DBusProperty<int> dtkSizeMode;
     DBusProperty<int> qtScrollBarPolicy;
+    DBusProperty<int> cursorSize;
 };
 
 #endif // APPEARANCEPROPERTY_H

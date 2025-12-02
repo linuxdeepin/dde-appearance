@@ -38,6 +38,7 @@ public:
     QString getGtkTheme();
     bool setIconTheme(QString name);
     bool setCursorTheme(QString name);
+    bool setCursorSize(int size);
     QString getThemePath(QString name, QString ty, QString key);
     void setGtk2Theme(QString name);
     void setGtk2Icon(QString name);
@@ -57,6 +58,7 @@ public:
     void setGtkCursor(QString name);
     void setQtCursor(QString name);
     void setWMCursor(QString name);
+    void setWMCursorSize(int size);
 
 private:
     QString getGtk2ConfFile();

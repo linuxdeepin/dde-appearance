@@ -66,6 +66,9 @@ public: // PROPERTIES
     Q_PROPERTY(int qtScrollBarPolicy READ qtScrollBarPolicy WRITE setQtScrollBarPolicy)
     int qtScrollBarPolicy() const;
 
+    Q_PROPERTY(int CursorSize READ cursorSize WRITE setCursorSize)
+    int cursorSize() const;
+
 public Q_SLOTS:
     // PROPERTIES
     void setFontSize(double value);
@@ -75,6 +78,7 @@ public Q_SLOTS:
     void setWindowRadius(int value);
     void setDTKSizeMode(int value);
     void setQtScrollBarPolicy(int value);
+    void setCursorSize(int value);
     // METHODS
     void Delete(const QString &ty, const QString &name, const QDBusMessage &message);
     QString GetCurrentWorkspaceBackground(const QDBusMessage &message);

@@ -223,6 +223,16 @@
             "description": "Whether to customize the lock screen wallpaper",
             "permissions": "readwrite",
             "visibility": "private"
+        },
+        "cursorSize": {
+            "value": 24,
+            "serial": 0,
+            "flags": [],
+            "name": "cursorSize",
+            "name[zh_CN]": "光标大小",
+            "description": "Cursor size",
+            "permissions": "readwrite",
+            "visibility": "private"
         }
     }
 }
