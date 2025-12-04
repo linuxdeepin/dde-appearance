@@ -1,3 +1,9 @@
+dde-appearance (1.1.73) unstable; urgency=medium
+
+  * feat: add cursor size configuration support
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 04 Dec 2025 19:37:00 +0800
+
 dde-appearance (1.1.72) unstable; urgency=medium
 
   * fix: initialize member variables to prevent undefined behavior
