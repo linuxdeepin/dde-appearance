@@ -275,6 +275,9 @@ void AppearanceManager::handleXsettingDConfigChange(QString key)
     } else if (key == DCKEYDTKWINDOWRADIUS) {
         m_property->windowRadius = m_XSettingsDconfig->value(DCKEYDTKWINDOWRADIUS).toInt();
         Q_EMIT Changed("WindowRadius", QString::number(m_property->windowRadius));
+    } else if (key == DCKEYCURSORSIZEBASE) {
+        m_property->cursorSize = m_XSettingsDconfig->value(DCKEYCURSORSIZEBASE).toInt();
+        Q_EMIT Changed("CursorSize", QString::number(m_property->cursorSize));
     }
 }
 
@@ -1072,16 +1075,15 @@ bool AppearanceManager::doSetCursorTheme(QString value)
     }
 
     auto getSuitableCursorSize = [this, value]() {
-        int cursorSize = - 1;
+        int cursorSize = 24;
         for (auto iter : m_subthemes->listCursorThemes()) {
             if (iter->getId() == value) {
                 auto availableSizes = utils::getAvailableCursorSizes(iter->getPath());
                 int len = INT_MAX;
-                int value = -1;
                 for (auto size : availableSizes) {
                     if (std::abs(size - m_property->cursorSize) < len) {
                         len = std::abs(size - m_property->cursorSize);
-                        value = size;
+                        cursorSize = size;
                     }
                 }
                 break;

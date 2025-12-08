@@ -707,8 +707,8 @@ bool ThemesApi::setCursorSize(int size)
 
     if (QGSettings::isSchemaInstalled("org.gnome.desktop.interface")) {
         QGSettings gtkSettings("org.gnome.desktop.interface", QByteArray(), this);
-        if (gtkSettings.keys().contains("cursor-size")) {
-            gtkSettings.set("cursor-size", size);
+        if (gtkSettings.keys().contains("cursorSize")) {
+            gtkSettings.set("cursorSize", size);
         }
     }
 
