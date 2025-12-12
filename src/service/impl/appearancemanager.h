@@ -30,6 +30,13 @@ using Dtk::Core::DConfig;
 class AppearanceManager : public QObject
 {
     Q_OBJECT
+
+    enum ThemeType {
+        Light = 1,
+        Dark = 2,
+        Auto = 3,
+    };
+
     struct coordinate{
         double latitude;
         double longitude;
@@ -175,6 +182,7 @@ private:
     void initGlobalTheme();
     bool checkWallpaperLockedStatus();
     void initGlobalOverrideConfig();
+    ThemeType parseThemeType(const QString &themeName);
 
 Q_SIGNALS:
     void Changed(const QString &ty, const QString &value);
