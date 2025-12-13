@@ -224,7 +224,7 @@ void AppearanceManager::handleTimezoneChanged(QString timezone)
     m_zone = timezone;
     // todo l, err := time.LoadLocation(zone)
 
-    if (m_property->gtkTheme == AUTOGTKTHEME) {
+    if (parseThemeType(m_property->globalTheme) == Auto) {
         autoSetTheme(m_latitude, m_longitude);
         resetThemeAutoTimer();
     }
@@ -965,20 +965,12 @@ bool AppearanceManager::doSetFonts(double size)
 
 bool AppearanceManager::doSetGlobalTheme(QString value)
 {
-    enum GolbalThemeMode {
-        Light = 1,
-        Dark = 2,
-        Auto = 3,
-    };
-
     QString themeId = value;
-    GolbalThemeMode mode = Auto;
-    if (value.endsWith(".light")) {
+    auto mode = parseThemeType(value);
+    if (mode == Light) {
         themeId = value.chopped(6);
-        mode = Light;
-    } else if (value.endsWith(".dark")) {
+    } else if (mode == Dark) {
         themeId = value.chopped(5);
-        mode = Dark;
     }
 
     QVector<QSharedPointer<Theme>> globalThemes = m_subthemes->listGlobalThemes();
@@ -1958,5 +1950,16 @@ void AppearanceManager::initGlobalOverrideConfig()
 
             qDebug() << "add global theme override:" << id << itemOverride.section << itemOverride.key << itemOverride.value;
         }
+    }
+}
+
+AppearanceManager::ThemeType AppearanceManager::parseThemeType(const QString &themeName)
+{
+    if (themeName.endsWith(".dark")) {
+        return AppearanceManager::Dark;
+    } else if (themeName.endsWith(".light")) {
+        return AppearanceManager::Light;
+    } else {
+        return AppearanceManager::Auto;
     }
 }
