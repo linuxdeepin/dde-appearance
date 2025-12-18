@@ -26,6 +26,7 @@
 #include <KX11Extras>
 
 #include <DConfig>
+#include <DGuiApplicationHelper>
 
 #ifndef DISABLE_DEEPIN_WM
 #define DconfigBackgroundUri "Background_Uris"
@@ -320,7 +321,7 @@ DeepinWMFaker::DeepinWMFaker(QObject* appearance)
     , m_previewWinMiniPair(QPair<uint, bool>(-1, false))
 {
     m_workspaceount =  QDBusInterface(KWinDBusService, "/VirtualDesktopManager", "org.kde.KWin.VirtualDesktopManager").property("count").value<int>();
-    m_isPlatformX11 = isX11Platform();
+    m_isPlatformX11 = Dtk::Gui::DGuiApplicationHelper::testAttribute(Dtk::Gui::DGuiApplicationHelper::IsDXcbPlatform);
     m_appearance = QSharedPointer<DConfig>(DConfig::create("org.deepin.dde.appearance", "org.deepin.dde.appearance"));
     if (!m_appearance || !m_appearance->isValid()) {
         qWarning() << "appearance dconfig is not vaild";
@@ -1306,20 +1307,6 @@ void DeepinWMFaker::setWorkspaceBackgroundForMonitor(const int index, const QStr
     allWallpaper[index - 1] = uri;
     m_appearance->setValue(DconfigBackgroundUri, allWallpaper);
 #endif // DISABLE_DEEPIN_WM
-}
-
-bool DeepinWMFaker::isX11Platform()
-{
-    QString strCmd = "loginctl show-session $(loginctl | grep $(whoami) | awk '{print $1}') -p Type";
-    QProcess p;
-    p.start("bash", QStringList() <<"-c" << strCmd);
-    p.waitForFinished();
-    QString result = p.readAllStandardOutput();
-    if (result.replace("\n", "").contains("Type=x11")) {
-        return  true;
-    } else {
-        return  false;
-    }
 }
 
 void DeepinWMFaker::quitTransientBackground()

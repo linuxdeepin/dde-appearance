@@ -38,6 +38,7 @@ target_link_libraries(dde-fakewm
     Qt${QT_VERSION_MAJOR}::Concurrent
     Qt${QT_VERSION_MAJOR}::Gui
     Dtk${DTK_VERSION_MAJOR}::Core
+    Dtk${DTK_VERSION_MAJOR}::Gui
     KF6::ConfigCore
     KF6::WindowSystem
     KF6::GlobalAccel
