@@ -1,3 +1,10 @@
+dde-appearance (1.1.76) unstable; urgency=medium
+
+  * fix: replace platform detection with DTK method
+  * fix: The theme judgment method is incorrect
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 18 Dec 2025 19:44:26 +0800
+
 dde-appearance (1.1.75) unstable; urgency=medium
 
   * Release 1.1.75
