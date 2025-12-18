@@ -234,6 +234,10 @@ bool Subthemes::isGlobalTheme(QString id)
 
 bool Subthemes::isGtkTheme(QString id)
 {
+    // Ensure gtkThemes is initialized to prevent theme switch failure due to lazy loading.
+    if(gtkThemes.empty()) {
+        refreshGtkThemes();
+    }
     for(auto iter : gtkThemes)
     {
         if(iter->getId() == id)
