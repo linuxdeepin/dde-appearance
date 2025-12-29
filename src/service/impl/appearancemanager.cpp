@@ -1479,13 +1479,7 @@ QString AppearanceManager::doSetMonitorBackground(const QString &monitorName, co
 
 QString AppearanceManager::doThumbnail(const QString &type, const QString &name)
 {
-    if (type == TYPEGTK) {
-        QMap<QString, QString> gtkThumbnailMap = m_subthemes->getGtkThumbnailMap();
-        if (gtkThumbnailMap.count(name) == 1) {
-            return "/usr/share/dde-daemon/appearance/" + gtkThumbnailMap[name] + ".svg";
-        }
-        return m_subthemes->getGtkThumbnail(name);
-    } else if (type == TYPEICON) {
+    if (type == TYPEICON) {
         return m_subthemes->getIconThumbnail(name);
     } else if (type == TYPECURSOR) {
         return m_subthemes->getCursorThumbnail(name);

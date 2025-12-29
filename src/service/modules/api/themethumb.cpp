@@ -202,33 +202,6 @@ bool genIcon(QString theme, int width, int height, double scaleFactor, QString o
     return image.save(out);
 }
 
-bool genGtk(QString name,int width,int height,double scaleFactor,QString dest)
-{
-    double gdkWinScalingFactor = 1.0;
-
-    if (scaleFactor > 1.7) {
-        // 根据 startdde 的逻辑，此种条件下 gtk 窗口放大为 2 倍
-        gdkWinScalingFactor = 2.0;
-    }
-
-    width = static_cast<int>(width* scaleFactor / gdkWinScalingFactor);
-    height = static_cast<int>(height* scaleFactor / gdkWinScalingFactor);
-
-    QString cmd = "/usr/lib/deepin-api/gtk-thumbnailer";
-    QStringList args{"-theme", name,
-                "-dest", dest,
-                "-width", QString::number(width),
-                "-height", QString::number(height),
-                "-force"};
-
-    QProcess process;
-    process.setProgram(cmd);
-    process.setArguments(args);
-    process.start();
-
-    return true;
-}
-
 QVector<QImage*> getCursors(QString dir, int size)
 {
     qDebug()<<"dir :"<<dir;
@@ -385,28 +358,6 @@ QString getGlobal(QString id, QSharedPointer<Theme> theme, QString gtkTheme)
         return path;
     }
     return QString();
-}
-
-QString getGtk(QString id, QString descFile)
-{
-    if (!checkScaleFactor()) {
-        qInfo() << "scaleFactor <= 0";
-        return "";
-    }
-
-    QString out = prepareOutputPath("gtk", id, cursorVersion);
-    if (!shouldGenerateNewCursor(descFile, out)) {
-        return out;
-    }
-
-    double scaleFactor = getScaleFactor();
-
-    if(!genGtk(id,width,height,scaleFactor,out))
-    {
-        return "";
-    }
-
-    return out;
 }
 
 QString getIcon(QString id, QString descFile)
