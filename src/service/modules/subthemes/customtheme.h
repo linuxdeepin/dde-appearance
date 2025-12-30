@@ -21,7 +21,7 @@ public:
 protected:
     void openCustomTheme();
     void saveCustomTheme();
-    void copyTheme(const QString &themePath, const QStringList &keys);
+    void copyTheme(const QString themeId, const QString &themePath, const QStringList &keys);
 
 Q_SIGNALS:
     void updateToCustom(const QString &mode);

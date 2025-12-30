@@ -30,7 +30,7 @@ using Dtk::Core::DConfig;
 class AppearanceManager : public QObject
 {
     Q_OBJECT
-
+public:
     enum ThemeType {
         Light = 1,
         Dark = 2,
@@ -134,7 +134,7 @@ public:
     int getWorkspaceCount();
     void timerEvent(QTimerEvent *event) override;
 
-    inline QHash<QString, QVector<GlobalThemeOverride>> getGlobalOverride() const { return m_globalThemeOverrideMap; }
+    static QHash<QString, QVector<GlobalThemeOverride>> getGlobalOverride() { return m_globalThemeOverrideMap; }
 
 public Q_SLOTS:
     void handleWmWorkspaceCountChanged(int count);
@@ -220,7 +220,7 @@ private:
     QString                                          m_currentGlobalTheme; // 当前主题，globalTheme+.light/.dark
     QJsonArray                                       m_wallpaperConfig; // store the config
     bool                                             m_setDefaulting;
-    QHash<QString, QVector<GlobalThemeOverride>>     m_globalThemeOverrideMap;
+    static QHash<QString, QVector<GlobalThemeOverride>> m_globalThemeOverrideMap;
 };
 
 #endif // APPEARANCEMANAGER_H
