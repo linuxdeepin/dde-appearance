@@ -35,6 +35,8 @@
 #define NAN_ANGLE (-200.0)          // 异常经纬度
 #define DEFAULT_WORKSPACE_COUNT (2) // 默认工作区数量
 
+QHash<QString, QVector<AppearanceManager::GlobalThemeOverride>> AppearanceManager::m_globalThemeOverrideMap;
+
 DCORE_USE_NAMESPACE
 
 AppearanceManager::AppearanceManager(AppearanceProperty *prop, QObject *parent)
@@ -1934,7 +1936,10 @@ QString AppearanceManager::marshal(const QVector<QSharedPointer<FontsManager::Fa
 
 void AppearanceManager::initGlobalOverrideConfig()
 {
-    m_globalThemeOverrideMap.clear();
+    if (!m_globalThemeOverrideMap.isEmpty()) {
+        return;
+    }
+
     const auto &overrideList = m_settingDconfig.value("globalThemeOverride").value<QVariantList>();
     for (const auto &overrideItem : overrideList) {
         const auto &overrideMap = overrideItem.toMap();

@@ -7,6 +7,7 @@
 #include "modules/api/keyfile.h"
 #include "modules/api/utils.h"
 #include "modules/common/commondefine.h"
+#include "impl/appearancemanager.h"
 #include "theme.h"
 
 #include <QDebug>
@@ -65,7 +66,7 @@ void CustomTheme::updateValue(const QString &type, const QString &value, const Q
                 break;
             }
         }
-        copyTheme(themePath, typekeyMap.values());
+        copyTheme(themeId, themePath, typekeyMap.values());
         Q_EMIT updateToCustom(modeStr);
     }
 
@@ -103,7 +104,7 @@ void CustomTheme::saveCustomTheme()
     m_customTheme->saveToFile(root.absoluteFilePath(THEMEFILE));
 }
 
-void CustomTheme::copyTheme(const QString &themePath, const QStringList &keys)
+void CustomTheme::copyTheme(const QString themeId, const QString &themePath, const QStringList &keys)
 {
     if (themePath.isEmpty())
         return;
@@ -128,11 +129,31 @@ void CustomTheme::copyTheme(const QString &themePath, const QStringList &keys)
         }
         m_customTheme->setKey(section, key, value);
     };
-    for (auto &&key : keys) {
-        QString value = theme.getStr(defaultTheme, key);
-        setKey("DefaultTheme", key, value);
 
-        value = theme.getStr(darkTheme, key, value);
-        setKey("DarkTheme", key, value);
+    // 预先构建 override 映射
+    QHash<QString, QString> defaultThemeOverrides;
+    QHash<QString, QString> darkThemeOverrides;
+    
+    const auto& overrideList = AppearanceManager::getGlobalOverride().value(themeId);
+    for (const auto &overrideItem : overrideList) {
+        if (overrideItem.section == "DefaultTheme") {
+            defaultThemeOverrides[overrideItem.key] = overrideItem.value;
+        } else if (overrideItem.section == "DarkTheme") {
+            darkThemeOverrides[overrideItem.key] = overrideItem.value;
+        }
+    }
+
+    for (auto &&key : keys) {
+        QString defaultValue = defaultThemeOverrides.value(key);
+        if (defaultValue.isEmpty()) {
+            defaultValue = theme.getStr(defaultTheme, key);
+        }
+        setKey("DefaultTheme", key, defaultValue);
+
+        QString darkValue = darkThemeOverrides.value(key);
+        if (darkValue.isEmpty()) {
+            darkValue = theme.getStr(darkTheme, key, theme.getStr(defaultTheme, key));
+        }
+        setKey("DarkTheme", key, darkValue);
     }
 }
