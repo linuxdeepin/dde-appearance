@@ -45,7 +45,6 @@ public:
     bool setCursorTheme(QString id);
     bool setCursorSize(int size);
     QString getGlobalThumbnail(QString id);
-    QString getGtkThumbnail(QString id);
     QString getIconThumbnail(QString id);
     QString getCursorThumbnail(QString id);
     QVector<QSharedPointer<Theme>> getThemes(QVector<QString> files);

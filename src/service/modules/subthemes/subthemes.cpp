@@ -316,26 +316,6 @@ QString Subthemes::getGlobalThumbnail(QString id)
     return getGlobal(id,theme,gtkTheme);
 }
 
-QString Subthemes::getGtkThumbnail(QString id)
-{
-    QSharedPointer<Theme> theme;
-    for(auto iter: gtkThemes)
-    {
-        if(iter->getId()==id)
-        {
-            theme = iter;
-        }
-    }
-
-    if(!theme)
-    {
-        return "";
-    }
-
-    QString path = theme->getPath()+"/index.theme";
-    return getGtk(id, path);
-}
-
 QString Subthemes::getIconThumbnail(QString id)
 {
     QSharedPointer<Theme> theme;
