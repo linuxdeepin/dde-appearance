@@ -1,3 +1,9 @@
+dde-appearance (1.1.77) unstable; urgency=medium
+
+  * fix: fix custom theme override not applying
+
+ -- zhangkun <zhangkun2@uniontech.com>  Wed, 31 Dec 2025 14:44:18 +0800
+
 dde-appearance (1.1.76) unstable; urgency=medium
 
   * fix: replace platform detection with DTK method
