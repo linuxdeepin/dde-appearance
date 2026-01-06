@@ -1,5 +1,11 @@
 dde-appearance (1.1.77) unstable; urgency=medium
 
+  * Release 1.1.77
+
+ -- zhangkun <zhangkun2@uniontech.com>  Tue, 06 Jan 2026 17:54:32 +0800
+
+dde-appearance (1.1.77) unstable; urgency=medium
+
   * fix: fix auto theme switching when global theme changes
   * refactor: remove GTK theme thumbnail generation code
   * fix: fix custom theme override not applying
