@@ -1,3 +1,11 @@
+dde-appearance (1.1.77) unstable; urgency=medium
+
+  * fix: fix auto theme switching when global theme changes
+  * refactor: remove GTK theme thumbnail generation code
+  * fix: fix custom theme override not applying
+
+ -- zhangkun <zhangkun2@uniontech.com>  Tue, 06 Jan 2026 17:51:27 +0800
+
 dde-appearance (1.1.76) unstable; urgency=medium
 
   * fix: replace platform detection with DTK method
