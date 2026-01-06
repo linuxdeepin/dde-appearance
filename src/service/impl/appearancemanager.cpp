@@ -842,7 +842,7 @@ void AppearanceManager::updateNewVersionData()
     setWallpaperURls(tempDoc.toJson(QJsonDocument::Compact));
 }
 
-void AppearanceManager::autoSetTheme(double latitude, double longitude)
+void AppearanceManager::autoSetTheme(double latitude, double longitude, const QString &globalTheme)
 {
     QDateTime curr = QDateTime::currentDateTime();
     double utcOffset = curr.offsetFromUtc() / 3600.0;
@@ -852,15 +852,16 @@ void AppearanceManager::autoSetTheme(double latitude, double longitude)
     if (!bSuccess) {
         return;
     }
-    QString themeName;
+    QString themeName = globalTheme.isEmpty() ? m_property->globalTheme : globalTheme;
+    QString themeNameWithThemeType;
     if (sunrise.secsTo(curr) >= 0 && curr.secsTo(sunset) >= 0) {
-        themeName = m_property->globalTheme + ".light";
+        themeNameWithThemeType = themeName + ".light";
     } else {
-        themeName = m_property->globalTheme + ".dark";
+        themeNameWithThemeType = themeName + ".dark";
     }
 
-    if (m_currentGlobalTheme != themeName) {
-        doSetGlobalTheme(themeName);
+    if (m_currentGlobalTheme != themeNameWithThemeType) {
+        doSetGlobalTheme(themeNameWithThemeType);
     }
 }
 
@@ -878,7 +879,7 @@ void AppearanceManager::resetThemeAutoTimer()
     qDebug() << "change theme after:" << interval << curr << changeTime;
 }
 
-void AppearanceManager::updateThemeAuto(bool enable)
+void AppearanceManager::updateThemeAuto(bool enable, const QString &globalTheme)
 {
     enableDetectSysClock(enable);
 
@@ -889,7 +890,7 @@ void AppearanceManager::updateThemeAuto(bool enable)
             m_longitude = m_coordinateMap[city].longitude;
         }
         m_locationValid = true;
-        autoSetTheme(m_latitude, m_longitude);
+        autoSetTheme(m_latitude, m_longitude, globalTheme);
         resetThemeAutoTimer();
     }
 }
@@ -1017,8 +1018,7 @@ bool AppearanceManager::doSetGlobalTheme(QString value)
         applyGlobalTheme(theme, darkTheme, defaultTheme, themePath, themeId);
     } break;
     case Auto: {
-        setGlobalTheme(value);
-        updateThemeAuto(true);
+        updateThemeAuto(true, value);
     } break;
     }
 

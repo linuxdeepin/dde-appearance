@@ -161,9 +161,9 @@ private:
     void doUpdateWallpaperURIs();
     void setPropertyWallpaperURIs(QMap<QString,QString> monitorWallpaperUris);
     void updateNewVersionData();
-    void autoSetTheme(double latitude, double longitude);
+    void autoSetTheme(double latitude, double longitude, const QString &globalTheme = QString());
     void resetThemeAutoTimer();
-    void updateThemeAuto(bool enable);
+    void updateThemeAuto(bool enable, const QString &globalTheme = QString());
     void enableDetectSysClock(bool enable);
     QDateTime getThemeAutoChangeTime(QDateTime date, double latitude, double longitude);
 
