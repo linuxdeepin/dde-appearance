@@ -211,7 +211,7 @@ void AppearanceManager::handleSetScaleFactorDone()
     optionMap["x-deepin-action-_logout"] = "dbus-send,--type=method_call,--dest=org.deepin.dde.SessionManager1,"
                                            "/org/deepin/dde/SessionManager1,org.deepin.dde.SessionManager1.RequestLogout";
     optionMap["x-deepin-action-_later"] = "";
-    int expireTimeout = 15 * 1000;
+    int expireTimeout = 0;
     m_dbusProxy->Notify("dde-control-center", "dialog-window-scale", summary, body, options, optionMap, expireTimeout);
     // 更新ScaleFactor缓存
     getScaleFactor();
