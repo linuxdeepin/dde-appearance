@@ -1646,7 +1646,22 @@ QString AppearanceManager::getWallpaperUri(const QString &index, const QString &
 
     QString wallpaper = PhaseWallPaper::getWallpaperUri(index, monitorName);
     if (wallpaper.isEmpty()) {
-        // 如果为空则随机给一个
+        // If there is no per-monitor wallpaper record yet (e.g. a new external monitor
+        // is connected in extend mode), prefer using the primary monitor's wallpaper
+        // to keep wallpapers consistent across screens by default.
+        const QString primaryMonitor = m_dbusProxy ? m_dbusProxy->primary() : QString();
+        if (!primaryMonitor.isEmpty() && monitorName != primaryMonitor) {
+            const QString primaryWallpaper = PhaseWallPaper::getWallpaperUri(index, primaryMonitor);
+            if (!primaryWallpaper.isEmpty()) {
+                wallpaper = primaryWallpaper;
+                if (auto value = PhaseWallPaper::setWallpaperUri(index, monitorName, wallpaper); value.has_value()) {
+                    m_wallpaperConfig = value.value();
+                }
+                return wallpaper;
+            }
+        }
+
+        // Fallback: if still empty, randomly assign one.
         QVector<Background> backgroudlist = m_backgrounds->listBackground();
         QVariant wallpaperVar = m_settingDconfig.value(DCKEYALLWALLPAPER);
         QString value = QJsonDocument::fromVariant(wallpaperVar).toJson();
