@@ -56,7 +56,7 @@ static QVector<QStringList> presentIcons {
     // terminal:
 //    {"deepin-terminal", "utilities-terminal", "terminal", "gnome-terminal", "xfce-terminal", "terminator", "openterm"},
 };
-// ScaleFactor 多次用到，且修改有信号，改为静态变量做缓存
+// ScaleFactor is used multiple times and has signals for modification, changed to static variable for caching
 static double g_ScaleFactor = 0.0;
 
 QString getScaleDir()
@@ -163,6 +163,11 @@ bool genCursor(QString descFile,int width,int height,double scaleFactor,QString 
     QVector<QImage*> images = getCursors(dirPath,iconSize);
     QImage image = CompositeImages(images,width,height,iconSize,padding);
 
+    // Clean up the images since we own them
+    for(auto img : images) {
+        delete img;
+    }
+
     if(image.save(out))
     {
 
@@ -180,9 +185,9 @@ bool genIcon(QString theme, int width, int height, double scaleFactor, QString o
 
     QList<QIcon> images = getIcons(theme, iconSize);
 
-    // 使用 QImage 替代 QPixmap
+    // Use QImage instead of QPixmap
     QImage image(width, height, QImage::Format_ARGB32);
-    image.fill(Qt::transparent); // 设置透明背景
+    image.fill(Qt::transparent); // Set transparent background
 
     QPainter painter;
     painter.begin(&image);
@@ -192,13 +197,13 @@ bool genIcon(QString theme, int width, int height, double scaleFactor, QString o
     int y = (height - iconSize) / 2;
 
     for (const auto& iter : images) {
-        // 绘制图标到 QImage 上
+        // Draw icon to QImage
         iter.paint(&painter, QRect(x, y, iconSize, iconSize));
         x += iconSize + padding;
     }
     painter.end();
 
-    // 将 QImage 保存到指定路径
+    // Save QImage to specified path
     return image.save(out);
 }
 
@@ -211,8 +216,7 @@ QVector<QImage*> getCursors(QString dir, int size)
         for(auto iter : cursors)
         {
             bool bAdd = true;
-            QFile file(dir + "/" + iter);
-            QImage* image = loadXCursor(dir + "/" + iter,size);
+            QImage* image = loadXCursor(dir + "/" + iter, size);
             if(!image)
             {
                 continue;
@@ -223,15 +227,14 @@ QVector<QImage*> getCursors(QString dir, int size)
                 if(tempImage->cacheKey() == image->cacheKey())
                 {
                     bAdd = false;
+                    delete image;
+                    break;
                 }
             }
 
             if(bAdd)
             {
-                if(image->width() != size)
-                {
-                    *image = image->scaledToWidth(size);
-                }
+                // Perform scaling in CompositeImages to avoid quality loss from multiple scaling operations
                 images.push_back(image);
                 break;
             }
@@ -249,7 +252,7 @@ QList<QIcon> getIcons(QString theme, int size)
     QIcon::setThemeName(theme);
     for(const auto &icons : std::as_const(presentIcons)) {
         for (auto &&iconName:icons) {
-            QIcon icon(new CompatibleEngine(iconName)); // QIcon::fromTheme(iconName); DTK中DCI支持不完整，暂用CompatibleEngine处理兼容
+            QIcon icon(new CompatibleEngine(iconName)); // QIcon::fromTheme(iconName); DCI support in DTK is incomplete, temporarily using CompatibleEngine for compatibility
             if (!icon.isNull()) {
                 images.append(icon);
                 break;
@@ -262,31 +265,37 @@ QList<QIcon> getIcons(QString theme, int size)
 
 QImage CompositeImages(QVector<QImage*> images, int width, int height, int iconSize,int padding)
 {
-    QImage image(width,height,QImage::Format_RGBA8888);
     if(images.isEmpty())
     {
-        return image;
+        return QImage();
     }
 
     while (images.size()>9) {
         images.pop_back();
     }
-    QColor bmpBackA(254,254,254,0);
-    for(int i=0;i< image.width();++i)
-    {
-        for(int j=0;j<image.height();++j)
-        {
-            image.setPixelColor(i,j,bmpBackA);
-        }
+    
+    // Adjust final image size based on icon count
+    double scaleFactor = getScaleFactor();
+    width = iconSize * images.size() + padding * (images.size() - 1);
+    width = width * scaleFactor;
+    height = height * scaleFactor;
 
-    }
-    int spaceW = width - iconSize*images.size();
-    int x = (spaceW-(images.size() -1)*padding) / 2;
-    int y = (height - iconSize) / 2;
+    QImage image(width, height, QImage::Format_RGBA8888);
+    image.setDevicePixelRatio(scaleFactor);
+    image.fill(Qt::transparent);
+    
+    // Calculate layout starting point based on scale factor
+    int spaceW = width - iconSize * images.size() * scaleFactor;
+    int x = (spaceW - (images.size() - 1) * padding * scaleFactor) / 2;
+    int y = (height - iconSize * scaleFactor) / 2;
 
     QPainter painter;
     painter.begin(&image);
-    painter.setCompositionMode(QPainter::CompositionMode_DestinationOver);
+    
+    // Enable all available high-quality rendering options
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+    painter.setRenderHint(QPainter::TextAntialiasing, true);
 
     int i=0;
 
@@ -298,13 +307,13 @@ QImage CompositeImages(QVector<QImage*> images, int width, int height, int iconS
         x+=iconSize +padding;
     }
     painter.end();
-
+    
     return image;
 }
 
 static QImage* fromXCurorImageToQImage(XcursorImage* image)
 {
-    // golang 原代码 pixels := (*[1 << 12]C.XcursorPixel)(unsafe.Pointer(img.pixels))[:n:n]
+    // Original golang code: pixels := (*[1 << 12]C.XcursorPixel)(unsafe.Pointer(img.pixels))[:n:n]
     XcursorPixel* tempPixel = &image->pixels[0];
     QImage* qImage =new QImage(static_cast<int>(image->width),static_cast<int>(image->height),QImage::Format_RGBA8888);
 
@@ -334,7 +343,7 @@ QImage* loadXCursor(QString fileName, int size)
         return nullptr;
     }
     QImage* image =fromXCurorImageToQImage(xcursorImage);
-    delete xcursorImage;
+    XcursorImageDestroy(xcursorImage);
 
     return image;
 }
