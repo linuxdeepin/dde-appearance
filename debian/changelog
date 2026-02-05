@@ -1,3 +1,11 @@
+dde-appearance (1.1.78) unstable; urgency=medium
+
+  * fix: Fixed abnormal behavior of secondary screen wallpaper
+  * feat: add maximize and unmaximize methods for active window
+  * fix: make scale notification persistent
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 05 Feb 2026 19:24:39 +0800
+
 dde-appearance (1.1.77) unstable; urgency=medium
 
   * fix: fix auto theme switching when global theme changes
