@@ -1,3 +1,10 @@
+dde-appearance (1.1.79) unstable; urgency=medium
+
+  * fix: Resolve the issue that mouse thumbnails generated during 1.25
+    scaling have jagged edges
+
+ -- zhangkun <zhangkun2@uniontech.com>  Fri, 27 Feb 2026 15:59:30 +0800
+
 dde-appearance (1.1.78) unstable; urgency=medium
 
   * fix: Fixed abnormal behavior of secondary screen wallpaper
