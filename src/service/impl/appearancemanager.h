@@ -183,6 +183,7 @@ private:
     bool checkWallpaperLockedStatus();
     void initGlobalOverrideConfig();
     ThemeType parseThemeType(const QString &themeName);
+    void detectVMEnvironment();
 
 Q_SIGNALS:
     void Changed(const QString &ty, const QString &value);
@@ -221,6 +222,8 @@ private:
     QJsonArray                                       m_wallpaperConfig; // store the config
     bool                                             m_setDefaulting;
     static QHash<QString, QVector<GlobalThemeOverride>> m_globalThemeOverrideMap;
+    bool m_isVM;
+    bool m_isManualScaleFactorChange;
 };
 
 #endif // APPEARANCEMANAGER_H

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -58,6 +58,8 @@ AppearanceManager::AppearanceManager(AppearanceProperty *prop, QObject *parent)
     , m_globalThemeUpdating(false)
     , m_wallpaperConfig({})
     , m_setDefaulting(false)
+    , m_isVM(false)
+    , m_isManualScaleFactorChange(false)
 {
     m_XSettingsDconfig = QSharedPointer<DConfig>(DconfigSettings::ConfigPtr(DDEDAEMONAPPID,XSETTINGSNAME));
     if (!m_XSettingsDconfig) {
@@ -66,6 +68,8 @@ AppearanceManager::AppearanceManager(AppearanceProperty *prop, QObject *parent)
     }
 
     m_fontsManager->xSetting = m_XSettingsDconfig;
+    // 初始化时检测一次是否为虚拟机
+    detectVMEnvironment();
     init();
 }
 
@@ -202,17 +206,58 @@ void AppearanceManager::handleSetScaleFactorStarted()
     m_dbusProxy->Notify("dde-control-center", "dialog-window-scale", summary, body, {}, {}, 0);
 }
 
+void AppearanceManager::detectVMEnvironment()
+{
+    QProcess process;
+    process.start("systemd-detect-virt", QStringList() << "-v" << "-q");
+
+    bool started = process.waitForStarted(1000);
+    if (started) {
+        bool finished = process.waitForFinished(1000);
+        if (finished) {
+            m_isVM = (process.exitCode() == 0);
+        } else {
+            qWarning() << "Timeout while detecting VM environment.";
+            m_isVM = false;
+        }
+    } else {
+        if (process.error() == QProcess::FailedToStart) {
+            qWarning() << "systemd-detect-virt command not found, assuming not running in VM";
+        } else {
+            qWarning() << "Failed to start VM detection process:" << process.errorString();
+        }
+        m_isVM = false;
+    }
+
+#ifdef QT_DEBUG
+    qDebug() << "VM detection result:" << (m_isVM ? "Running in virtual machine environment" : "Running on physical machine");
+#endif
+}
+
 void AppearanceManager::handleSetScaleFactorDone()
 {
-    QString body = tr("Log out for display scaling settings to take effect");
-    QString summary = tr("Set successfully");
-    QStringList options{ "_logout", tr("Log Out Now"), "_later", tr("Later") };
-    QMap<QString, QVariant> optionMap;
-    optionMap["x-deepin-action-_logout"] = "dbus-send,--type=method_call,--dest=org.deepin.dde.SessionManager1,"
-                                           "/org/deepin/dde/SessionManager1,org.deepin.dde.SessionManager1.RequestLogout";
-    optionMap["x-deepin-action-_later"] = "";
-    int expireTimeout = 0;
-    m_dbusProxy->Notify("dde-control-center", "dialog-window-scale", summary, body, options, optionMap, expireTimeout);
+    // 区分手动设置和自动调整：
+    // - 手动设置（通过dde-control-center）：总是显示注销提示
+    // - 自动调整（如VMware窗口调整）：虚拟机中不显示注销提示
+    bool shouldShowNotification = m_isManualScaleFactorChange || !m_isVM;
+
+    if (shouldShowNotification) {
+        QString body = tr("Log out for display scaling settings to take effect");
+        QString summary = tr("Set successfully");
+        QStringList options{ "_logout", tr("Log Out Now"), "_later", tr("Later") };
+        QMap<QString, QVariant> optionMap;
+        optionMap["x-deepin-action-_logout"] = "dbus-send,--type=method_call,--dest=org.deepin.dde.SessionManager1,"
+                                               "/org/deepin/dde/SessionManager1,org.deepin.dde.SessionManager1.RequestLogout";
+        optionMap["x-deepin-action-_later"] = "";
+        int expireTimeout = 0;
+        m_dbusProxy->Notify("dde-control-center", "dialog-window-scale", summary, body, options, optionMap, expireTimeout);
+    } else {
+        qInfo() << "Skip logout notification: auto scale factor adjustment in VM environment";
+    }
+
+    // 重置手动设置标志
+    m_isManualScaleFactorChange = false;
+
     // 更新ScaleFactor缓存
     getScaleFactor();
 }
@@ -1223,6 +1268,8 @@ ScaleFactors AppearanceManager::getScreenScaleFactors()
 
 bool AppearanceManager::setScaleFactor(double scale)
 {
+    // 标记为手动设置缩放
+    m_isManualScaleFactorChange = true;
     m_dbusProxy->SetScaleFactor(scale);
     return true;
 }
