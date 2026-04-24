@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -12,6 +12,14 @@
 
 #include <DConfig>
 #include <QThread>
+
+#ifdef HAVE_DDE_API_EVENTLOGGER
+#include <dde-api/eventlogger.hpp>
+
+// Event ID for appearance config (10-digit number)
+// 1000600011: icon_theme (same ID as taskmanager_config, but separate target)
+constexpr qint64 EVENT_LOGGER_APPEARANCE_CONFIG = 1000610005;
+#endif
 
 // AppearanceManager是实际功能实现
 // Appearance1Thread在线程中处理，并处理DBus返回及属性设置
@@ -349,5 +357,27 @@ void Appearance1Thread::init()
     appearanceManager.reset(new AppearanceManager(property, this));
     connect(appearanceManager.get(), &AppearanceManager::Changed, this, &Appearance1Thread::Changed);
     connect(appearanceManager.get(), &AppearanceManager::Refreshed, this, &Appearance1Thread::Refreshed);
+
+#ifdef HAVE_DDE_API_EVENTLOGGER
+    // Log icon theme on startup
+    QString currentIconTheme = property->iconTheme;
+    DDE_EventLogger::EventLogger::instance().writeEventLog(
+        DDE_EventLogger::EventLoggerData(EVENT_LOGGER_APPEARANCE_CONFIG, "appearance_config", {
+            {"icon_theme", currentIconTheme}
+        }));
+    qInfo() << "EventLogger: icon theme on startup:" << currentIconTheme;
+
+    // Connect to icon theme changes
+    connect(appearanceManager.get(), &AppearanceManager::Changed, this, [this](const QString &ty, const QString &value) {
+        if (ty == "icon") {
+            DDE_EventLogger::EventLogger::instance().writeEventLog(
+                DDE_EventLogger::EventLoggerData(EVENT_LOGGER_APPEARANCE_CONFIG, "appearance_config", {
+                    {"icon_theme", value}
+                }));
+            qInfo() << "EventLogger: icon theme changed to:" << value;
+        }
+    });
+#endif
+
     qInfo()<<"init: end";
 }

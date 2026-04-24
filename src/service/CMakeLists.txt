@@ -107,6 +107,11 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
     PkgConfig::GSETTINGS_QT
     KF6::WindowSystem
 )
+
+if (HAVE_DDE_API_EVENTLOGGER)
+    target_compile_definitions(${PLUGIN_NAME} PRIVATE HAVE_DDE_API_EVENTLOGGER)
+    target_link_libraries(${PLUGIN_NAME} PRIVATE DDEAPI::EventLogger)
+endif()
 include(GNUInstallDirs)
 install(TARGETS ${PLUGIN_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}/deepin-service-manager/)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/plugin-dde-appearance.json DESTINATION share/deepin-service-manager/user/)
