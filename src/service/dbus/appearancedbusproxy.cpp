@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -32,6 +32,7 @@ AppearanceDBusProxy::AppearanceDBusProxy(QObject *parent)
     QDBusConnection::sessionBus().connect("org.deepin.dde.XSettings1","/org/deepin/dde/XSettings1","org.deepin.dde.XSettings1","SetScaleFactorDone",this,SIGNAL(SetScaleFactorDone()));
 
     QDBusConnection::sessionBus().connect("org.deepin.dde.Display1", "/org/deepin/dde/Display1", "org.freedesktop.DBus.Properties","PropertiesChanged", this, SLOT(onDisplayPropertiesChanged(QDBusMessage)));
+    QDBusConnection::sessionBus().connect("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "NotificationClosed", this, SLOT(onNotificationClosed(uint, uint)));
 }
 
 void AppearanceDBusProxy::setUserInterface(const QString &userPath)
@@ -293,4 +294,12 @@ void AppearanceDBusProxy::onDisplayPropertiesChanged(const QDBusMessage &message
             }
         }
     }
+}
+
+void AppearanceDBusProxy::onNotificationClosed(uint id, uint reason)
+{
+    Q_UNUSED(reason)
+    // reset m_nid after notification closure
+    if (id == m_nid)
+        m_nid = 0;
 }

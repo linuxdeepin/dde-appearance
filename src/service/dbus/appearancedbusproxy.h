@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -130,6 +130,7 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void onDisplayPropertiesChanged(const QDBusMessage &message);
+    void onNotificationClosed(uint, uint);
 
 private:
     DDBusInterface *m_wmInterface;
