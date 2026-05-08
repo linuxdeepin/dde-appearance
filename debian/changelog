@@ -1,3 +1,11 @@
+dde-appearance (1.1.80) unstable; urgency=medium
+
+  * fix: display banner notification after changing scale
+  * feat: integrate event logger with cmake find_package 使用 cmake
+    find_package 集成事件日志记录器
+
+ -- zhangkun <zhangkun2@uniontech.com>  Fri, 08 May 2026 15:30:12 +0800
+
 dde-appearance (1.1.79) unstable; urgency=medium
 
   * fix: Resolve the issue that mouse thumbnails generated during 1.25
