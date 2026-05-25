@@ -1,3 +1,9 @@
+dde-appearance (1.1.81) unstable; urgency=medium
+
+  * Release 1.1.81
+
+ -- zhangkun <zhangkun2@uniontech.com>  Mon, 25 May 2026 11:10:13 +0800
+
 dde-appearance (1.1.80) unstable; urgency=medium
 
   * fix: display banner notification after changing scale
