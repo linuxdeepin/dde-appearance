@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -1695,6 +1695,13 @@ void AppearanceManager::initDtkSizeMode(){
 
 void AppearanceManager::initGlobalTheme()
 {
+    // treeland 不需要走初始化全局主题逻辑，treeland下所有的个性化设置全部走控制中心的协议
+    if (utils::isTreeland()) {
+        qInfo() << "treeland, skip initGlobalTheme";
+        m_currentGlobalTheme = m_property->globalTheme;
+        return;
+    }
+
     QVector<QSharedPointer<Theme>> globalList = m_subthemes->listGlobalThemes();
     bool bFound = false;
 
