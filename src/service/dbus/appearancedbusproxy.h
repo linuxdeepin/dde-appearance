@@ -123,7 +123,7 @@ public:
 public:
     static void DeleteCustomWallPaper(const QString &username, const QString &file);
     static QStringList GetCustomWallPapers(const QString &username);
-    static QString SaveCustomWallPaper(const QString &username, const QString &file);
+    static QString SaveCustomWallPaper(const QString &username, const QString &file, bool isSolid = false);
 
 Q_SIGNALS:
     void HandleForSleep(bool sleep);
