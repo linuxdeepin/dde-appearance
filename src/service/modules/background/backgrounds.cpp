@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -13,6 +13,10 @@
 
 QStringList Backgrounds::systemWallpapersDir = { "/usr/share/wallpapers/deepin" };
 QStringList Backgrounds::uiSupportedFormats = { "jpeg", "png", "bmp", "tiff", "gif" };
+
+namespace {
+constexpr auto WallpaperTypeCustom = "custom";
+}
 
 Backgrounds::Backgrounds(QObject *parent)
     : QObject(parent)
@@ -220,7 +224,7 @@ QString Backgrounds::onPrepare(QString fileName)
     QString file = resizeImage(fileName, customWallpapersConfigDir);
     notifyChanged();
 
-    return AppearanceDBusProxy::SaveCustomWallPaper(user->pw_name, file);
+    return AppearanceDBusProxy::SaveCustomWallPaper(user->pw_name, file, WallpaperTypeCustom);
 }
 
 QString Backgrounds::prepare(QString file)

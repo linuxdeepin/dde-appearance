@@ -6,6 +6,9 @@
 
 #include <QDBusInterface>
 #include <QDBusPendingReply>
+#include <QDBusUnixFileDescriptor>
+#include <QFile>
+#include <QFileInfo>
 
 const QString DaemonService = QStringLiteral("org.deepin.dde.Daemon1");
 const QString DaemonPath = QStringLiteral("/org/deepin/dde/Daemon1");
@@ -276,10 +279,25 @@ QStringList AppearanceDBusProxy::GetCustomWallPapers(const QString &username)
     return QDBusPendingReply<QStringList>(QDBusConnection::systemBus().asyncCall(daemonMessage));
 }
 
-QString AppearanceDBusProxy::SaveCustomWallPaper(const QString &username, const QString &file)
+QString AppearanceDBusProxy::SaveCustomWallPaper(const QString &username, const QString &file, const QString &wallpaperType)
 {
+    QFileInfo wallpaperInfo(file);
+    if (!wallpaperInfo.isFile() || !wallpaperInfo.isReadable()) {
+        return "";
+    }
+
+    QFile wallpaper(file);
+    if (!wallpaper.open(QIODevice::ReadOnly)) {
+        return "";
+    }
+
+    QDBusUnixFileDescriptor fd(wallpaper.handle());
+    if (!fd.isValid()) {
+        return "";
+    }
+
     QDBusMessage daemonMessage = QDBusMessage::createMethodCall(DaemonService, DaemonPath, DaemonInterface, "SaveCustomWallPaper");
-    daemonMessage << username << file;
+    daemonMessage << username << QVariant::fromValue(fd) << wallpaperType;
     return QDBusPendingReply<QString>(QDBusConnection::systemBus().asyncCall(daemonMessage));
 }
 
