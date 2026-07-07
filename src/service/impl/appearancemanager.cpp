@@ -1527,6 +1527,11 @@ int AppearanceManager::getCurrentDesktopIndex()
 void AppearanceManager::applyGlobalTheme(KeyFile &theme, const QString &themeName, const QString &defaultTheme, const QString &themePath, const QString &themeId)
 {
     m_globalThemeUpdating = true;
+    // treeland 仅记录globalTheme的设置状态，不做实际的主题设置，实际的主题设置在dcc中完成
+    if (utils::isTreeland()) {
+        m_globalThemeUpdating = false;
+        return;
+    }
     QString defTheme = (defaultTheme.isEmpty() || defaultTheme == themeName) ? QString() : defaultTheme;
     auto getValue = [&theme, &themeId, this](const QString &section, const QString &key) -> QString{
         QString ret = theme.getStr(section, key);
