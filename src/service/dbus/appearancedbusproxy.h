@@ -55,6 +55,8 @@ public:
     QString primary();
     Q_PROPERTY(QList<QDBusObjectPath> Monitors READ monitors NOTIFY MonitorsChanged)
     QList<QDBusObjectPath> monitors();
+    bool isConcatScreenEnabled();
+    QString concatScreenName();
 
 public Q_SLOTS:
     QStringList ListOutputNames();

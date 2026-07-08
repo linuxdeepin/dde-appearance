@@ -159,6 +159,17 @@ QStringList AppearanceDBusProxy::ListOutputNames()
 {
     return QDBusPendingReply<QStringList>(m_displayInterface->asyncCall(QStringLiteral("ListOutputNames")));
 }
+
+bool AppearanceDBusProxy::isConcatScreenEnabled()
+{
+    return qvariant_cast<bool>(m_displayInterface->property("ConcatScreenEnabled"));
+}
+
+QString AppearanceDBusProxy::concatScreenName()
+{
+    return qvariant_cast<QString>(m_displayInterface->property("ConcatScreenName"));
+}
+
 // xSettingsInterface
 void AppearanceDBusProxy::SetString(const QString &prop, const QString &v)
 {

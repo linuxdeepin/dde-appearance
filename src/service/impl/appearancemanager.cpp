@@ -763,13 +763,14 @@ void AppearanceManager::doUpdateWallpaperURIs()
 
     QStringList monitorList = m_dbusProxy->ListOutputNames();
 
+    QString key;
+    const auto workspaceCount = getWorkspaceCount();
     for (int i = 0; i < monitorList.length(); i++) {
-        for (int idx = 1; idx <= getWorkspaceCount(); idx++) {
-            QString wallpaperUri = getWallpaperUri(QString::number(idx), monitorList.at(i));
+        for (int idx = 1; idx <= workspaceCount; idx++) {
+            const QString wallpaperUri = getWallpaperUri(QString::number(idx), monitorList.at(i));
             if (wallpaperUri.isEmpty())
                 continue;
 
-            QString key;
             if (m_monitorMap.count(monitorList[i]) != 0) {
                 key = QString::asprintf("%s&&%d", m_monitorMap[monitorList[i]].toLatin1().data(), idx);
             } else {
@@ -777,6 +778,23 @@ void AppearanceManager::doUpdateWallpaperURIs()
             }
 
             monitorWallpaperUris[key] = wallpaperUri;
+        }
+    }
+
+    // 跨屏拼接模式：DDE-CONCAT-SCREEN 是一个虚拟 RANDR Monitor，不在 ListOutputNames()
+    // 返回的物理显示器列表中。当拼接模式激活时，需将其壁纸也纳入 WallpaperURls，
+    // 确保 WM 合成器等订阅方能通过 PropertiesChanged 信号感知拼接屏的壁纸变更。
+    if (m_dbusProxy->isConcatScreenEnabled()) {
+        const QString concatScreenName = m_dbusProxy->concatScreenName();
+        if (!concatScreenName.isEmpty()) {
+            for (int idx = 1; idx <= workspaceCount; idx++) {
+                const QString wallpaperUri = getWallpaperUri(QString::number(idx), concatScreenName);
+                if (wallpaperUri.isEmpty())
+                    continue;
+
+                key = QString("%1&&%2").arg(concatScreenName).arg(idx);
+                monitorWallpaperUris[key] = wallpaperUri;
+            }
         }
     }
 
