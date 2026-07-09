@@ -967,7 +967,7 @@ bool AppearanceManager::doUpdateFonts(double size)
         qWarning() << "set font size error:can not set family ";
         return false;
     }
-    m_dbusProxy->SetString("Qt/FontPointSize", QString::number(size));
+    m_XSettingsDconfig->setValue("qt-font-point-size", QString::number(size));
     if (!setDQtTheme({ QTKEYFONTSIZE }, { QString::number(size) })) {
         qWarning() << "set font size error:can not set qt theme ";
         return false;
@@ -1130,7 +1130,7 @@ bool AppearanceManager::doSetStandardFont(QString value)
         qWarning() << "set standard font error:can not set family ";
         return false;
     }
-    m_dbusProxy->SetString("Qt/FontName", value);
+    m_XSettingsDconfig->setValue("qt-font-name", value);
     if (!setDQtTheme({ QTKEYFONT }, { value })) {
         qWarning() << "set standard font error:can not set qt theme ";
         return false;
@@ -1155,7 +1155,7 @@ bool AppearanceManager::doSetMonospaceFont(QString value)
         return false;
     }
 
-    m_dbusProxy->SetString("Qt/MonoFontName", value);
+    m_XSettingsDconfig->setValue("qt-mono-font-name", value);
     if (!setDQtTheme({ QTKEYMONOFONT }, { value })) {
         qWarning() << "set monospace font error:can not set qt theme ";
         return false;
@@ -1220,12 +1220,7 @@ QString AppearanceManager::doGetWallpaperSlideShow(QString monitorName)
 
 double AppearanceManager::getScaleFactor()
 {
-    double scaleFactor = 0.0;
-    if (m_XSettingsDconfig) {
-        scaleFactor = m_XSettingsDconfig->value("scale-factor").toDouble();
-    } else {
-        scaleFactor = m_dbusProxy->GetScaleFactor();
-    }
+    double scaleFactor = m_XSettingsDconfig->value("scale-factor").toDouble();
     qInfo() << __FUNCTION__ << "UpdateScaleFactor" << scaleFactor;
     if (scaleFactor <= 0) {
         scaleFactor = 1.0;
@@ -1236,7 +1231,20 @@ double AppearanceManager::getScaleFactor()
 
 ScaleFactors AppearanceManager::getScreenScaleFactors()
 {
-    return m_dbusProxy->GetScreenScaleFactors();
+    ScaleFactors factors;
+    QString raw = m_XSettingsDconfig->value("individual-scaling").toString();
+    const QStringList pairs = raw.split(u';', Qt::SkipEmptyParts);
+    for (const QString &pair : pairs) {
+        int eq = pair.indexOf(u'=');
+        if (eq > 0) {
+            bool ok = false;
+            double val = pair.mid(eq + 1).toDouble(&ok);
+            if (ok) {
+                factors.insert(pair.left(eq), val);
+            }
+        }
+    }
+    return factors;
 }
 
 bool AppearanceManager::setScaleFactor(double scale)
@@ -1713,7 +1721,7 @@ QString AppearanceManager::getWallpaperUri(const QString &index, const QString &
 }
 
 void AppearanceManager::initDtkSizeMode(){
-    m_dbusProxy->SetInteger("DTK/SizeMode",m_property->dtkSizeMode);
+    m_XSettingsDconfig->setValue("dtk-size-mode", static_cast<int>(m_property->dtkSizeMode));
 }
 
 void AppearanceManager::initGlobalTheme()
@@ -1852,7 +1860,7 @@ QString AppearanceManager::doGetWorkspaceBackgroundForMonitor(const int &index, 
 void AppearanceManager::doSetDTKSizeMode(int value) {
     if (value != m_property->dtkSizeMode) {
         setDTKSizeMode(value);
-        m_dbusProxy->SetInteger("DTK/SizeMode",value);
+        m_XSettingsDconfig->setValue("dtk-size-mode", value);
     }
 }
 
@@ -1860,7 +1868,7 @@ void AppearanceManager::doSetQtScrollBarPolicy(int value)
 {
     if (value != m_property->qtScrollBarPolicy) {
         setQtScrollBarPolicy(value);
-        m_dbusProxy->SetInteger("Qt/ScrollBarPolicy",value);
+        m_XSettingsDconfig->setValue("qt-scrollbar-policy", value);
     }
 }
 

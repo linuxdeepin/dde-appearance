@@ -67,11 +67,7 @@ Q_SIGNALS:
 
     // xSettingsInterface
 public Q_SLOTS:
-    void SetString(const QString &prop, const QString &v);
-    void SetInteger(const QString &prop, const int &v);
-    double GetScaleFactor();
     void SetScaleFactor(double scale);
-    ScaleFactors GetScreenScaleFactors();
     void SetScreenScaleFactors(const ScaleFactors &factors);
 
 Q_SIGNALS:
@@ -137,7 +133,6 @@ private Q_SLOTS:
 private:
     DDBusInterface *m_wmInterface;
     QDBusInterface *m_displayInterface;
-    QDBusInterface *m_xSettingsInterface;
     DDBusInterface *m_timeDateInterface;
     QSharedPointer<DDBusInterface> m_userInterface;
     uint m_nid;

@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "appearancedbusproxy.h"
+#include "modules/api/utils.h"
 
 #include <QDBusInterface>
 #include <QDBusPendingReply>
@@ -17,7 +18,6 @@ const QString DaemonInterface = QStringLiteral("org.deepin.dde.Daemon1");
 AppearanceDBusProxy::AppearanceDBusProxy(QObject *parent)
     : QObject(parent)
     , m_displayInterface(new QDBusInterface("org.deepin.dde.Display1", "/org/deepin/dde/Display1", "org.deepin.dde.Display1", QDBusConnection::sessionBus(), this))
-    , m_xSettingsInterface(new QDBusInterface("org.deepin.dde.XSettings1", "/org/deepin/dde/XSettings1", "org.deepin.dde.XSettings1", QDBusConnection::sessionBus(),this))
     , m_timeDateInterface(new DDBusInterface("org.freedesktop.timedate1", "/org/freedesktop/timedate1", "org.freedesktop.timedate1", QDBusConnection::systemBus(), this))
     , m_nid(0)
 {
@@ -170,32 +170,6 @@ QString AppearanceDBusProxy::concatScreenName()
     return qvariant_cast<QString>(m_displayInterface->property("ConcatScreenName"));
 }
 
-// xSettingsInterface
-void AppearanceDBusProxy::SetString(const QString &prop, const QString &v)
-{
-    m_xSettingsInterface->asyncCall(QStringLiteral("SetString"), prop, v);
-}
-void AppearanceDBusProxy::SetInteger(const QString &prop, const int &v)
-{
-    m_xSettingsInterface->asyncCall(QStringLiteral("SetInteger"), prop, v);
-}
-double AppearanceDBusProxy::GetScaleFactor()
-{
-    return QDBusPendingReply<double>(m_xSettingsInterface->asyncCall(QStringLiteral("GetScaleFactor")));
-}
-void AppearanceDBusProxy::SetScaleFactor(double scale)
-{
-    m_xSettingsInterface->asyncCall(QStringLiteral("SetScaleFactor"), scale);
-}
-ScaleFactors AppearanceDBusProxy::GetScreenScaleFactors()
-{
-    return QDBusPendingReply<ScaleFactors>(m_xSettingsInterface->asyncCall(QStringLiteral("GetScreenScaleFactors")));
-}
-void AppearanceDBusProxy::SetScreenScaleFactors(const ScaleFactors &factors)
-{
-    m_xSettingsInterface->asyncCall(QStringLiteral("SetScreenScaleFactors"), QVariant::fromValue(factors));
-}
-
 QString AppearanceDBusProxy::FindUserById(const QString &uid)
 {
     QDBusMessage accountsMessage = QDBusMessage::createMethodCall("org.deepin.dde.Accounts1", "/org/deepin/dde/Accounts1", "org.deepin.dde.Accounts1", "FindUserById");
@@ -331,4 +305,24 @@ void AppearanceDBusProxy::onNotificationClosed(uint id, uint reason)
     // reset m_nid after notification closure
     if (id == m_nid)
         m_nid = 0;
+}
+
+void AppearanceDBusProxy::SetScaleFactor(double scale)
+{
+    if (utils::isTreeland()) {
+        qWarning() << "treeland env, skip set scale to xsettings";
+        return;
+    }
+    QDBusInterface iface("org.deepin.dde.XSettings1", "/org/deepin/dde/XSettings1", "org.deepin.dde.XSettings1", QDBusConnection::sessionBus());
+    iface.asyncCall(QStringLiteral("SetScaleFactor"), scale);
+}
+
+void AppearanceDBusProxy::SetScreenScaleFactors(const ScaleFactors &factors)
+{
+    if (utils::isTreeland()) {
+        qWarning() << "treeland env, skip get scale from xsettings";
+        return;
+    }
+    QDBusInterface iface("org.deepin.dde.XSettings1", "/org/deepin/dde/XSettings1", "org.deepin.dde.XSettings1", QDBusConnection::sessionBus());
+    iface.asyncCall(QStringLiteral("SetScreenScaleFactors"), QVariant::fromValue(factors));
 }
