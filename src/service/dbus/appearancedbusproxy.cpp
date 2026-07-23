@@ -155,6 +155,11 @@ QList<QDBusObjectPath> AppearanceDBusProxy::monitors()
     return qvariant_cast<QList<QDBusObjectPath>>(m_displayInterface->property("Monitors"));
 }
 
+QStringList AppearanceDBusProxy::ListEffectiveOutputNames()
+{
+    return QDBusPendingReply<QStringList>(m_displayInterface->asyncCall(QStringLiteral("ListEffectiveOutputNames")));
+}
+
 QStringList AppearanceDBusProxy::ListOutputNames()
 {
     return QDBusPendingReply<QStringList>(m_displayInterface->asyncCall(QStringLiteral("ListOutputNames")));
@@ -163,11 +168,6 @@ QStringList AppearanceDBusProxy::ListOutputNames()
 bool AppearanceDBusProxy::isConcatScreenEnabled()
 {
     return qvariant_cast<bool>(m_displayInterface->property("ConcatScreenEnabled"));
-}
-
-QString AppearanceDBusProxy::concatScreenName()
-{
-    return qvariant_cast<QString>(m_displayInterface->property("ConcatScreenName"));
 }
 
 QString AppearanceDBusProxy::FindUserById(const QString &uid)
@@ -292,7 +292,7 @@ void AppearanceDBusProxy::onDisplayPropertiesChanged(const QDBusMessage &message
         QVariantMap changedProps = qdbus_cast<QVariantMap>(message.arguments().at(1).value<QDBusArgument>());
         for (QVariantMap::const_iterator it = changedProps.cbegin(); it != changedProps.cend(); ++it) {
             auto prop = it.key().toLatin1() + "Changed";
-            if (prop == "PrimaryChanged" || prop == "MonitorsChanged") {
+            if (prop == "PrimaryChanged" || prop == "MonitorsChanged" || prop == "ConcatScreenEnabledChanged") {
                 QMetaObject::invokeMethod(this, prop, Qt::DirectConnection, QGenericArgument(it.value().typeName(), it.value().data()));
             }
         }

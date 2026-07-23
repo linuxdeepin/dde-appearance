@@ -93,6 +93,9 @@ bool AppearanceManager::init()
 
     connect(m_dbusProxy.get(), &AppearanceDBusProxy::PrimaryChanged, this, &AppearanceManager::updateMonitorMap);
     connect(m_dbusProxy.get(), &AppearanceDBusProxy::MonitorsChanged, this, &AppearanceManager::updateMonitorMap);
+    connect(m_dbusProxy.get(), &AppearanceDBusProxy::ConcatScreenEnabledChanged, this, [this](bool){
+        doUpdateWallpaperURIs();
+    });
 
     updateMonitorMap();
 
@@ -761,40 +764,29 @@ void AppearanceManager::doUpdateWallpaperURIs()
 {
     QMap<QString, QString> monitorWallpaperUris;
 
-    QStringList monitorList = m_dbusProxy->ListOutputNames();
+    const QStringList effectiveOutputs = m_dbusProxy->ListEffectiveOutputNames();
+    const QStringList monitorList = m_dbusProxy->ListOutputNames();
 
     QString key;
     const auto workspaceCount = getWorkspaceCount();
-    for (int i = 0; i < monitorList.length(); i++) {
+    for (const QString &outputName : effectiveOutputs) {
         for (int idx = 1; idx <= workspaceCount; idx++) {
-            const QString wallpaperUri = getWallpaperUri(QString::number(idx), monitorList.at(i));
+            const QString wallpaperUri = getWallpaperUri(QString::number(idx), outputName);
             if (wallpaperUri.isEmpty())
                 continue;
 
-            if (m_monitorMap.count(monitorList[i]) != 0) {
-                key = QString::asprintf("%s&&%d", m_monitorMap[monitorList[i]].toLatin1().data(), idx);
+            if (m_monitorMap.contains(outputName)) {
+                // physical screen in m_monitorMap cache, role known (Primary/SubsidiaryN)
+                key = m_monitorMap.value(outputName);
+            } else if (monitorList.contains(outputName)) {
+                // physical screen not in m_monitorMap cache, role unknown, "&&idx"
+                key = "";
             } else {
-                key = QString::asprintf("&&%d", idx);
+                // not in any physical screen list, may be virtual screen, use its name as role
+                key = outputName;
             }
-
+            key = QString("%1&&%2").arg(key).arg(idx);
             monitorWallpaperUris[key] = wallpaperUri;
-        }
-    }
-
-    // 跨屏拼接模式：DDE-CONCAT-SCREEN 是一个虚拟 RANDR Monitor，不在 ListOutputNames()
-    // 返回的物理显示器列表中。当拼接模式激活时，需将其壁纸也纳入 WallpaperURls，
-    // 确保 WM 合成器等订阅方能通过 PropertiesChanged 信号感知拼接屏的壁纸变更。
-    if (m_dbusProxy->isConcatScreenEnabled()) {
-        const QString concatScreenName = m_dbusProxy->concatScreenName();
-        if (!concatScreenName.isEmpty()) {
-            for (int idx = 1; idx <= workspaceCount; idx++) {
-                const QString wallpaperUri = getWallpaperUri(QString::number(idx), concatScreenName);
-                if (wallpaperUri.isEmpty())
-                    continue;
-
-                key = QString("%1&&%2").arg(concatScreenName).arg(idx);
-                monitorWallpaperUris[key] = wallpaperUri;
-            }
         }
     }
 

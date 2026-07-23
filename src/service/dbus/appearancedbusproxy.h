@@ -55,8 +55,9 @@ public:
     QString primary();
     Q_PROPERTY(QList<QDBusObjectPath> Monitors READ monitors NOTIFY MonitorsChanged)
     QList<QDBusObjectPath> monitors();
+    Q_PROPERTY(bool ConcatScreenEnabled READ isConcatScreenEnabled NOTIFY ConcatScreenEnabledChanged)
     bool isConcatScreenEnabled();
-    QString concatScreenName();
+    QStringList ListEffectiveOutputNames();
 
 public Q_SLOTS:
     QStringList ListOutputNames();
@@ -64,6 +65,7 @@ public Q_SLOTS:
 Q_SIGNALS:
     void PrimaryChanged(const QString &Primary);
     void MonitorsChanged(QList<QDBusObjectPath> monitors);
+    void ConcatScreenEnabledChanged(bool isCancat);
 
     // xSettingsInterface
 public Q_SLOTS:
