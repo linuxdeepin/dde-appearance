@@ -34,13 +34,13 @@
         },
         "Wallpaper_Slideshow": {
             "value": "",
-            "serial": 0,
+            "serial": 1,
             "flags": [],
             "name": "Wallpaper_Slideshow",
             "name[zh_CN]": "*****",
             "description": "",
             "permissions": "readwrite",
-            "visibility": "private"
+            "visibility": "public"
         },
         "Cursor_Theme": {
             "value": "bloom",
@@ -64,13 +64,13 @@
         },
         "Wallpaper_Uris": {
             "value": "",
-            "serial": 0,
+            "serial": 1,
             "flags": [],
             "name": "Wallpaper_Uris",
             "name[zh_CN]": "*****",
             "description": "current wallpaper json string",
             "permissions": "readwrite",
-            "visibility": "private"
+            "visibility": "public"
         },
         "Icon_Theme": {
             "value": "nirvana",
@@ -84,13 +84,13 @@
         },
         "Global_Theme": {
             "value": "nirvana.light",
-            "serial": 0,
+            "serial": 1,
             "flags": [],
             "name": "Global_Theme",
             "name[zh_CN]": "*****",
             "description": "deepin theme to use for the panel, nautilus etc.",
             "permissions": "readwrite",
-            "visibility": "private"
+            "visibility": "public"
         },
         "Opacity": {
             "value": 0.40000000000000002,
@@ -134,23 +134,23 @@
         },
         "Sound_Theme": {
             "value": "deepin",
-            "serial": 0,
+            "serial": 1,
             "flags": [],
             "name": "Sound_Theme",
             "name[zh_CN]": "*****",
             "description": "Set the system sound theme",
             "permissions": "readwrite",
-            "visibility": "private"
+            "visibility": "public"
         },
         "Background_Uris": {
             "value": ["file:///usr/share/backgrounds/default_background.jpg"],
-            "serial": 0,
+            "serial": 1,
             "flags": [],
             "name": "Background_Uris",
             "name[zh_CN]": "*****",
             "description": "Note that the backend only supports local (file://) URIs.",
             "permissions": "readwrite",
-            "visibility": "private"
+            "visibility": "public"
         },
         "All_Wallpaper_Uris": {
             "value": [],
