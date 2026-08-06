@@ -7,8 +7,9 @@
             "serial": 0,
             "flags": [],
             "name": "Extra_Picture_Uris",
-            "name[zh_CN]": "*****",
+            "name[zh_CN]": "额外图片地址",
             "description": "",
+            "description[zh_CN]": "额外的壁纸图片地址",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -17,8 +18,9 @@
             "serial": 0,
             "flags": [],
             "name": "Font_Standard",
-            "name[zh_CN]": "*****",
+            "name[zh_CN]": "标准字体",
             "description": "The standard font for desktop",
+            "description[zh_CN]": "桌面环境使用的标准字体",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -27,8 +29,9 @@
             "serial": 0,
             "flags": [],
             "name": "Theme_Auto",
-            "name[zh_CN]": "*****",
+            "name[zh_CN]": "自动切换主题",
             "description": "",
+            "description[zh_CN]": "是否按时间自动切换浅色/深色主题",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -37,8 +40,9 @@
             "serial": 0,
             "flags": [],
             "name": "Wallpaper_Slideshow",
-            "name[zh_CN]": "*****",
+            "name[zh_CN]": "壁纸轮播",
             "description": "",
+            "description[zh_CN]": "壁纸轮播配置",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -47,8 +51,9 @@
             "serial": 0,
             "flags": [],
             "name": "Cursor_Theme",
-            "name[zh_CN]": "*****",
+            "name[zh_CN]": "光标主题",
             "description": "Cursor theme name. Used only by Xservers that support the Xcursor extension.",
+            "description[zh_CN]": "光标主题名称，仅支持带 Xcursor 扩展的 X Server",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -57,8 +62,9 @@
             "serial": 0,
             "flags": [],
             "name": "Font_Size",
-            "name[zh_CN]": "*****",
+            "name[zh_CN]": "字体大小",
             "description": "The desktop font size",
+            "description[zh_CN]": "桌面环境的字体大小",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -67,8 +73,9 @@
             "serial": 0,
             "flags": [],
             "name": "Wallpaper_Uris",
-            "name[zh_CN]": "*****",
+            "name[zh_CN]": "壁纸地址",
             "description": "current wallpaper json string",
+            "description[zh_CN]": "当前壁纸的 URI，以 JSON 字符串表示",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -77,8 +84,9 @@
             "serial": 0,
             "flags": [],
             "name": "Icon_Theme",
-            "name[zh_CN]": "*****",
+            "name[zh_CN]": "图标主题",
             "description": "Icon theme to use for the panel, nautilus etc.",
+            "description[zh_CN]": "系统使用的图标主题",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -87,8 +95,9 @@
             "serial": 0,
             "flags": [],
             "name": "Global_Theme",
-            "name[zh_CN]": "*****",
+            "name[zh_CN]": "全局主题",
             "description": "deepin theme to use for the panel, nautilus etc.",
+            "description[zh_CN]": "系统使用的全局主题",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -97,8 +106,9 @@
             "serial": 0,
             "flags": [],
             "name": "Opacity",
-            "name[zh_CN]": "*****",
+            "name[zh_CN]": "不透明度",
             "description": "",
+            "description[zh_CN]": "窗口的不透明度",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -107,8 +117,9 @@
             "serial": 0,
             "flags": [],
             "name": "Font_Monospace",
-            "name[zh_CN]": "*****",
+            "name[zh_CN]": "等宽字体",
             "description": "The monospace font for desktop",
+            "description[zh_CN]": "桌面环境使用的等宽字体",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -117,8 +128,9 @@
             "serial": 0,
             "flags": [],
             "name": "Excluded_Icon_Themes",
-            "name[zh_CN]": "*****",
+            "name[zh_CN]": "排除的图标主题",
             "description": "Icon theme black list.",
+            "description[zh_CN]": "不在图标主题列表中显示的主题（黑名单）",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -127,8 +139,9 @@
             "serial": 0,
             "flags": [],
             "name": "Gtk_Theme",
-            "name[zh_CN]": "*****",
+            "name[zh_CN]": "GTK 主题",
             "description": "Basename of the default theme used by gtk+.",
+            "description[zh_CN]": "GTK+ 使用的默认主题基名",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -137,8 +150,9 @@
             "serial": 0,
             "flags": [],
             "name": "Sound_Theme",
-            "name[zh_CN]": "*****",
+            "name[zh_CN]": "声音主题",
             "description": "Set the system sound theme",
+            "description[zh_CN]": "系统使用的声音主题",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -147,8 +161,9 @@
             "serial": 0,
             "flags": [],
             "name": "Background_Uris",
-            "name[zh_CN]": "*****",
+            "name[zh_CN]": "背景图片地址",
             "description": "Note that the backend only supports local (file://) URIs.",
+            "description[zh_CN]": "桌面背景图片的 URI 列表，后端仅支持本地（file://）URI",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -157,8 +172,9 @@
             "serial": 0,
             "flags": [],
             "name": "All_Wallpaper_Uris",
-            "name[zh_CN]": "*****",
+            "name[zh_CN]": "全部壁纸地址",
             "description": "Save all the wallpaper URL information.",
+            "description[zh_CN]": "保存的所有壁纸 URI 信息",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -169,6 +185,7 @@
             "name": "Dtk_Size_Mode",
             "name[zh_CN]": "紧凑模式",
             "description": "Compact Mode.",
+            "description[zh_CN]": "DTK 控件尺寸模式（0 标准模式，1 紧凑模式）",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -179,6 +196,7 @@
             "name": "Qt_Scrollbar_Policy",
             "name[zh_CN]": "滚动条显示策略",
             "description": "Scroll bar display strategy.",
+            "description[zh_CN]": "滚动条显示策略（0 按需显示，1 始终隐藏，2 始终显示）",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -189,6 +207,7 @@
             "name": "Active_Colors",
             "name[zh_CN]": "亮暗活动色",
             "description": "Active colors in light and dark themes.",
+            "description[zh_CN]": "浅色与深色主题下的活动色",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -199,7 +218,8 @@
             "global": true,
             "name": "IrregularFontOverride",
             "name[zh_CN]": "不规范字体参数override",
-            "description": "不规范字体override",
+            "description": "Override parameters for non-standard fonts.",
+            "description[zh_CN]": "不规范字体的覆盖参数",
             "permissions": "read",
             "visibility": "private"
         },
@@ -210,7 +230,8 @@
             "global": true,
             "name": "globalThemeOverride",
             "name[zh_CN]": "全局主题参数的override",
-            "description": "全局主题参数的override",
+            "description": "Override parameters for the global theme.",
+            "description[zh_CN]": "全局主题参数的override",
             "permissions": "readonly",
             "visibility": "private"
         },
@@ -221,6 +242,7 @@
             "name": "isCustomLockBackground",
             "name[zh_CN]": "是否自定义锁屏壁纸",
             "description": "Whether to customize the lock screen wallpaper",
+            "description[zh_CN]": "是否使用了自定义锁屏壁纸",
             "permissions": "readwrite",
             "visibility": "private"
         },
@@ -231,6 +253,7 @@
             "name": "cursorSize",
             "name[zh_CN]": "光标大小",
             "description": "Cursor size",
+            "description[zh_CN]": "光标大小（像素）",
             "permissions": "readwrite",
             "visibility": "private"
         }
