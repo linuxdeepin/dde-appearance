@@ -32,7 +32,7 @@ const int baseIconSize = 36;
 
 static QVector<QStringList> presentCursors {
    {"left_ptr"},
-   {"left_ptr_watch"},
+   {"left_ptr_watch", "watch"},
    {"x-cursor", "X_cursor"},
    {"hand2", "hand1"},
    {"grab", "grabbing", "closedhand"},
