@@ -334,6 +334,9 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
                 break;
             }
             bSuccess = doSetStandardFont(value);
+            if (bSuccess) {
+                setStandardFont(value);
+            }
         } else if (key == GSKEYFONTMONOSPACE) {
             type = TYPEMONOSPACEFONT;
             value = m_settingDconfig.value(key).toString();
@@ -341,6 +344,9 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
                 break;
             }
             bSuccess = doSetMonospaceFont(value);
+            if (bSuccess) {
+                setMonospaceFont(value);
+            }
         } else if (key == GSKEYFONTSIZE) {
             type = TYPEFONTSIZE;
             double size = m_settingDconfig.value(key).toDouble();
@@ -394,8 +400,20 @@ void AppearanceManager::handleSettingDConfigChange(QString key)
                 setQtScrollBarPolicy(policy);
                 value = QString::number(policy);
             }
-        }
-        else {
+        } else if (key == DACTIVECOLORS) {
+            type = TYPEACTIVECOLOR;
+            value = m_settingDconfig.value(key).toString();
+            setActiveColors(value);
+            setQtActiveColor(value);
+        } else if (key == DCKEYCURSORSIZE) {
+            type = TYPECURSORSIZE;
+            int size = m_settingDconfig.value(key).toInt();
+            if (size == m_property->cursorSize) {
+                break;
+            }
+            doSetCursorSize(size);
+            value = QString::number(size);
+        } else {
             return;
         }
     } while (false);
