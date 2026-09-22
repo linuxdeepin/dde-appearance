@@ -1,3 +1,10 @@
+dde-appearance (1.1.86) unstable; urgency=medium
+
+  * fix: refresh UI on font, active color, and cursor size DConfig
+    change
+
+ -- zhangkun <zhangkun2@uniontech.com>  Tue, 22 Sep 2026 20:46:05 +0800
+
 dde-appearance (1.1.85) unstable; urgency=medium
 
   * chore: refine dde-appearance dconfig descriptions
