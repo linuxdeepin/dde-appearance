@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -20,7 +20,6 @@
 
 #include <KF5/KConfigCore/KConfig>
 #include <KF5/KConfigCore/KConfigGroup>
-#include <KF5/KConfigCore/KSharedConfig>
 #include <KF5/KWindowSystem/KWindowSystem>
 #include <KF5/KWindowSystem/KWindowEffects>
 #include <KF5/KGlobalAccel/KGlobalAccel>
@@ -308,7 +307,8 @@ std::mutex WORKSPACE_COUNT_GUARD;
 DeepinWMFaker::DeepinWMFaker(QObject* appearance)
     : QObject(appearance)
     , m_windowSystem(KWindowSystem::self())
-    , m_deepinWMConfig(new KConfig(DeepinWMConfigName, KConfig::CascadeConfig))
+    , m_deepinWMConfig(KSharedConfig::openConfig(DeepinWMConfigName, KConfig::CascadeConfig))
+    , m_deepinWMConfigWatcher(KConfigWatcher::create(m_deepinWMConfig))
     , m_deepinWMGeneralGroup(new KConfigGroup(m_deepinWMConfig->group(DeepinWMGeneralGroupName)))
     , m_deepinWMWorkspaceBackgroundGroup(new KConfigGroup(m_deepinWMConfig->group(DeepinWMWorkspaceBackgroundGroupName)))
     , m_kwinConfig(new KConfig(KWinConfigName, KConfig::CascadeConfig))
@@ -400,7 +400,6 @@ void DeepinWMFaker::handleThemeChanged(const QString& key, const QString &value)
 
 DeepinWMFaker::~DeepinWMFaker()
 {
-    delete m_deepinWMConfig;
     delete m_deepinWMGeneralGroup;
     delete m_deepinWMWorkspaceBackgroundGroup;
     delete m_kwinConfig;
