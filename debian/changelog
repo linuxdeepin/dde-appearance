@@ -1,3 +1,9 @@
+dde-appearance (1.1.31) UNRELEASED; urgency=medium
+
+  * fix: deepinwmrc not synchronized
+
+ -- justforlxz <justforlxz@gmail.com>  Thu, 15 Oct 2026 10:35:24 +0800
+
 dde-appearance (1.1.30) unstable; urgency=medium
 
   * fix: Cursor images are not scaled to the same size(Issue: 9892)
