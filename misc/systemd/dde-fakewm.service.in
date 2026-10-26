@@ -8,5 +8,6 @@ After=plasma-kglobalaccel.service
 Type=dbus
 BusName=com.deepin.wm
 ExecCondition=/bin/sh -c 'test "$XDG_SESSION_TYPE" != "wayland" || exit 2'
+ExecStartPre=-/usr/libexec/dde-thp-disable
 ExecStart=@CMAKE_INSTALL_FULL_BINDIR@/dde-fakewm
 Slice=session.slice
