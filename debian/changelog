@@ -1,3 +1,9 @@
+dde-appearance (1.1.87) unstable; urgency=medium
+
+  * fix: deepinwmrc not synchronized (PMS: BUG-352365)
+
+ -- justforlxz <justforlxz@gmail.com>  Mon, 26 Oct 2026 16:48:36 +0800
+
 dde-appearance (1.1.86) unstable; urgency=medium
 
   * fix: refresh UI on font, active color, and cursor size DConfig
