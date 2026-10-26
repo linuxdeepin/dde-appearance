@@ -1096,31 +1096,8 @@ bool AppearanceManager::doSetCursorTheme(QString value)
         return false;
     }
 
-    auto getSuitableCursorSize = [this, value]() {
-        int cursorSize = 24;
-        for (auto iter : m_subthemes->listCursorThemes()) {
-            if (iter->getId() == value) {
-                auto availableSizes = utils::getAvailableCursorSizes(iter->getPath());
-                int len = INT_MAX;
-                for (auto size : availableSizes) {
-                    if (std::abs(size - m_property->cursorSize) < len) {
-                        len = std::abs(size - m_property->cursorSize);
-                        cursorSize = size;
-                    }
-                }
-                break;
-            }
-        }
-        return cursorSize;
-    };
-
     setCursorTheme(value);
-    if (m_subthemes->setCursorTheme(value)) {
-        doSetCursorSize(getSuitableCursorSize());
-        return true;
-    } else {
-        return false;
-    }
+    return m_subthemes->setCursorTheme(value);
 }
 
 bool AppearanceManager::doSetStandardFont(QString value)
