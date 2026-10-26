@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -10,6 +10,9 @@
 #include <QDBusContext>
 #include <QDBusMessage>
 #include <DConfig>
+
+#include <KF6/KConfigCore/KSharedConfig>
+#include <KF6/KConfigCore/KConfigWatcher>
 
 class KWindowSystem;
 class KConfig;
@@ -205,7 +208,8 @@ private:
     void callHighlightWindows(const QStringList &windowIds);
 
     KWindowSystem *m_windowSystem;
-    KConfig *m_deepinWMConfig;
+    KSharedConfig::Ptr m_deepinWMConfig;
+    KConfigWatcher::Ptr m_deepinWMConfigWatcher;
     KConfigGroup *m_deepinWMGeneralGroup;
     KConfigGroup *m_deepinWMWorkspaceBackgroundGroup;
     KConfig *m_kwinConfig;
