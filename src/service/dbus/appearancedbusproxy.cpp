@@ -174,7 +174,16 @@ QString AppearanceDBusProxy::FindUserById(const QString &uid)
 {
     QDBusMessage accountsMessage = QDBusMessage::createMethodCall("org.deepin.dde.Accounts1", "/org/deepin/dde/Accounts1", "org.deepin.dde.Accounts1", "FindUserById");
     accountsMessage << uid;
-    return QDBusPendingReply<QString>(QDBusConnection::systemBus().asyncCall(accountsMessage));
+    QDBusPendingReply<QString> reply = QDBusConnection::systemBus().asyncCall(accountsMessage);
+    reply.waitForFinished();
+
+    if (reply.isError()) {
+        qWarning() << "FindUserById failed for uid:" << uid
+                   << "error:" << reply.error().name() << reply.error().message();
+        return QString();
+    }
+
+    return reply.value();
 }
 // userInterface
 QStringList AppearanceDBusProxy::desktopBackgrounds()

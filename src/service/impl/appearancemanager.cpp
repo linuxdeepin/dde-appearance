@@ -709,6 +709,9 @@ void AppearanceManager::initUserObj()
     }
 
     QString userPath = AppearanceDBusProxy::FindUserById(QString::number(pw->pw_uid));
+    if (userPath.isEmpty()) {
+        return;
+    }
 
     m_dbusProxy->setUserInterface(userPath);
 
