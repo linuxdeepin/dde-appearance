@@ -709,6 +709,10 @@ void AppearanceManager::initUserObj()
     }
 
     QString userPath = AppearanceDBusProxy::FindUserById(QString::number(pw->pw_uid));
+    if (userPath.isEmpty()) {
+        qWarning() << "Failed to resolve Accounts1 user; skip user settings initialization, uid:" << pw->pw_uid;
+        return;
+    }
 
     m_dbusProxy->setUserInterface(userPath);
 
