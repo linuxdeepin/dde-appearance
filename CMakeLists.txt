@@ -6,6 +6,8 @@ cmake_minimum_required(VERSION 3.16)
 
 project(dde-appearance)
 
+add_compile_definitions(QT_NO_KEYWORDS)
+
 cmake_policy(SET CMP0160 OLD)
 
 set(CMAKE_CXX_STANDARD 17)
