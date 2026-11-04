@@ -37,14 +37,14 @@
         },
         "Wallpaper_Slideshow": {
             "value": "",
-            "serial": 0,
+            "serial": 1,
             "flags": [],
             "name": "Wallpaper_Slideshow",
             "name[zh_CN]": "壁纸轮播",
             "description": "",
             "description[zh_CN]": "壁纸轮播配置",
             "permissions": "readwrite",
-            "visibility": "private"
+            "visibility": "public"
         },
         "Cursor_Theme": {
             "value": "bloom",
@@ -70,14 +70,14 @@
         },
         "Wallpaper_Uris": {
             "value": "",
-            "serial": 0,
+            "serial": 1,
             "flags": [],
             "name": "Wallpaper_Uris",
             "name[zh_CN]": "壁纸地址",
             "description": "current wallpaper json string",
             "description[zh_CN]": "当前壁纸的 URI，以 JSON 字符串表示",
             "permissions": "readwrite",
-            "visibility": "private"
+            "visibility": "public"
         },
         "Icon_Theme": {
             "value": "nirvana",
@@ -92,14 +92,14 @@
         },
         "Global_Theme": {
             "value": "nirvana.light",
-            "serial": 0,
+            "serial": 1,
             "flags": [],
             "name": "Global_Theme",
             "name[zh_CN]": "全局主题",
             "description": "deepin theme to use for the panel, nautilus etc.",
             "description[zh_CN]": "系统使用的全局主题",
             "permissions": "readwrite",
-            "visibility": "private"
+            "visibility": "public"
         },
         "Opacity": {
             "value": 0.40000000000000002,
@@ -147,25 +147,25 @@
         },
         "Sound_Theme": {
             "value": "deepin",
-            "serial": 0,
+            "serial": 1,
             "flags": [],
             "name": "Sound_Theme",
             "name[zh_CN]": "声音主题",
             "description": "Set the system sound theme",
             "description[zh_CN]": "系统使用的声音主题",
             "permissions": "readwrite",
-            "visibility": "private"
+            "visibility": "public"
         },
         "Background_Uris": {
             "value": ["file:///usr/share/backgrounds/default_background.jpg"],
-            "serial": 0,
+            "serial": 1,
             "flags": [],
             "name": "Background_Uris",
             "name[zh_CN]": "背景图片地址",
             "description": "Note that the backend only supports local (file://) URIs.",
             "description[zh_CN]": "桌面背景图片的 URI 列表，后端仅支持本地（file://）URI",
             "permissions": "readwrite",
-            "visibility": "private"
+            "visibility": "public"
         },
         "All_Wallpaper_Uris": {
             "value": [],
