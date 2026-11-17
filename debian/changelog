@@ -1,3 +1,12 @@
+dde-appearance (6.2.0) unstable; urgency=medium
+
+  * fix: avoid dde-appearance abort on invalid Accounts1 path
+  * chore: Sync by
+    https://github.com/linuxdeepin/.github/commit/88d36aea6c90c8d1de4d42
+    c68aebbf72bcb80b1c
+
+ -- zhangkun <zhangkun2@uniontech.com>  Tue, 17 Nov 2026 22:07:13 +0800
+
 dde-appearance (1.1.87) unstable; urgency=medium
 
   * fix: deepinwmrc not synchronized (PMS: BUG-352365)
