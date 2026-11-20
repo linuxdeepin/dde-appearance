@@ -161,10 +161,7 @@ QString PhaseWallPaper::getWallpaperUri(const QString &index, const QString &str
             }
 
             if (obj["wpIndex"] == wpIndexKey) {
-                auto wallpaper = obj["uri"].toString();
-                auto wallpaperPath = QUrl(wallpaper).toLocalFile();
-                QFile file(wallpaperPath);
-                return file.exists() ? wallpaper : QString();
+                return obj["uri"].toString();
             }
         }
     }
